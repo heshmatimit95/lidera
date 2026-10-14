@@ -1,0 +1,117 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Leader {
+  id            String       @id @default(uuid())
+  slug          String       @unique
+  name          String?      // اصلاح شد تا اجباری نباشد و ارور ندهد
+  lastName      String?
+  fullName      String?
+  username      String?      @unique
+  mobile        String?      @unique
+  nationalId    String?      @unique
+  password      String?
+  brandName     String?
+  logoUrl       String?
+  primaryColor  String       @default("#0070f3")
+  status        String       @default("ACTIVE")
+  title         String?
+  paymentMethod String       @default("card")
+  address      String?     
+  instagram       String?
+  telegram        String?
+  rubika          String?
+  whatsapp        String?
+  cards         BankCard[]
+  tours         Tour[]
+  passengers    Passenger[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+}
+
+
+model BankCard {
+  id          String   @id @default(uuid())
+  cardNumber  String
+  bankName    String
+  cardHolder  String?
+  leaderId    String
+  leader      Leader   @relation(fields: [leaderId], references: [id], onDelete: Cascade)
+}
+
+model Tour {
+  id            String         @id @default(uuid())
+  name          String
+  title         String?
+  date          String?
+  price         String?
+  images        String[]
+  tenantId      String
+
+  image1        String?
+  image2        String?
+  image3        String?
+  image4        String?
+
+  leaderId      String
+  leader        Leader         @relation(fields: [leaderId], references: [id], onDelete: Cascade)
+  
+  tourImages    TourImage[]
+  registrations Registration[]
+  passengers    Passenger[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model TourImage {
+  id        String   @id @default(uuid())
+  url       String
+  tourId    String
+  tour      Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Registration {
+  id         String   @id @default(uuid())
+  fullName   String
+  nationalId String
+  tourId     String
+  tour       Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+}
+
+// بخش اصلاح شده مدل Passenger
+model Passenger {
+  id             String   @id @default(uuid())
+  fullName       String
+  mobile         String
+  nationalId     String?
+  tourName       String
+  paymentStatus  String   @default("در انتظار پرداخت")
+  insurance      Boolean  @default(false)
+  receiptDate    String?
+  amount         String?
+ receiptImage String?
+  idCardImage    String?  // این فیلد اضافه شد تا خطای تایپ اسکریپت برطرف شود
+  seatsCount     Int      @default(1)
+
+  tourId         String?
+  tour           Tour?    @relation(fields: [tourId], references: [id], onDelete: SetNull)
+
+  leaderId       String
+  leader         Leader   @relation(fields: [leaderId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  tenantId       String
+}
+model Admin {
+  id       String @id @default(uuid())
+  username String @unique
+  password String
+}

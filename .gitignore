@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# متغیرهای محیطی
+.env
+
+# پکیج‌های نصبی (خیلی مهم)
+node_modules/
+
+# فایل‌های بیلد (خروجی پروژه)
+.next/
+out/
+build/
+
+# فایل‌های سیستمی و کش
+.DS_Store
+*.log
