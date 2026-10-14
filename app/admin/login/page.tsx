@@ -49,8 +49,7 @@ if (res && res.success) {
 <div className="relative w-32 h-12 mb-3">
   <img
     src="/logo.png"
-    alt="لوگو لیدرا"
-    className="w-full h-full object-contain"
+      className="w-full h-full object-contain"
   />
   </div>
   <span className="inline-block px-3.5 py-1 bg-red-500/10 text-red-500 border border-red-500/20 rounded-full text-xs font-bold mb-3 tracking-wide">
@@ -86,7 +85,7 @@ if (res && res.success) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              dir="rtl"
+              dir="left"
               className="w-full bg-[#0a0a0c] border border-neutral-800 focus:border-red-500 p-3.5 rounded-xl text-xs text-white text-left placeholder-neutral-600 focus:outline-none transition-colors font-mono"
             />
           </div>

@@ -702,7 +702,7 @@ const exportToExcel = () => {
 <div className="relative w-32 h-12 mb-3">
   <img
     src="/logo.png"
-    alt="لوگو لیدرا"
+ 
     className="w-full h-full object-contain"
   />        </div>
             <div>
@@ -729,7 +729,7 @@ const exportToExcel = () => {
             <button onClick={() => setIsChangePassModalOpen(true)} title="تغییر رمز" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-zinc-800 cursor-pointer flex-1 sm:flex-none">
               <FaKey size={18} />
             </button>
-            <button onClick={handleLogout} title="خروج از پنل" className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-rose-900/30 cursor-pointer w-full sm:w-auto">
+            <button onClick={handleLogout} title="خروج از پنل" className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-rose-900/30 cursor-pointer flex-1 sm:flex-none">
               <FaSignOutAlt size={18} />
             </button>
           </div>

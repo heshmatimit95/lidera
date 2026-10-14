@@ -339,7 +339,7 @@ return (
 <div className="relative w-32 h-12 mb-3">
   <img
     src="/logo.png"
-    alt="لوگو لیدرا"
+ 
     className="w-full h-full object-contain"
   />
 
