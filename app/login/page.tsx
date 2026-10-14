@@ -68,16 +68,21 @@ return (
         </button>
 
 {/* هدر و لوگو */}
+
 <div className="flex flex-col items-center justify-center mb-6">
-<div className="relative w-32 h-12 mb-3">
-  <img
-    src="/logo.png"
- 
-    className="w-full h-full object-contain"
-  />
+  <div className="relative w-44 sm:w-52 h-auto mb-3">
+    <img
+      src="/logo.png"
+   
+      className="w-full h-auto object-contain max-h-16"
+    />
   </div>
-  <h1 className="text-base sm:text-lg font-bold text-white text-center">به لیدرا خوش آمدید</h1>
-  <p className="text-zinc-400 text-[11px] sm:text-xs text-center mt-1">ورود اختصاصی تورلیدران پلتفرم</p>
+  <h1 className="text-base sm:text-lg font-bold text-white text-center">
+    به لیدرا خوش آمدید
+  </h1>
+  <p className="text-zinc-400 text-[11px] sm:text-xs text-center mt-1">
+    پلتفرم اختصاصی ورود تور لیدرها
+  </p>
 </div>
 
         {/* فرم ورود تورلیدر */}

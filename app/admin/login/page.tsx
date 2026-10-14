@@ -79,16 +79,15 @@ if (res && res.success) {
             <label className="block text-xs text-neutral-400 mb-1.5 font-medium pr-1">
               رمز عبور ارشد
             </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              dir="left"
-              className="w-full bg-[#0a0a0c] border border-neutral-800 focus:border-red-500 p-3.5 rounded-xl text-xs text-white text-left placeholder-neutral-600 focus:outline-none transition-colors font-mono"
-            />
-          </div>
+<input
+  type="password"
+  required
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  placeholder="••••••••"
+  dir="rtl"
+  className="w-full bg-[#0a0a0c] border border-neutral-800 focus:border-red-500 p-3.5 rounded-xl text-xs text-white text-right"
+/>       </div>
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs py-2.5 px-4 rounded-xl text-center font-medium leading-relaxed">
