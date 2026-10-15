@@ -350,13 +350,14 @@ return (
           </div>
         </div>
 
-        <a 
-          href={`/login${window.location.search}`} 
-          className="flex items-center justify-center px-3 py-1.5 bg-[#F9704E]  text-neutral-200 rounded-xl transition-all duration-200 active:scale-95 text-xs font-bold border border-neutral-700"
-          title="ورود تورلیدر"
-        >
-          ورود لیدر
-        </a>
+<a
+  href={`/login${window.location.search}`}
+  className="flex items-center justify-center px-2.5 sm:px-3.5 py-1.5 bg-[#F9704E] text-white rounded-xl transition-all duration-200 active:scale-95 text-[11px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap shrink-0"
+  title="ورود تورلیدر"
+>
+  ورود لیدر
+</a>
+
       </div>
 
       {!isSuccess && (
@@ -369,7 +370,7 @@ return (
             <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 1 ? '100%' : '0%' }}></div>
           </div>
           <div className="flex items-center gap-2">
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-500'}`}>۲</span>
+    cc        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-500'}`}>۲</span>
             <span className={step >= 2 ? 'text-white' : ''}>مشخصات</span>
           </div>
           <div className="h-2px flex-1 mx-2 bg-neutral-800">

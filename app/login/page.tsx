@@ -69,12 +69,12 @@ return (
 
 {/* هدر و لوگو */}
 
+{/* هدر و لوگو */}
 <div className="flex flex-col items-center justify-center mb-6">
-  <div className="relative w-44 sm:w-52 h-auto mb-3">
+  <div className="relative w-28 sm:w-36 h-auto mb-2">
     <img
       src="/logo.png"
-   
-      className="w-full h-auto object-contain max-h-16"
+          className="w-full h-auto object-contain"
     />
   </div>
   <h1 className="text-base sm:text-lg font-bold text-white text-center">
