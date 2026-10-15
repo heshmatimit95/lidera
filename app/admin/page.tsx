@@ -340,23 +340,28 @@ if (res.ok) {
     <div className="min-h-screen bg-[#F9704E] p-4 sm:p-6 md:p-12 text-white font-sans selection:bg-[#F9704E] selection:text-black" dir="rtl">
       <div className="max-w-7xl mx-auto space-y-6">
         
-        {/* هدر اصلی */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-[#1e1e1e] p-5 sm:p-6 rounded-2xl border border-zinc-800 shadow-xl text-center md:text-right">
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-<div className="relative w-32 h-12 mb-3">
-  <img
-    src="/logo.png"
    
-    className="w-full h-full object-contain"
-  />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center justify-center md:justify-start gap-2">
-                پنل مدیریت لیدرا
-              </h1>
-              <p className="text-zinc-400 mt-1 text-xs sm:text-sm">اتوماسیون هوشمند مدیریت و بررسی اطلاعات راهنمایان</p>
-            </div>
-          </div>
+       {/* هدر اصلی */}
+<div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border border-zinc-800 shadow-xl text-center md:text-right">
+  <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+    {/* ابعاد ریسپانسیو لوگو برای موبایل */}
+    <div className="relative w-24 sm:w-32 h-10 sm:h-12 shrink-0">
+      <img
+        src="/logo.png"
+        className="w-full h-full object-contain"
+        alt="Lidara Logo"
+      />
+    </div>
+    <div>
+      <h1 className="text-base sm:text-2xl font-bold text-white flex items-center justify-center md:justify-start gap-2">
+        پنل مدیریت لیدرا
+      </h1>
+      <p className="text-zinc-400 mt-0.5 text-[11px] sm:text-sm">
+        اتوماسیون هوشمند مدیریت و بررسی اطلاعات راهنمایان
+      </p>
+    </div>
+  </div>
+
 
           {/* دکمه‌های ابزار بالای جدول */}
           <div className="flex flex-wrap items-center justify-between gap-3">
