@@ -338,7 +338,7 @@ return (
 <div className="p-4 sm:p-6 pb-5 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-col sm:flex-row items-center sm:justify-between bg-neutral-900/20 mb-5 gap-4 text-center sm:text-right">
   
   {/* بخش لوگو */}
-  <div className="relative w-40 sm:w-48 h-10 sm:h-12 shrink-0">
+  <div className="relative w-48 sm:w-48 h-12 sm:h-12 shrink-0">
     <img
       src="/logo.png"
       className="w-full h-full object-contain"
