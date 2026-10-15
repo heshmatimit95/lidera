@@ -413,7 +413,7 @@ return (
                     <select 
                       value={selectedTour} 
                       onChange={(e) => setSelectedTour(e.target.value)}
-                      className="w-full bg-[#1c1c21] border border-neutral-800 focus:border-[#F9704E] p-4 rounded-xl text-xs text-white focus:outline-none transition-all duration-200 font-medium"
+                      className="w-full bg-[#1c1c21] border border-[#F9704E] focus:border-[#F9704E] p-4 rounded-xl text-xs text-white focus:outline-none transition-all duration-200 font-medium"
                     >
                       {currentLider.tours.map((tour: any, idx: number) => {
                         const tourId = tour.id || tour._id || idx;
@@ -433,14 +433,14 @@ return (
 
                 {/* گالری تصاویر تورِ انتخاب‌شده (طراحی مدرن، مرکزچین، زیبا با قابلیت زوم عالی) */}
                 {currentTourDetails && currentTourDetails.images && currentTourDetails.images.length > 0 && (
-                  <div className="mt-4 p-4 bg-neutral-900/60 border border-neutral-800/80 rounded-2xl flex flex-col items-center">
+                  <div className="mt-4 p-4 bg-neutral-900/60 border border-[#F9704E] rounded-2xl flex flex-col items-center">
                     <span className="block text-xs text-neutral-300 mb-3 font-semibold text-center">📷 گالری تصاویر تور (برای بزرگنمایی کلیک کنید):</span>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full justify-items-center">
                       {currentTourDetails.images.map((imgUrl: string, imgIdx: number) => (
                         <div 
                           key={imgIdx} 
                           onClick={() => setActiveImageModal(imgUrl)}
-                          className="w-full aspect-square rounded-2xl overflow-hidden border border-neutral-700/80 bg-neutral-950 cursor-pointer group relative shadow-lg hover:border-[#F9704E] transition-all duration-300"
+                          className="w-full aspect-square rounded-2xl overflow-hidden border border-[#F9704E] bg-neutral-950 cursor-pointer group relative shadow-lg hover:border-[#F9704E] transition-all duration-300"
                         >
                           <img
                             src={imgUrl}
@@ -483,7 +483,7 @@ return (
                      {/* تعداد صندلی مورد نیاز */}
                 <div className="mb-4">
                   <label className="block text-sm text-white mb-2 font-medium">تعداد صندلی مورد نیاز</label>
-                  <div className="flex items-center justify-between bg-[#1c1c21] border border-neutral-800 p-3 rounded-xl">
+                  <div className="flex items-center justify-between bg-[#1c1c21] border border-[#F9704E] p-3 rounded-xl">
                     <button
                       type="button"
                       onClick={() => {
@@ -514,7 +514,7 @@ return (
 
                 {/* مجموع قیمت صندلی‌ها در مرحله اول */}
                 {currentTourDetails && (
-                  <div className="mb-4 p-4 rounded-xl bg-neutral-900/60 border border-neutral-800/80 flex items-center justify-between">
+                  <div className="mb-4 p-4 rounded-xl bg-neutral-900/60 border border-[#F9704E] flex items-center justify-between">
                     <span className="text-xs text-neutral-400 font-medium">🧮 مجموع قیمت صندلی‌ها:</span>
                     <span className="text-xl font-extrabold text-[#F9704E] tracking-wide">
                       {calculateTotalPrice()}
@@ -560,7 +560,7 @@ return (
                         <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
                         <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
                         {idCardPreview ? (
-                          <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border border-neutral-700 bg-neutral-900">
+                          <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border border-[#F9704E] bg-neutral-900">
                             <img src={idCardPreview} alt="کارت ملی" className="w-full h-full object-cover opacity-80" />
                             <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
                               <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-neutral-200 transition-all cursor-pointer">تغییر عکس</button>
@@ -582,7 +582,7 @@ return (
 
               {step === 3 && (
                 <div className="space-y-5">
-                  <div className="bg-[#1a1a1f] border border-neutral-800 p-5 rounded-2xl space-y-4">
+                  <div className="bg-[#1a1a1f] borderborder-[#F9704E] p-5 rounded-2xl space-y-4">
                     <div className="bg-[#121215] p-4 rounded-xl border border-neutral-800 flex flex-col gap-2">
                       <span className="text-[11px] text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز:</span>
                       <div className="flex items-center justify-between">
@@ -609,7 +609,7 @@ return (
   {currentLider.cards && currentLider.cards.length > 0 ? (
     <div className="space-y-2">
       {currentLider.cards.map((card: any, index: number) => (
-        <div key={index} className="flex items-center justify-between bg-[#121215] p-3 rounded-xl border border-neutral-800">
+        <div key={index} className="flex items-center justify-between bg-[#121215] p-3 rounded-xl borderborder-[#F9704E]">
           <div className="flex flex-col">
             <span className="text-xs text-orange-400 font-bold">
               {card.bankName ? `بانک ${card.bankName}` : `کارت شماره ${index + 1}`}
@@ -631,7 +631,7 @@ return (
       ))}
     </div>
   ) : (
-    <div className="bg-[#121215] p-3 rounded-xl border border-neutral-800 text-center">
+    <div className="bg-[#121215] p-3 rounded-xl border border-[#F9704E] text-center">
       <span className="text-xs text-neutral-400">شماره کارتی ثبت نشده است</span>
     </div>
   )}
@@ -642,7 +642,7 @@ return (
                     <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر فیش واریزی</label>
                     <input type="file" ref={receiptInputRef} accept="image/*" onChange={handleReceiptChange} className="hidden" />
 {receiptPreview ? (
-  <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border border-neutral-700 bg-neutral-900">
+  <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border border-[#F9704E] bg-neutral-900">
     <img src={receiptPreview} alt="فیش" className="w-full h-full object-cover opacity-80" />
     <div className="absolute inset-0 flex items-center justify-center bg-black/40 gap-3">
       <button type="button" onClick={() => receiptInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-medium">
