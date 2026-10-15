@@ -334,32 +334,37 @@ return (
     <div className="w-full max-w-lg bg-[#121215] border-2 border-[#E5C060] rounded-[28px] sm:rounded-[28px] p-5 sm:p-8 overflow-hidden shadow-2xl shadow-black/80 my-2">
 
       {/* هدر لیدر و لوگو اصلاح شده */}
-      <div className="p-4 sm:p-6 pb-5 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex items-center justify-between bg-neutral-900/20 mb-5">
-        <div className="flex items-center gap-3 sm:gap-4">
-<div className="relative w-26 sm:w-38 h-10 sm:h-12 shrink-0">
-  <img
-    src="/logo.png"
- 
-    className="w-full h-full object-contain"
-  />
+     {/* هدر لیدر و لوگو اصلاح شده */}
+<div className="p-4 sm:p-6 pb-5 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-col sm:flex-row items-center sm:justify-between bg-neutral-900/20 mb-5 gap-4 text-center sm:text-right">
+  
+  {/* بخش لوگو */}
+  <div className="relative w-32 sm:w-48 h-10 sm:h-12 shrink-0">
+    <img
+      src="/logo.png"
+      className="w-full h-full object-contain"
+      alt="Lidara Logo"
+    />
+  </div>
 
-          </div>
-          <div>
-            <h1 className="text-base sm:text-xl font-extrabold text-white tracking-tight">{currentLider.fullName || currentLider.name}</h1>
-            <p className="text-[10px] sm:text-xs font-medium text-neutral-400 mt-0.5">{currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}</p>
-          </div>
-        </div>
+  {/* بخش نام و عنوان لیدر */}
+  <div className="text-center sm:text-right">
+    <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
+      {currentLider.fullName || currentLider.name}
+    </h1>
+    <p className="text-[11px] sm:text-xs font-medium text-neutral-400 mt-0.5">
+      {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
+    </p>
+  </div>
 
-<a
-  href={`/login${window.location.search}`}
-  className="flex items-center justify-center px-2.5 sm:px-3.5 py-1.5 bg-[#F9704E] text-white rounded-xl transition-all duration-200 active:scale-95 text-[11px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap shrink-0"
-  title="ورود تورلیدر"
->
-  ورود لیدر
-</a>
-
-      </div>
-
+  {/* دکمه ورود لیدر */}
+  <a
+    href={`/login${window.location.search}`}
+    className="flex items-center justify-center px-3 py-1.5 bg-[#F9704E] text-white rounded-xl transition-all duration-200 active:scale-95 text-[11px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap shrink-0"
+    title="ورود تورلیدر"
+  >
+    ورود لیدر
+  </a>
+</div>
       {!isSuccess && (
         <div className="px-2 pt-2 pb-4 flex items-center justify-between text-[11px] font-bold text-neutral-400">
           <div className="flex items-center gap-2">
