@@ -820,7 +820,7 @@ const exportToExcel = () => {
         </div>
 
          {/* نوار جستجو و فیلتر */}
-        <div className="mb-6 bg-[#1e1e1e] p-4 rounded-2xl border-2 border-[#E5C060]shadow-md flex flex-col md:flex-row items-center justify-between gap-1" dir="rtl">
+        <div className="mb-6 bg-[#1e1e1e] p-4 rounded-2xl  border-2 border-[#E5C060] shadow-xl  flex-col md:flex-row items-center justify-between gap-1" dir="rtl">
           <div className="flex flex-wrap items-center justify-start gap-3 w-full md:w-auto">
             <div className="flex items-center gap-2">
               <FaFilter className="text-zinc-500 text-xs" />
