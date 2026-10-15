@@ -46,7 +46,7 @@ if (res && res.success) {
       <div className="w-full max-w-sm sm:max-w-md bg-[#121215] border-2 border-[#E5C060] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-red-950/40 my-auto transition-all">
         
 <div className="flex flex-col items-center text-center mb-6 sm:mb-8">
-<div className="relative w-40 sm:w-48 h-14 sm:h-16 mb-3">
+<div className="relative w-60 sm:w-60 h-20 sm:h-20 mb-3">
   <img
     src="/logo.png"
       className="w-full h-full object-contain"
