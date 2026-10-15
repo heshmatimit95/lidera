@@ -699,7 +699,7 @@ const exportToExcel = () => {
         {/* هدر اصلی */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6 md:mb-8 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl">
           <div className="flex items-center gap-4">
-<div className="relative w-40 sm:w-48 h-10 sm:h-12 mb-3">
+<div className="relative w-48 sm:w-56 h-14 sm:h-12 mb-3">
   <img
     src="/logo.png"
  
