@@ -342,7 +342,7 @@ if (res.ok) {
         
    
        {/* هدر اصلی */}
-<div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border border-zinc-800 shadow-xl text-center md:text-right">
+<div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl text-center md:text-right">
   <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
     {/* ابعاد ریسپانسیو لوگو برای موبایل */}
     <div className="relative w-24 sm:w-32 h-10 sm:h-12 shrink-0">
@@ -422,7 +422,7 @@ if (res.ok) {
         {/* ----------------- نمایش موبایل (Mobile Cards) ----------------- */}
         <div className="block md:hidden space-y-4">
           {guides.length === 0 ? (
-            <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border-2 border-[#FFD700] text-white text-sm">
+            <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border-2 border-[#E5C060] text-white text-sm">
               هیچ لیدری ثبت نشده است.
             </div>
           ) : (
@@ -448,7 +448,7 @@ if (res.ok) {
 
                             <button
                               onClick={() => handleCopyLeaderLink(guide.username)}
-                              className="p-2 text-emerald-400 hover:text-emerald-400  bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
+                              className="p-2 text-emerald-400 hover:text-emerald-400  bg-zinc-900 border-2 border-[#E5C060] rounded-lg active:scale-95 transition-all"
                             >
                               <FaLink size={15} />
                             </button>
@@ -511,8 +511,8 @@ if (res.ok) {
           )}
         </div>
 
-        {/* ----------------- نمایش دسکتاپ (Table) ----------------- */}
-        <div className="hidden md:block bg-[#1e1e1e] rounded-2xl border border-zinc-800 shadow-xl overflow-hidden">
+        {/* ----------------- نمایش دسکتاپ (Table) ----------------- */
+        <div className="hidden md:block bg-[#1e1e1e] rounded-2xl border-2 border-[#E5C060] shadow-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-right border-collapse">
               <thead>

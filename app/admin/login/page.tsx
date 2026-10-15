@@ -43,7 +43,7 @@ if (res && res.success) {
 
   return (
     <div className="min-h-screen w-full bg-[#F9704E] text-white flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-sm sm:max-w-md bg-[#121215] border border-red-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-red-950/40 my-auto transition-all">
+      <div className="w-full max-w-sm sm:max-w-md bg-[#121215] border-2 border-[#E5C060] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-red-950/40 my-auto transition-all">
         
 <div className="flex flex-col items-center text-center mb-6 sm:mb-8">
 <div className="relative w-32 h-12 mb-3">

@@ -334,26 +334,21 @@ return (
     <div className="w-full max-w-lg bg-[#121215] border-2 border-[#E5C060] rounded-[28px] sm:rounded-[28px] p-5 sm:p-8 overflow-hidden shadow-2xl shadow-black/80 my-2">
 
       {/* هدر لیدر و لوگو اصلاح شده */}
-{/* هدر لیدر و لوگو اصلاح شده */}
-<div className="p-3 sm:p-6 pb-5 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-col sm:flex-row items-center sm:justify-between bg-neutral-900/20 mb-5 gap-4 text-center sm:text-right">
-  <div className="flex items-center gap-3">
-    {/* تنظیم ابعاد ریسپانسیو لوگو برای موبایل */}
-    <div className="relative w-24 sm:w-32 h-10 sm:h-12 shrink-0">
-      <img
-        src="/logo.png"
-        className="w-full h-full object-contain"
-        alt="Lidara Logo"
-      />
-    </div>
-    <div>
-      <h1 className="text-sm sm:text-xl font-extrabold text-white tracking-tight">
-        {currentLider.fullName || currentLider.name}
-      </h1>
-      <p className="text-[11px] sm:text-xs font-medium text-neutral-400 mt-0.5">
-        {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
-      </p>
-    </div>
-  </div>
+      <div className="p-4 sm:p-6 pb-5 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex items-center justify-between bg-neutral-900/20 mb-5">
+        <div className="flex items-center gap-3 sm:gap-4">
+<div className="relative w-32 h-12 mb-3">
+  <img
+    src="/logo.png"
+ 
+    className="w-full h-full object-contain"
+  />
+
+          </div>
+          <div>
+            <h1 className="text-base sm:text-xl font-extrabold text-white tracking-tight">{currentLider.fullName || currentLider.name}</h1>
+            <p className="text-[10px] sm:text-xs font-medium text-neutral-400 mt-0.5">{currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}</p>
+          </div>
+        </div>
 
 <a
   href={`/login${window.location.search}`}

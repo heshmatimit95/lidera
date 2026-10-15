@@ -696,23 +696,20 @@ const exportToExcel = () => {
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
       <div className="max-w-7xl mx-auto">
         
-{/* هدر اصلی */}
-<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6 md:mb-8 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border  border-[#E5C060] shadow-xl">
-  <div className="flex items-center gap-3">
-    {/* تنظیم ابعاد ریسپانسیو لوگو برای موبایل و دسکتاپ */}
-    <div className="relative w-24 sm:w-32 h-10 sm:h-12 shrink-0">
-      <img
-        src="/logo.png"
-        className="w-full h-full object-contain"
-        alt="Lidara Logo"
-      />
-    </div>
-    <div>
-      {/* کوچک‌تر کردن فونت تیتر در موبایل برای جلوگیری از شکستگی */}
-      <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">پنل مدیریت تور لیدر</h1>
-      <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5">مدیریت مسافران، وضعیت پرداخت‌ها و تنظیمات حساب بانکی لیدر</p>
-    </div>
-  </div>
+        {/* هدر اصلی */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6 md:mb-8 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl">
+          <div className="flex items-center gap-4">
+<div className="relative w-32 h-12 mb-3">
+  <img
+    src="/logo.png"
+ 
+    className="w-full h-full object-contain"
+  />        </div>
+            <div>
+              <h1 className="text-base sm:text-xl font-bold text-white">پنل مدیریت تور لیدر</h1>
+             
+            </div>
+          </div>
           
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-3 w-full lg:w-auto">
             <button onClick={() => setIsTourModalOpen(true)} title="مدیریت تورها" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#F9704E] p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer flex-1 sm:flex-none">
@@ -739,7 +736,7 @@ const exportToExcel = () => {
         </div>
 
         {/* بخش تنظیمات مالی و کارت‌های بانکی لیدر */}
-        <div className="mb-6 bg-[#1e1e1e] p-5 rounded-2xl border border-[#E5C060] shadow-xl space-y-4">
+        <div className="mb-6 bg-[#1e1e1e] p-5 rounded-2xl border-2 border-[#E5C060] shadow-xl space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
               <FaCreditCard className="text-[#F9704E]" /> تنظیمات مالی و شماره کارت‌ها 
@@ -823,7 +820,7 @@ const exportToExcel = () => {
         </div>
 
          {/* نوار جستجو و فیلتر */}
-        <div className="mb-6 bg-[#1e1e1e] p-4 rounded-2xl border border-[#E5C060] shadow-md flex flex-col md:flex-row items-center justify-between gap-1" dir="rtl">
+        <div className="mb-6 bg-[#1e1e1e] p-4 rounded-2xl border-2 border-[#E5C060]shadow-md flex flex-col md:flex-row items-center justify-between gap-1" dir="rtl">
           <div className="flex flex-wrap items-center justify-start gap-3 w-full md:w-auto">
             <div className="flex items-center gap-2">
               <FaFilter className="text-zinc-500 text-xs" />
@@ -849,7 +846,7 @@ const exportToExcel = () => {
         </div>
 
         {/* جدول مسافران */}
-        <div className="bg-[#1e1e1e] rounded-2xl border border-[#E5C060] shadow-xl overflow-hidden">
+        <div className="bg-[#1e1e1e] rounded-2xl border-2 border-[#E5C060] shadow-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-right border-collapse">
               <thead>
