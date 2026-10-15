@@ -448,7 +448,7 @@ if (res.ok) {
 
                             <button
                               onClick={() => handleCopyLeaderLink(guide.username)}
-                              className="p-2 text-emerald-400 hover:text-emerald-400  bg-zinc-900 border-2 border-[#E5C060] rounded-lg active:scale-95 transition-all"
+                              className="p-2 text-emerald-400 hover:text-emerald-400  bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
                             >
                               <FaLink size={15} />
                             </button>
@@ -631,7 +631,7 @@ if (res.ok) {
         {/* ----------------- ➕ مودال افزودن لیدر جدید ----------------- */}
         {isAddLeaderModalOpen && (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto" dir="rtl">
-    <div className="bg-[#121214] border border-zinc-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl my-8">
+    <div className="bg-[#121214] border-2 border-[#E5C060] rounded-2xl w-full max-w-lg p-6 shadow-2xl my-8">
       <h2 className="text-base font-bold mb-4 text-[#F9704E] flex items-center gap-2 border-b border-zinc-800 pb-3">
         <FaPlus /> افزودن تورلیدر جدید به دیتابیس
       </h2>
@@ -780,7 +780,7 @@ if (res.ok) {
         {/* ----------------- ✏️ مودال ویرایش اطلاعات لیدر ----------------- */}
         {isEditLeaderModalOpen && editingLeader && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-            <div className="bg-[#1e1e1e] border border-zinc-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl my-8" dir="rtl">
+            <div className="bg-[#1e1e1e] border-2 border-[#E5C060] rounded-2xl w-full max-w-lg p-6 shadow-2xl my-8" dir="rtl">
               <h2 className="text-base font-bold mb-4 text-[#F9704E] flex items-center gap-2 border-b border-zinc-800 pb-3">
                 <FaEdit /> ویرایش اطلاعات لیدر: {editingLeader.fullName}
               </h2>
