@@ -345,7 +345,7 @@ if (res.ok) {
 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl text-center md:text-right">
   <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
     {/* ابعاد ریسپانسیو لوگو برای موبایل */}
-    <div className="relative w-50 sm:w-48 h-17 sm:h-15 mb-3">
+    <div className="relative w-40 sm:w-48 h-17 sm:h-15 mb-3">
       <img
         src="/logo.png"
         className="w-full h-full object-contain"
@@ -469,7 +469,7 @@ if (res.ok) {
                       </button>
                       <button
                         onClick={() => handleDelete(guide.id)}
-                        className="p-2 text-rose-500 hover:text-rose-500 bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
+                        className="p-2 text-rose-400 hover:text-rose-400 bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
                         title="حذف"
                       >
                         <FaTrash size={14} />
@@ -604,7 +604,7 @@ if (res.ok) {
 
                             <button
                               onClick={() => handleResetLeaderPassword(guide.id)}
-                              className="p-2 text-amber-500  hover:text-amber-500 rounded-lg hover:bg-amber-500/10 transition-colors cursor-pointer"
+                              className="p-2 text-amber-400  hover:text-amber-400 rounded-lg hover:bg-amber-500/10 transition-colors cursor-pointer"
                               title="ریست پسورد"
                             >
                               <FaKey size={14} />
@@ -612,7 +612,7 @@ if (res.ok) {
 
                             <button
                               onClick={() => handleDelete(guide.id)}
-                              className="p-2 text-rose-500 hover:text-rose-500 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
+                              className="p-2 text-rose-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
                               title="حذف"
                             >
                               <FaTrash size={16} />

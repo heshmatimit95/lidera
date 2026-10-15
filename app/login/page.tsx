@@ -69,7 +69,7 @@ return (
 
 {/* هدر و لوگو */}
 <div className="flex flex-col items-center justify-center mb-6">
-  <div className="relative w-50 sm:w-38 h-18 sm:h-14 mb-3">
+  <div className="relative w-38 sm:w-48 h-18 sm:h-14 mb-3">
     <img
       src="/logo.png"
       className="w-full h-full object-contain"
