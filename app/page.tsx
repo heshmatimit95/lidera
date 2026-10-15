@@ -368,21 +368,21 @@ return (
       {!isSuccess && (
         <div className="px-2 pt-2 pb-4 flex items-center justify-between text-[11px] font-bold text-neutral-400">
           <div className="flex items-center gap-2">
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-500'}`}>۱</span>
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-[#F9704E] text-white' : 'bg-[#F9704E] text-neutral-500'}`}>۱</span>
             <span className={step >= 1 ? 'text-white' : ''}>انتخاب تور</span>
           </div>
           <div className="h-2px flex-1 mx-2 bg-neutral-800">
             <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 1 ? '100%' : '0%' }}></div>
           </div>
           <div className="flex items-center gap-2">
-    cc        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-500'}`}>۲</span>
+    cc        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-[#F9704E] text-white' : 'bg-[#F9704E] text-neutral-500'}`}>۲</span>
             <span className={step >= 2 ? 'text-white' : ''}>مشخصات</span>
           </div>
           <div className="h-2px flex-1 mx-2 bg-neutral-800">
             <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step >= 3 ? '100%' : '0%' }}></div>
           </div>
           <div className="flex items-center gap-2">
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step === 3 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-500'}`}>۳</span>
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step === 3 ? 'bg-[#F9704E] text-white' : 'bg-[#F9704E]text-neutral-500'}`}>۳</span>
             <span className={step === 3 ? 'text-white' : ''}>پرداخت</span>
           </div>
         </div>
