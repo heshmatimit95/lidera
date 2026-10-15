@@ -336,7 +336,7 @@ return (
       {/* هدر لیدر و لوگو اصلاح شده */}
       <div className="p-4 sm:p-6 pb-5 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex items-center justify-between bg-neutral-900/20 mb-5">
         <div className="flex items-center gap-3 sm:gap-4">
-<div className="relative w-32 h-12 mb-3">
+<div className="relative w-40 sm:w-48 h-14 sm:h-16 mb-3">
   <img
     src="/logo.png"
  
