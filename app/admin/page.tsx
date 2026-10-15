@@ -345,7 +345,7 @@ if (res.ok) {
 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl text-center md:text-right">
   <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
     {/* ابعاد ریسپانسیو لوگو برای موبایل */}
-    <div className="relative w-60 sm:w-60 h-18 sm:h-16 mb-3">
+    <div className="relative w-50 sm:w-48 h-17 sm:h-15 mb-3">
       <img
         src="/logo.png"
         className="w-full h-full object-contain"
@@ -433,7 +433,7 @@ if (res.ok) {
               return (
                 <div key={guide.id} className={`bg-[#1e1e1e] border rounded-2xl p-5 shadow-lg space-y-4 transition-all ${isChanged ? 'border-amber-500/60 ring-1 ring-amber-500/30' : 'border-zinc-800'}`}>
                   
-                  <div className="flex justify-between items-start border-2 border-[#E5C060] pb-3">
+                  <div className="flex justify-between items-start border-b border-[#FFD700] pb-3">
                     <div>
                       <h3 className="font-bold text-white text-base">{guide.fullName}</h3>
                       <p className="text-xs text-[#FFD700] mt-1 font-mono">نام کاربری: {guide.username}</p>
