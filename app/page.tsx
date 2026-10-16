@@ -333,17 +333,17 @@ return (
   <div className="min-h-screen bg-[#F9704E] text-white p-4 flex flex-col items-center justify-center" dir="rtl">
     <div className="w-full max-w-lg bg-[#121215] border-2 border-[#E5C060] rounded-[28px] sm:rounded-[28px] p-5 sm:p-8 overflow-hidden shadow-2xl shadow-black/80 my-2">
 
-{/* کانتینر اصلی هدر با چیدمان استاندارد و اصلاح شده */}
-<div className="w-full flex flex-row items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-neutral-900/80 border border-[#F9704E]/30 backdrop-blur-md shadow-lg">
+{/* کانتینر اصلی هدر با چیدمان صحیح راست‌به‌چپ */}
+<div className="w-full flex flex-row-reverse items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-neutral-900/80 border border-[#F9704E]/30 backdrop-blur-md shadow-lg">
   
-  {/* سمت راست: لوگو و مشخصات لیدر */}
+  {/* سمت راست: لوگو و مشخصات لیدر (در زبان RTL به عنوان شروع کننده در سمت راست قرار می‌گیرد) */}
   <div className="flex items-center gap-3 min-w-0">
-    {/* بخش لوگو */}
-    <div className="relative w-48 sm:w-56 h-14 sm:h-12 mb-3">
+    {/* بخش لوگو با ابعاد متناسب و شکیل */}
+    <div className="relative w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-xl bg-neutral-800/50 p-1.5 border border-white/5 flex items-center justify-center">
       <img
         src="/logo.png"
-      className="w-full h-full object-contain"
-        
+        className="w-full h-full object-contain"
+        alt="Lidara Logo"
       />
     </div>
 
@@ -357,6 +357,17 @@ return (
       </p>
     </div>
   </div>
+
+  {/* سمت چپ: دکمه ورود لیدر */}
+  <a
+    href={`/login?${window.location.search}`}
+    title="ورود تورلیدر"
+    className="shrink-0 flex items-center justify-center px-3.5 py-2 bg-[#F9704E] hover:bg-[#e05e3d] text-white text-xs sm:text-sm font-semibold rounded-xl transition-all duration-200 active:scale-95 shadow-md shadow-[#F9704E]/20 whitespace-nowrap"
+  >
+    ورود لیدر
+  </a>
+
+</div>
 
   {/* سمت چپ: دکمه ورود لیدر */}
   <a
