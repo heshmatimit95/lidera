@@ -336,7 +336,7 @@ return (
         {/* هدر اصلی */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6 md:mb-8 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl">
           <div className="flex items-center gap-4">
-<div className="relative w-48 sm:w-56 h-14 sm:h-12 mb-3">
+<div className="relative w-56 sm:w-48 h-16 sm:h-12 mb-3">
   <img
     src="/logo.png"
  
@@ -345,7 +345,7 @@ return (
 
  {/* بخش نام و عنوان لیدر - عریض و مرکزچین */}
 <div className="flex-1 flex flex-col items-center justify-center text-center px-2 truncate">
-  <h1 className="w-full text-sm sm:text-base font-bold text-white tracking-tight truncate">
+  <h1 className="text-base sm:text-xl font-bold text-white">
     {currentLider.fullName || currentLider.name}
   </h1>
   <p className="w-full text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-0.5">
