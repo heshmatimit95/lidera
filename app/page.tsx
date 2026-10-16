@@ -330,49 +330,40 @@ const handleRemoveReceipt = () => {
   }
 
 return (
-    <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* هدر اصلی */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6 md:mb-8 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl">
-          <div className="flex items-center gap-4">
-<div className="relative w-56 sm:w-48 h-16 sm:h-12 mb-3">
-  <img
-    src="/logo.png"
- 
-    className="w-full h-full object-contain"
-  />        </div>
+  <div className="min-h-screen bg-[#F9704E] text-white p-4 flex flex-col items-center justify-center" dir="rtl">
+    <div className="w-full max-w-lg bg-[#121215] border-2 border-[#E5C060] rounded-[28px] sm:rounded-[28px] p-5 sm:p-8 overflow-hidden shadow-2xl shadow-black/80 my-2">
 
- {/* بخش نام و عنوان لیدر - عریض و مرکزچین */}
-<div className="flex-1 flex flex-col items-center justify-center text-center px-2 truncate">
-  <h1 className="text-base sm:text-xl font-bold text-white">
-    {currentLider.fullName || currentLider.name}
-  </h1>
-  <p className="w-full text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-0.5">
-    {currentLider.title || currentLider.brandName || "تورلیدر رسمی"}
-  </p>
-</div>
+      {/* هدر لیدر و لوگو اصلاح شده */}
+     {/* هدر لیدر و لوگو اصلاح شده */}
+<div className="p-4 sm:p-6 pb-5 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-col sm:flex-row items-center sm:justify-between bg-neutral-900/20 mb-5 gap-4 text-center sm:text-right">
+  
+  {/* بخش لوگو */}
+  <div className="relative w-52 sm:w-56 h-14  sm:h-12 shrink-0">
+    <img
+      src="/logo.png"
+      className="w-full h-full object-contain"
+      alt="Lidara Logo"
+    />
+  </div>
 
-  {/* سمت چپ: دکمه ورود لیدر */}
+  {/* بخش نام و عنوان لیدر */}
+  <div className="text-center sm:text-right">
+    <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
+      {currentLider.fullName || currentLider.name}
+    </h1>
+    <p className="text-[11px] sm:text-xs font-medium text-neutral-400 mt-0.5">
+      {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
+    </p>
+  </div>
+
+  {/* دکمه ورود لیدر */}
   <a
-    href={`/login?${window.location.search}`}
+    href={`/login${window.location.search}`}
+    className="flex items-center justify-center px-3 py-1.5 bg-[#F9704E] text-white rounded-xl transition-all duration-200 active:scale-95 text-[11px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap shrink-0"
     title="ورود تورلیدر"
-    className="shrink-0 flex items-center justify-center px-3.5 py-2 bg-[#F9704E] hover:bg-[#e05e3d] text-white text-xs sm:text-sm font-semibold rounded-xl transition-all duration-200 active:scale-95 shadow-md shadow-[#F9704E]/20 whitespace-nowrap"
   >
     ورود لیدر
   </a>
-
-</div>
-
-  {/* سمت چپ: دکمه ورود لیدر */}
-  <a
-    href={`/login?${window.location.search}`}
-    title="ورود تورلیدر"
-    className="shrink-0 flex items-center justify-center px-3.5 py-2 bg-[#F9704E] hover:bg-[#e05e3d] text-white text-xs sm:text-sm font-semibold rounded-xl transition-all duration-200 active:scale-95 shadow-md shadow-[#F9704E]/20 whitespace-nowrap"
-  >
-    ورود لیدر
-  </a>
-
 </div>
       {!isSuccess && (
         <div className="px-2 pt-2 pb-4 flex items-center justify-between text-[11px] font-bold text-neutral-400">
@@ -422,7 +413,7 @@ return (
                     <select 
                       value={selectedTour} 
                       onChange={(e) => setSelectedTour(e.target.value)}
-                     className="w-full bg-[#1c1c21] border-2 border-[#F9704E]/50 focus:border-[#F9704E] p-4 rounded-xl text-xs text-white focus:outline-none transition-all duration-200"
+                      className="w-full bg-[#1c1c21] border border-[#F9704E] focus:border-[#F9704E] p-4 rounded-xl text-xs text-white focus:outline-none transition-all duration-200 font-medium"
                     >
                       {currentLider.tours.map((tour: any, idx: number) => {
                         const tourId = tour.id || tour._id || idx;
@@ -442,7 +433,7 @@ return (
 
                 {/* گالری تصاویر تورِ انتخاب‌شده (طراحی مدرن، مرکزچین، زیبا با قابلیت زوم عالی) */}
                 {currentTourDetails && currentTourDetails.images && currentTourDetails.images.length > 0 && (
-                 <div className="mt-4 p-4 bg-neutral-900/60 border-2 border-[#F9704E] rounded-2xl flex flex-col items-center">
+                  <div className="mt-4 p-4 bg-neutral-900/60 border border-[#F9704E] rounded-2xl flex flex-col items-center">
                     <span className="block text-xs text-neutral-300 mb-3 font-semibold text-center">📷 گالری تصاویر تور (برای بزرگنمایی کلیک کنید):</span>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full justify-items-center">
                       {currentTourDetails.images.map((imgUrl: string, imgIdx: number) => (
@@ -492,14 +483,14 @@ return (
                      {/* تعداد صندلی مورد نیاز */}
                 <div className="mb-4">
                   <label className="block text-sm text-white mb-2 font-medium">تعداد صندلی مورد نیاز</label>
-                 <div className="flex items-center justify-between bg-[#1c1c21] border-2 border-[#F9704E]/50 hover:border-[#F9704E] p-3 rounded-xl transition-colors shadow-sm">
+                  <div className="flex items-center justify-between bg-[#1c1c21] border border-[#F9704E] p-3 rounded-xl">
                     <button
                       type="button"
                       onClick={() => {
                         const current = parseInt(seatsCount, 10) || 1;
                         if (current > 1) setSeatsCount((current - 1).toString());
                       }}
-                     className="w-10 h-10 rounded-lg  bg-[#F9704E] hover:bg-[#F9704E] active:scale-95 text-white flex items-center justify-center text-lg font-bold transition-all duration-200 cursor-pointer"
+                      className="w-10 h-10 rounded-lg bg-neutral-800 text-white flex items-center justify-center text-lg font-bold hover:bg-[#F9704E] transition-colors cursor-pointer"
                     >
                       -
                     </button>
@@ -514,10 +505,8 @@ return (
                         const current = parseInt(seatsCount, 10) || 1;
                         if (current < 10) setSeatsCount((current + 1).toString());
                       }}
-                    
-                      className="w-10 h-10 rounded-lg bg-[#F9704E] text-white flex items-center justify-center text-lg font-bold hover:bg-[#F9704E]  transition-colors cursor-pointer"
-                    > 
-
+                      className="w-10 h-10 rounded-lg bg-neutral-800 text-white flex items-center justify-center text-lg font-bold hover:bg-[#F9704E] transition-colors cursor-pointer"
+                    >
                       +
                     </button>
                   </div>
@@ -525,7 +514,7 @@ return (
 
                 {/* مجموع قیمت صندلی‌ها در مرحله اول */}
                 {currentTourDetails && (
-                 <div className="mb-4 p-4 rounded-xl bg-[#1c1c21] border-2 border-[#F9704E]/50 hover:border-[#F9704E] transition-colors flex items-center justify-between shadow-sm">
+                  <div className="mb-4 p-4 rounded-xl bg-neutral-900/60 border border-[#F9704E] flex items-center justify-between">
                     <span className="text-xs text-neutral-400 font-medium">🧮 مجموع قیمت صندلی‌ها:</span>
                     <span className="text-xl font-extrabold text-[#F9704E] tracking-wide">
                       {calculateTotalPrice()}
