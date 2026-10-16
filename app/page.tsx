@@ -330,33 +330,28 @@ const handleRemoveReceipt = () => {
   }
 
 return (
-  <div className="min-h-screen bg-[#F9704E] text-white p-4 flex flex-col items-center justify-center" dir="rtl">
-    <div className="w-full max-w-lg bg-[#121215] border-2 border-[#E5C060] rounded-[28px] sm:rounded-[28px] p-5 sm:p-8 overflow-hidden shadow-2xl shadow-black/80 my-2">
+    <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* هدر اصلی */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6 md:mb-8 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl">
+          <div className="flex items-center gap-4">
+<div className="relative w-48 sm:w-56 h-14 sm:h-12 mb-3">
+  <img
+    src="/logo.png"
+ 
+    className="w-full h-full object-contain"
+  />        </div>
 
-{/* کانتینر اصلی هدر با چیدمان صحیح راست‌به‌چپ */}
-<div className="w-full flex flex-row-reverse items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-neutral-900/80 border border-[#F9704E]/30 backdrop-blur-md shadow-lg">
-  
-  {/* سمت راست: لوگو و مشخصات لیدر (در زبان RTL به عنوان شروع کننده در سمت راست قرار می‌گیرد) */}
-  <div className="flex items-center gap-3 min-w-0">
-    {/* بخش لوگو با ابعاد متناسب و شکیل */}
-    <div className="relative w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-xl bg-neutral-800/50 p-1.5 border border-white/5 flex items-center justify-center">
-      <img
-        src="/logo.png"
-        className="w-full h-full object-contain"
-        alt="Lidara Logo"
-      />
-    </div>
-
-    {/* بخش نام و عنوان لیدر */}
-    <div className="flex flex-col text-right truncate">
-      <h1 className="text-sm sm:text-base font-bold text-white tracking-tight truncate">
-        {currentLider.fullName || currentLider.name}
-      </h1>
-      <p className="text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-0.5">
-        {currentLider.title || currentLider.brandName || "تورلیدر رسمی"}
-      </p>
-    </div>
-  </div>
+ {/* بخش نام و عنوان لیدر - عریض و مرکزچین */}
+<div className="flex-1 flex flex-col items-center justify-center text-center px-2 truncate">
+  <h1 className="w-full text-sm sm:text-base font-bold text-white tracking-tight truncate">
+    {currentLider.fullName || currentLider.name}
+  </h1>
+  <p className="w-full text-[11px] sm:text-xs text-neutral-400 font-medium truncate mt-0.5">
+    {currentLider.title || currentLider.brandName || "تورلیدر رسمی"}
+  </p>
+</div>
 
   {/* سمت چپ: دکمه ورود لیدر */}
   <a
