@@ -431,9 +431,9 @@ if (res.ok) {
               const isChanged = pendingStatusChanges[guide.id] !== undefined && pendingStatusChanges[guide.id] !== guide.status;
 
               return (
-                <div key={guide.id} className={`bg-[#1e1e1e] border rounded-2xl p-5 shadow-lg space-y-4 transition-all ${isChanged ? 'border-amber-500/60 ring-1 ring-amber-500/30' : 'border-zinc-800'}`}>
+               <div key={guide.id} className="bg-[#1e1e1e] border-2 border-[#FFD700] hover:border-amber-400 rounded-2xl p-5 shadow-lg shadow-amber-500/10 space-y-4 transition-all">
                   
-                  <div className="flex justify-between items-start border-b border-[#FFD700] pb-3">
+                 <div className="flex items-center justify-between border-b border-[#F9704E]/30 pb-3 gap-2">
                     <div>
                       <h3 className="font-bold text-white text-base">{guide.fullName}</h3>
                       <p className="text-xs text-[#FFD700] mt-1 font-mono">نام کاربری: {guide.username}</p>
