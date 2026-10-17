@@ -378,7 +378,7 @@ return (
     </div>
 
     {/* خط رابط ۱ */}
-    <div className="h-[2px] flex-1 bg-neutral-800 max-w-[40px]">
+    <div className="h-2px] flex-1 bg-neutral-800 max-w-40px]">
       <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 1 ? '100%' : '0%' }}></div>
     </div>
 
@@ -389,7 +389,7 @@ return (
     </div>
 
     {/* خط رابط ۲ */}
-    <div className="h-[2px] flex-1 bg-neutral-800 max-w-[40px]">
+    <div className="h-2px] flex-1 bg-neutral-800 max-w-40px]">
       <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 2 ? '100%' : '0%' }}></div>
     </div>
 

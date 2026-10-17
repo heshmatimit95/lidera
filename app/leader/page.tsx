@@ -1,4 +1,6 @@
 "use client";
+import { generateTourAiItinerary } from "../actions/ai-actions";
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -6,7 +8,7 @@ import * as XLSX from 'xlsx';
 import { 
   FaFileExcel, FaTrash, FaUserPlus, FaEdit, FaCheck, FaTimes, 
   FaMapMarkedAlt, FaPlus, FaKey, FaSignOutAlt, FaSearch, FaFilter,
-  FaImage, FaCreditCard,FaUpload
+  FaImage, FaCreditCard,FaUpload,FaMagic
 } from 'react-icons/fa';
 
 interface Passenger {
@@ -45,6 +47,15 @@ interface BankCard {
 }
 
 export default function LeaderDashboard() {
+const [loadingAiId, setLoadingAiId] = useState<string | null>(null);
+
+const handleGenerateAi = async (tourId: string, tourName: string) => {
+  setLoadingAiId(tourId);
+  const result = await generateTourAiItinerary(tourId, tourName, 3, "طبیعت‌گردی و گردشگری");
+  setLoadingAiId(null);
+  alert(result.message);
+};
+  
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -714,7 +725,19 @@ const exportToExcel = () => {
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-3 w-full lg:w-auto">
             <button onClick={() => setIsTourModalOpen(true)} title="مدیریت تورها" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#F9704E] p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer flex-1 sm:flex-none">
               <FaMapMarkedAlt size={18} />
+
             </button>
+          
+<button
+  onClick={() => handleGenerateAi("تور-فعلی", "کویر مرنجاب")}
+  disabled={loadingAiId !== null}
+  className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-md transition-all disabled:opacity-50"
+>
+  <FaMagic size={14} />
+  <span>{loadingAiId ? "در حال ساخت برنامه..." : "✨ ساخت برنامه سفر با AI"}</span>
+</button>
+          
+          
            <button onClick={() => openAddModal()} title="افزودن مسافر جدید" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-orange-500 p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer flex-1 sm:flex-none">
               <FaUserPlus size={18} />
             </button>

@@ -68,7 +68,11 @@ model Tour {
   passengers    Passenger[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  aiItinerary   AiItinerary? @relation(fields: [aiItineraryId], references: [id])
+  aiItineraryId String?      @unique
 }
+
+
 
 model TourImage {
   id        String   @id @default(uuid())
@@ -114,4 +118,12 @@ model Admin {
   id       String @id @default(uuid())
   username String @unique
   password String
+}
+model AiItinerary {
+  id          String   @id @default(uuid())
+  dayByDay    String   @db.Text // برنامه‌ی روزانه تولید شده توسط هوش مصنوعی
+  packingList String   @db.Text // چک‌لیست وسایل ضروری
+  promoText   String   @db.Text // متن تبلیغاتی اینستاگرام
+  tour        Tour?
+  createdAt   DateTime @default(now())
 }
