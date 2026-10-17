@@ -363,7 +363,8 @@ if (res.ok) {
 </div>
 
 {/* دکمه‌های ابزار بالای جدول - اصلاح شده شبیه پنل تورلیدر */}
-<div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2.5 w-full lg:w-auto">
+{/* دکمه‌های ابزار بالای جدول - با فاصله بیشتر */}
+<div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 w-full lg:w-auto">
   
   {/* دکمه افزودن */}
   <button

@@ -339,13 +339,13 @@ return (
 <div className="flex items-center justify-start shrink-0">
   <img 
     src="/logo.png" 
-    className="h-12 sm:h-12 md:h-14 w-auto object-contain" 
+    className="h-11 sm:h-12 md:h-14 w-auto object-contain" 
     alt="Lidera Logo" 
   />
 </div>
 
   {/* ۲. وسط: نام و عنوان لیدر */}
-<div className="text-center flex-1 min-w-0 px-1 pr-1">
+<div className="text-center flex-1 min-w-0 px-1 pr-6">
     <h1 className="text-xs sm:text-base md:text-lg font-bold text-white tracking-tight truncate">
       {currentLider.fullName || currentLider.name}
     </h1>
@@ -498,28 +498,27 @@ return (
                 <div className="mb-4">
                   <label className="block text-sm text-white mb-2 font-medium">تعداد صندلی مورد نیاز</label>
                   <div className="flex items-center justify-between bg-[#1c1c21] border border-[#F9704E] p-3 rounded-xl">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const current = parseInt(seatsCount, 10) || 1;
-                        if (current > 1) setSeatsCount((current - 1).toString());
-                      }}
-                      className="w-10 h-10 rounded-lg bg-[#F9704E] text-white flex items-center justify-center text-lg font-bold hover:bg-[#F9704E] transition-colors cursor-pointer"
-                    >
-                      -
-                    </button>
-                    
-                    <span className="text-white font-bold text-sm">
-                      {seatsCount} صندلی
-                    </span>
+<button
+  type="button"
+  onClick={() => {
+    const current = parseInt(seatsCount, 10) || 1;
+    if (current > 1) setSeatsCount((current - 1).toString());
+  }}
+  className="w-10 h-10 rounded-lg bg-rose-950/60 text-rose-400 border border-rose-900/40 hover:bg-rose-900/80 flex items-center justify-center text-lg font-bold transition-all active:scale-95 cursor-pointer"
+>
+  -
+</button>
 
+<span className="text-white font-bold text-sm">
+  {seatsCount} صندلی
+</span>
                     <button
                       type="button"
                       onClick={() => {
                         const current = parseInt(seatsCount, 10) || 1;
                         if (current < 10) setSeatsCount((current + 1).toString());
                       }}
-                      className="w-10 h-10 rounded-lg bg-[#F9704E] text-white flex items-center justify-center text-lg font-bold hover:bg-[#F9704E] transition-colors cursor-pointer"
+                       className="w-10 h-10 rounded-lg bg-rose-950/60 text-rose-400 border border-rose-900/40 hover:bg-rose-900/80 flex items-center justify-center text-lg font-bold transition-all active:scale-95 cursor-pointer"
                     >
                       +
                     </button>
@@ -574,19 +573,23 @@ return (
                         <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
                         <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
                         {idCardPreview ? (
-                        <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] hover:border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
-                            <img src={idCardPreview} alt="کارت ملی" className="w-full h-full object-cover opacity-80" />
-                            <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
-                              <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-neutral-200 transition-all cursor-pointer">تغییر عکس</button>
-                              <button type="button" onClick={handleRemoveIdCard} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-bold transition-all cursor-pointer">حذف عکس</button>
-                            </div>
-                          </div>
-                        ) : (
-                          <button type="button" onClick={() => idCardInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#F9704E] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${idCardError ? 'border-red-500/50 text-red-400' : 'border-[#F9704E] hover:border-[#F9704E]/50 text-neutral-400'}`}>
-                            <span className="text-lg">🪪</span>
-                            <span>برای آپلود عکس کارت ملی کلیک کنید</span>
-                          </button>
-                        )}
+  <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] hover:border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
+    <img src={idCardPreview} alt="کارت ملی" className="w-full h-full object-cover opacity-80" />
+    <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
+      <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-neutral-250 transition-all cursor-pointer">تغییر عکس</button>
+      <button type="button" onClick={handleRemoveIdCard} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-bold transition-all cursor-pointer">حذف عکس</button>
+    </div>
+  </div>
+) : (
+  <button
+    type="button"
+    onClick={() => idCardInputRef.current?.click()}
+    className="w-full border-2 border-dashed border-[#F9704E] hover:border-[#F9704E] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 bg-neutral-900 text-neutral-400 cursor-pointer"
+  >
+    <span className="text-lg">+</span>
+    <span>برای آپلود عکس کارت ملی کلیک کنید</span>
+  </button>
+)}
                         {idCardError && <p className="text-xs text-red-400 mt-2 font-medium">{idCardError}</p>}
                       </div>
                     </div>
