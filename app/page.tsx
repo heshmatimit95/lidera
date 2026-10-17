@@ -367,7 +367,6 @@ return (
 
 </div>
 
-
 {!isSuccess && (
   <div className="px-2 pt-3 pb-2 flex items-center justify-between text-[11px] font-bold text-neutral-400 w-full max-w-sm sm:max-w-md mx-auto">
     
@@ -377,8 +376,10 @@ return (
       <span className={step >= 1 ? 'text-white' : ''}>انتخاب تور</span>
     </div>
 
-    {/* خط رابط بین ۱ و ۲ */}
-    <div className={`h-3px] flex-1 mx-2 rounded-full overflow-hidden transition-all duration-300 ${step > 1 ? 'bg-[#F9704E]' : 'bg-neutral-700'}`}></div>
+    {/* خط رابط ۱ */}
+    <div className="h-[2px] flex-1 mx-2 bg-neutral-800 rounded-full overflow-hidden">
+      <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 1 ? '100%' : '0%' }}></div>
+    </div>
 
     {/* استپ ۲ */}
     <div className="flex items-center gap-1 shrink-0">
@@ -386,8 +387,10 @@ return (
       <span className={step >= 2 ? 'text-white' : ''}>مشخصات</span>
     </div>
 
-    {/* خط رابط بین ۲ و ۳ */}
-    <div className={`h-3px] flex-1 mx-2 rounded-full overflow-hidden transition-all duration-300 ${step > 2 ? 'bg-[#F9704E]' : 'bg-neutral-700'}`}></div>
+    {/* خط رابط ۲ */}
+    <div className="h-[2px] flex-1 mx-2 bg-neutral-800 rounded-full overflow-hidden">
+      <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 2 ? '100%' : '0%' }}></div>
+    </div>
 
     {/* استپ ۳ */}
     <div className="flex items-center gap-1 shrink-0">
