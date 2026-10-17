@@ -707,19 +707,22 @@ const exportToExcel = () => {
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
       <div className="max-w-7xl mx-auto">
         
-        {/* هدر اصلی */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6 md:mb-8 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl">
-          <div className="flex items-center gap-4">
-<div className="relative w-54 sm:w-60 h-14 sm:h-12 mb-3">
-  <img
-    src="/logo.png"
-      className="h-10 sm:h-12 md:h-14 w-auto object-contain" 
-   
-  />        </div>
-            <div>
-              <h1 className="text-base sm:text-xl font-bold text-white">پنل مدیریت تور لیدر</h1>
-             
-            </div>
+<div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl text-center md:text-right">
+<div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 mb-4">
+  
+  {/* لوگو و عنوان در موبایل با فاصله بسیار کم */}
+  <div className="flex items-center gap-2 sm:gap-3">
+    <img 
+      src="/logo.png" 
+      className="h-12 sm:h-16 w-auto object-contain" 
+      alt="Lidera Logo" 
+    />
+    <div>
+      <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
+        پنل مدیریت تور لیدر
+      </h1>
+</div>
+    </div>
           </div>
           
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-3 w-full lg:w-auto">
