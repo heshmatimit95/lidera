@@ -345,7 +345,7 @@ return (
 </div>
 
   {/* ۲. وسط: نام و عنوان لیدر */}
-<div className="text-right flex-1 min-w-0 px-1 pl-6 mr-2  ">
+<div className="text-right flex-1 min-w-0 px-1 pl-6 ">
     <h1 className="text-xs sm:text-base md:text-lg font-bold text-white tracking-tight ">
       {currentLider.fullName || currentLider.name}
     </h1>
@@ -529,7 +529,7 @@ return (
                 {currentTourDetails && (
                   <div className="mb-4 p-4 rounded-xl bg-neutral-900/60 border border-[#F9704E] flex items-center justify-between">
                     <span className="text-xs text-neutral-400 font-medium">🧮 مجموع قیمت صندلی‌ها:</span>
-                    <span className="text-xl font-extrabold text-[#F9704E] tracking-wide">
+                    <span className="text-xs font-bold text-[#F9704E] tracking-wide">
                       {calculateTotalPrice()}
                     </span>
                   </div>
