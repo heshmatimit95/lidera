@@ -380,7 +380,7 @@ if (res.ok) {
                   title={`ذخیره تغییرات وضعیت (${Object.keys(pendingStatusChanges).length})`}
                   className="flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-black p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer animate-pulse"
                 >
-                  <FaSave size={16} />
+                  <FaSave size={14} />
                 </button>
               )}
 
@@ -389,7 +389,7 @@ if (res.ok) {
                 title="تغییر رمز مدیریت"
                 className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer"
               >
-                <FaKey size={16} />
+                <FaKey size={14} />
               </button>
 
               <button
@@ -397,7 +397,7 @@ if (res.ok) {
                 title="حذف کلیه رکوردها"
                 className="flex items-center justify-center bg-red-950/50 hover:bg-red-900/80 text-red-400 p-2.5 rounded-xl transition-all border border-red-900/40 active:scale-95 cursor-pointer"
               >
-                <FaTrash size={16} />
+                <FaTrash size={14} />
               </button>
             
               <button
@@ -405,7 +405,7 @@ if (res.ok) {
                 title="خروجی اکسل (Excel)"
                 className="flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer"
               >
-                <FaFileExcel size={16} />
+                <FaFileExcel size={14} />
               </button>
             </div>
                  
@@ -414,7 +414,7 @@ if (res.ok) {
               title="خروج از پنل"
               className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2.5 rounded-xl transition-all border border-rose-900/30 active:scale-95 cursor-pointer"
             >
-              <FaSignOutAlt size={16} />
+              <FaSignOutAlt size={14} />
             </button>
           </div>
         </div>
@@ -422,7 +422,7 @@ if (res.ok) {
         {/* ----------------- نمایش موبایل (Mobile Cards) ----------------- */}
         <div className="block md:hidden space-y-4">
           {guides.length === 0 ? (
-            <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border-2 border-[#E5C060] text-white text-sm">
+            <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border-2 border-[#FFD700] text-white text-sm">
               هیچ لیدری ثبت نشده است.
             </div>
           ) : (
@@ -431,9 +431,9 @@ if (res.ok) {
               const isChanged = pendingStatusChanges[guide.id] !== undefined && pendingStatusChanges[guide.id] !== guide.status;
 
               return (
-               <div key={guide.id} className="bg-[#1e1e1e] border-2 border-[#FFD700] hover:border-amber-400 rounded-2xl p-5 shadow-lg shadow-amber-500/10 space-y-4 transition-all">
+                <div key={guide.id} className={`bg-[#1e1e1e] border rounded-2xl p-5 shadow-lg space-y-4 transition-all ${isChanged ? 'border-amber-500/60 ring-1 ring-amber-500/30' : 'border-zinc-800'}`}>
                   
-                 <div className="flex items-center justify-between border-b border-[#F9704E]/30 pb-3 gap-2">
+                  <div className="flex justify-between items-start border-b border-[#FFD700] pb-3">
                     <div>
                       <h3 className="font-bold text-white text-base">{guide.fullName}</h3>
                       <p className="text-xs text-[#FFD700] mt-1 font-mono">نام کاربری: {guide.username}</p>
@@ -469,7 +469,7 @@ if (res.ok) {
                       </button>
                       <button
                         onClick={() => handleDelete(guide.id)}
-                        className="p-2 text-rose-400 hover:text-rose-400 bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
+                        className="p-2 text-rose-500 hover:text-rose-500 bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
                         title="حذف"
                       >
                         <FaTrash size={14} />
@@ -477,16 +477,17 @@ if (res.ok) {
                     </div>
                   </div>
 
-              {/* شبکه‌های اجتماعی */}
-<div className="flex items-center justify-between bg-zinc-900/80 p-3 rounded-xl border border-[#F9704E]">
-  <span className="text-xs text-zinc-400">ارتباط:</span>
-  <div className="flex items-center gap-3" dir="ltr">
-    {guide.instagram ? <a href={`https://instagram.com/${guide.instagram}`} target="_blank" rel="noreferrer" className="text-pink-500"><FaInstagram size={18} /></a> : <FaInstagram size={18} className="text-white/10" />}
-    {guide.telegram ? <a href={`https://t.me/${guide.telegram}`} target="_blank" rel="noreferrer" className="text-sky-400"><FaTelegramPlane size={18} /></a> : <FaTelegramPlane size={18} className="text-white/10" />}
-    {guide.whatsapp ? <a href={`https://wa.me/${guide.whatsapp}`} target="_blank" rel="noreferrer" className="text-emerald-400"><FaWhatsapp size={18} /></a> : <FaWhatsapp size={18} className="text-white/10" />}
-    {guide.rubika ? <a href={`https://rubika.ir/${guide.rubika}`} target="_blank" rel="noreferrer" className="text-red-500"><MdChat size={18} /></a> : <MdChat size={18} className="text-white/10" />}
-  </div>
-</div>
+                  {/* شبکه‌های اجتماعی */}
+                  <div className="flex items-center justify-between bg-zinc-900/80 p-3 rounded-xl borderborder-[#F9704E]">
+                    <span className="text-xs text-zinc-400">ارتباط:</span>
+                    <div className="flex items-center gap-3">
+                      {guide.instagram ? <a href={`https://instagram.com/${guide.instagram}`} target="_blank" rel="noreferrer" className="text-pink-500"><FaInstagram size={18} /></a> : <FaInstagram size={18} className="text-white/10" />}
+                      {guide.telegram ? <a href={`https://t.me/${guide.telegram}`} target="_blank" rel="noreferrer" className="text-sky-400"><FaTelegramPlane size={18} /></a> : <FaTelegramPlane size={18} className="text-white/10" />}
+                      {guide.whatsapp ? <a href={`https://wa.me/${guide.whatsapp}`} target="_blank" rel="noreferrer" className="text-emerald-400"><FaWhatsapp size={18} /></a> : <FaWhatsapp size={18} className="text-white/10" />}
+                      {guide.rubika ? <a href={`https://rubika.ir/${guide.rubika}`} target="_blank" rel="noreferrer" className="text-red-500"><MdChat size={18} /></a> : <MdChat size={18} className="text-white/10" />}
+                    </div>
+                  </div>
+
                   {/* وضعیت دسترسی */}
                   <div className="flex items-center justify-between pt-1">
                     <span className="text-xs text-zinc-400">

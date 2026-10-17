@@ -332,38 +332,7 @@ const handleRemoveReceipt = () => {
 return (
   <div className="min-h-screen bg-[#F9704E] text-white p-4 flex flex-col items-center justify-center" dir="rtl">
     <div className="w-full max-w-lg bg-[#121215] border-2 border-[#E5C060] rounded-[28px] sm:rounded-[28px] p-5 sm:p-8 overflow-hidden shadow-2xl shadow-black/80 my-2">
-{/* هدر لیدر و لوگو اصلاح شده */}
-<div className="p-3 sm:p-5 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-row items-center justify-between bg-neutral-900/20 gap-3">
-  
-  {/* سمت راست: لوگو */}
-  <div className="relative w-48 sm:w-52 h-10 sm:h-12 shrink-0 flex items-center justify-start">
-    <img 
-      src="/logo.png" 
-      className="w-full h-full object-contain object-right" 
-      alt="Lidera Logo" 
-    />
-  </div>
 
-  {/* وسط: نام و عنوان لیدر (مرکزی و یک‌خطی) */}
-  <div className="text-center flex-1 min-w-0">
-    <h1 className="text-sm sm:text-base md:text-lg font-bold text-white tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
-      {currentLider.fullName || currentLider.name}
-    </h1>
-    <p className="text-[10px] sm:text-xs font-medium text-neutral-400 mt-0.5 whitespace-nowrap">
-      {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
-    </p>
-  </div>
-
-  {/* سمت چپ: دکمه ورود لیدر */}
-  <a
-    href={`/login${window.location.search}`}
-    className="flex items-center justify-center px-1 sm:px-3 py-1.5 bg-[#F9704E] text-white rounded-xl transition-all duration-200 active:scale-95 text-[10px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap shrink-0"
-    title="ورود تورلیدر"
-  >
-    ورود لیدر
-  </a>
-
-</div>
 {/* هدر لیدر و لوگو اصلاح شده کاملاً ریسپانسیو */}
 <div className="p-2.5 sm:p-4 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-row items-center justify-between bg-neutral-900/20 gap-2 sm:gap-4 w-full overflow-hidden">
   
