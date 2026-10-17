@@ -335,10 +335,10 @@ return (
 
       {/* هدر لیدر و لوگو اصلاح شده */}
      {/* هدر لیدر و لوگو اصلاح شده */}
-<div className="p-4 sm:p-6 pb-5 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-col sm:flex-row items-center sm:justify-between bg-neutral-900/20 mb-5 gap-4 text-center sm:text-right">
+<div className="p-4 sm:p-6 pb-5 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-col sm:flex-row items-center sm:justify-between bg-neutral-900/20 mb-5 gap-2 text-center sm:text-right">
   
   {/* بخش لوگو */}
-  <div className="relative w-52 sm:w-56 h-14  sm:h-12 shrink-0">
+  <div className="relative w-52 sm:w-56 h-16  sm:h-12 shrink-0">
     <img
       src="/logo.png"
       className="w-full h-full object-contain"
@@ -347,7 +347,7 @@ return (
   </div>
 
   {/* بخش نام و عنوان لیدر */}
-  <div className="text-center sm:text-right">
+  <div className="text-right sm:text-right">
     <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
       {currentLider.fullName || currentLider.name}
     </h1>
@@ -527,13 +527,13 @@ return (
              {step === 2 && (
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-sm text-white mb-2 font-medium">نام و نام خانوادگی نماینده مسافران</label>
-                    <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="مثال: رضا کیهانی" className="w-full bg-[#1c1c21] border border-neutral-800 focus:border-[#F9704E] p-4 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-medium" />
+                    <label className="block text-sm  text-white mb-2 font-medium">نام و نام خانوادگی نماینده مسافران</label>
+                    <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="مثال: رضا کیهانی" className="w-full bg-[#1c1c21]  border border-[#F9704E] focus:border-[#F9704E] p-4 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-medium" />
                   </div>
 
                   <div>
                     <label className="block text-sm text-white mb-2 font-medium">شماره موبایل</label>
-                    <input type="tel" required maxLength={11} value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="09191294068" className={`w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono tracking-wider font-medium ${phone.length > 0 && !isPhoneValid ? 'border-red-500/50 focus:border-red-500' : 'border-neutral-800 focus:border-[#F9704E]'}`} style={{ direction: 'ltr' }} />
+                    <input type="tel" required maxLength={11} value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="09191294068" className={`w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono tracking-wider font-medium ${phone.length > 0 && !isPhoneValid ? ' border border-[#F9704E] focus:border-red-500' : ' border border-[#F9704E] focus:border-[#F9704E]'}`} style={{ direction: 'ltr' }} />
                   </div>
 
                   {isPhoneValid && (
@@ -551,7 +551,7 @@ return (
                             setNationalId(val.replace(/[^0-9]/g, ''));
                           }} 
                           placeholder="0012345678" 
-                          className={`w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono tracking-wider font-medium ${nationalId.length > 0 && !isIdValid ? 'border-red-500/50 focus:border-red-500' : 'border-neutral-800 focus:border-[#F9704E]'}`} 
+                          className={`w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono tracking-wider font-medium ${nationalId.length > 0 && !isIdValid ? ' border border-[#F9704E] focus:border-red-500' : ' border border-[#F9704E] focus:border-[#F9704E]'}`} 
                           style={{ direction: 'ltr' }} 
                         />
                       </div>
@@ -582,8 +582,8 @@ return (
 
               {step === 3 && (
                 <div className="space-y-5">
-                  <div className="bg-[#1a1a1f] borderborder-[#F9704E] p-5 rounded-2xl space-y-4">
-                    <div className="bg-[#121215] p-4 rounded-xl border border-neutral-800 flex flex-col gap-2">
+                  <div className="bg-[#1a1a1f] border border-[#F9704E] p-5 rounded-2xl space-y-4">
+                    <div className="bg-[#121215] p-4 rounded-xl  border border-[#F9704E] flex flex-col gap-2">
                       <span className="text-[11px] text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز:</span>
                       <div className="flex items-center justify-between">
                         <span className="text-xl font-extrabold text-[#F9704E] tracking-tight block py-1">
@@ -597,7 +597,7 @@ return (
                             navigator.clipboard.writeText(numericPrice);
                             alert("مبلغ عددی کپی شد!");
                           }} 
-                          className="text-[10px] bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-2.5 py-1.5 rounded-md font-medium transition-colors active:scale-95"
+                          className="text-[10px] bg-neutral-800  border border-[#F9704E] text-neutral-300 px-2.5 py-1.5 rounded-md font-medium transition-colors active:scale-95"
                         >
                           کپی مبلغ عددی
                         </button>
@@ -609,7 +609,7 @@ return (
   {currentLider.cards && currentLider.cards.length > 0 ? (
     <div className="space-y-2">
       {currentLider.cards.map((card: any, index: number) => (
-        <div key={index} className="flex items-center justify-between bg-[#121215] p-3 rounded-xl borderborder-[#F9704E]">
+        <div key={index} className="flex items-center justify-between bg-[#121215] p-3 rounded-xl border border-[#F9704E]">
           <div className="flex flex-col">
             <span className="text-xs text-orange-400 font-bold">
               {card.bankName ? `بانک ${card.bankName}` : `کارت شماره ${index + 1}`}
@@ -623,7 +623,7 @@ return (
           <button
             type="button"
             onClick={() => handleCopyCard(card.cardNumber)}
-            className="text-[10px] bg-neutral-800 hover:bg-neutral-700 text-white px-2.5 py-1.5 rounded-md transition-colors font-medium active:scale-95"
+            className="text-[10px] bg-neutral-800  border border-[#F9704E] text-white px-2.5 py-1.5 rounded-md transition-colors font-medium active:scale-95"
           >
             {isCopied ? "کپی شد ✓" : "کپی کارت"}
           </button>
