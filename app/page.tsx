@@ -336,7 +336,7 @@ return (
 <div className="p-2.5 sm:p-4 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-row items-center justify-between bg-neutral-900/20 gap-2 sm:gap-4 w-full overflow-hidden">
   
   {/* ۱. سمت راست: لوگو */}
-<div className="flex items-center justify-start shrink-0 mr-3 sm:mr-4">
+<div className="flex items-center justify-start shrink-0 ml-3 sm:ml-4">
   <img 
     src="/logo.png" 
     className="h-10 sm:h-12 md:h-14 w-auto object-contain" 
