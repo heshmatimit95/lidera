@@ -369,32 +369,28 @@ return (
 
 
 {!isSuccess && (
-  <div className="px-2 pt-3 pb-2 flex items-center justify-between gap-1 sm:gap-2 text-[11px] font-bold text-neutral-400 w-full max-w-xs sm:max-w-sm mx-auto">
+  <div className="px-2 pt-3 pb-2 flex items-center justify-center gap-2 text-[11px] font-bold text-neutral-400 w-full max-w-sm mx-auto">
     
     {/* استپ ۱ */}
-    <div className="flex items-center gap-1.5 shrink-0">
-      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-[#F9704E] text-white' : 'bg-[#F9704E]/40 text-neutral-400'}`}>1</span>
+    <div className="flex items-center gap-1 shrink-0">
+      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-400'}`}>1</span>
       <span className={step >= 1 ? 'text-white' : ''}>انتخاب تور</span>
     </div>
 
     {/* خط رابط ۱ */}
-    <div className="h-3px] flex-1 bg-neutral-700 mx-1.5 rounded-full overflow-hidden">
-      <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 1 ? '100%' : '0%' }}></div>
-    </div>
+    <div className={`w-8 sm:w-12 h-3px] rounded-full transition-all duration-300 ${step > 1 ? 'bg-[#F9704E]' : 'bg-neutral-700'}`}></div>
 
     {/* استپ ۲ */}
-    <div className="flex items-center gap-1.5 shrink-0">
+    <div className="flex items-center gap-1 shrink-0">
       <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-400'}`}>2</span>
       <span className={step >= 2 ? 'text-white' : ''}>مشخصات</span>
     </div>
 
     {/* خط رابط ۲ */}
-    <div className="h-3px] flex-1 bg-neutral-700 mx-1.5 rounded-full overflow-hidden">
-      <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 2 ? '100%' : '0%' }}></div>
-    </div>
+    <div className={`w-8 sm:w-12 h-3px] rounded-full transition-all duration-300 ${step > 2 ? 'bg-[#F9704E]' : 'bg-neutral-700'}`}></div>
 
     {/* استپ ۳ */}
-    <div className="flex items-center gap-1.5 shrink-0">
+    <div className="flex items-center gap-1 shrink-0">
       <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 3 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-400'}`}>3</span>
       <span className={step >= 3 ? 'text-white' : ''}>پرداخت</span>
     </div>
