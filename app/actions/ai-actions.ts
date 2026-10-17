@@ -25,13 +25,15 @@ export async function generateTourAiItinerary(tourId: string, destination: strin
       }
     });
 
-    // ۳. اتصال این رکوردِ هوش مصنوعی به تورِ مربوطه
+// ۳. اتصال این رکوردِ هوش مصنوعی به تورِ مربوطه (چون فعلاً tourId واقعی نداریم، موقتاً کامنتش می‌کنیم)
+    /*
     await prisma.tour.update({
       where: { id: tourId },
       data: {
         aiItineraryId: aiRecord.id
       }
     });
+    */
 
     revalidatePath('/leader'); // رفرش کردن صفحه پنل لیدر برای نمایش تغییرات
     return { success: true, message: 'برنامه سفر با موفقیت توسط هوش مصنوعی تولید شد!' };
