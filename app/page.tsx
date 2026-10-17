@@ -377,8 +377,8 @@ return (
       <span className={step >= 1 ? 'text-white' : ''}>انتخاب تور</span>
     </div>
 
-    {/* خط رابط ۱ */}
-    <div className={`w-8 sm:w-12 h-3px] rounded-full transition-all duration-300 ${step > 1 ? 'bg-[#F9704E]' : 'bg-neutral-700'}`}></div>
+    {/* خط رابط بین ۱ و ۲ */}
+    <div className={`w-6 sm:w-10 h-3px] rounded-full transition-all duration-300 ${step > 1 ? 'bg-[#F9704E]' : 'bg-neutral-700'}`}></div>
 
     {/* استپ ۲ */}
     <div className="flex items-center gap-1 shrink-0">
@@ -386,8 +386,8 @@ return (
       <span className={step >= 2 ? 'text-white' : ''}>مشخصات</span>
     </div>
 
-    {/* خط رابط ۲ */}
-    <div className={`w-8 sm:w-12 h-3px] rounded-full transition-all duration-300 ${step > 2 ? 'bg-[#F9704E]' : 'bg-neutral-700'}`}></div>
+    {/* خط رابط بین ۲ و ۳ */}
+    <div className={`w-6 sm:w-10 h-3px] rounded-full transition-all duration-300 ${step > 2 ? 'bg-[#F9704E]' : 'bg-neutral-700'}`}></div>
 
     {/* استپ ۳ */}
     <div className="flex items-center gap-1 shrink-0">
