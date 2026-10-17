@@ -345,7 +345,7 @@ return (
   </div>
 
   {/* وسط: نام و عنوان لیدر (مرکزی و یک‌خطی) */}
-  <div className="text-rigth flex-1 min-w-0">
+  <div className="text-center flex-1 min-w-0">
     <h1 className="text-sm sm:text-base md:text-lg font-bold text-white tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
       {currentLider.fullName || currentLider.name}
     </h1>
@@ -409,7 +409,7 @@ return (
                 ثبت‌نام شما پس از بررسی مدارک و فیش واریزی توسط لیدر تایید و پیامک هماهنگی ارسال خواهد شد.
               </p>
             </div>
-            <button onClick={handleReset} className="text-xs font-bold px-6 py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700/60 transition-all duration-200 mt-4 mx-auto block active:scale-95">
+            <button onClick={handleReset} className="text-xs font-bold px-6 py-3 rounded-xl bg-[#F9704E] hover:bg-[#F9704E] text-white border-b-2 border-[#F9704E]  transition-all duration-200 mt-4 mx-auto block active:scale-95">
               ثبت‌نام جدید
             </button>
           </div>
@@ -571,7 +571,7 @@ return (
                         <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
                         <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
                         {idCardPreview ? (
-                          <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border border-[#F9704E] bg-neutral-900">
+                          <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border border-[#F9704E] focus:border-[#F9704E] focus:outline-none bg-neutral-900">
                             <img src={idCardPreview} alt="کارت ملی" className="w-full h-full object-cover opacity-80" />
                             <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
                               <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-neutral-200 transition-all cursor-pointer">تغییر عکس</button>
@@ -653,7 +653,7 @@ return (
                     <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر فیش واریزی</label>
                     <input type="file" ref={receiptInputRef} accept="image/*" onChange={handleReceiptChange} className="hidden" />
 {receiptPreview ? (
-  <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border border-[#F9704E] bg-neutral-900">
+<div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
     <img src={receiptPreview} alt="فیش" className="w-full h-full object-cover opacity-80" />
     <div className="absolute inset-0 flex items-center justify-center bg-black/40 gap-3">
       <button type="button" onClick={() => receiptInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-medium">
