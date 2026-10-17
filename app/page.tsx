@@ -336,16 +336,16 @@ return (
 <div className="p-2.5 sm:p-4 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-row items-center justify-between bg-neutral-900/20 gap-2 sm:gap-4 w-full overflow-hidden">
   
   {/* ۱. سمت راست: لوگو */}
-  <div className="flex items-center justify-start shrink-0">
-    <img 
-      src="/logo.png" 
-      className="h-7 sm:h-10 md:h-12 w-auto object-contain" 
-      alt="Lidera Logo" 
-    />
-  </div>
+<div className="flex items-center justify-start shrink-0">
+  <img 
+    src="/logo.png" 
+    className="h-9 sm:h-12 md:h-14 w-auto object-contain" 
+    alt="Lidera Logo" 
+  />
+</div>
 
   {/* ۲. وسط: نام و عنوان لیدر */}
-  <div className="text-center flex-1 min-w-0 px-1">
+<div className="text-center flex-1 min-w-0 px-1 pr-3">
     <h1 className="text-xs sm:text-base md:text-lg font-bold text-white tracking-tight truncate">
       {currentLider.fullName || currentLider.name}
     </h1>
@@ -574,7 +574,7 @@ return (
                         <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
                         <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
                         {idCardPreview ? (
-                         <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
+                        <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] hover:border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
                             <img src={idCardPreview} alt="کارت ملی" className="w-full h-full object-cover opacity-80" />
                             <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
                               <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-neutral-200 transition-all cursor-pointer">تغییر عکس</button>

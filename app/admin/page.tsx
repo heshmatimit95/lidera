@@ -343,81 +343,89 @@ if (res.ok) {
    
        {/* هدر اصلی */}
 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl text-center md:text-right">
-  <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
-    {/* ابعاد ریسپانسیو لوگو برای موبایل */}
-    <div className="relative w-40 sm:w-48 h-17 sm:h-15 mb-3">
-      <img
-        src="/logo.png"
-        className="w-full h-full object-contain"
-        alt="Lidara Logo"
-      />
-    </div>
+<div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 mb-4">
+  
+  {/* لوگو و عنوان در موبایل با فاصله بسیار کم */}
+  <div className="flex items-center gap-2 sm:gap-3">
+    <img 
+      src="/logo.png" 
+      className="h-9 sm:h-12 w-auto object-contain" 
+      alt="Lidera Logo" 
+    />
     <div>
-      <h1 className="text-base sm:text-2xl font-bold text-white flex items-center justify-center md:justify-start gap-2">
+      <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
         پنل مدیریت لیدرا
       </h1>
-      <p className="text-zinc-400 mt-0.5 text-[11px] sm:text-sm">
+      <p className="text-[10px] sm:text-xs text-neutral-400 mt-0.5">
         اتوماسیون هوشمند مدیریت و بررسی اطلاعات راهنمایان
       </p>
     </div>
   </div>
 
+</div>
 
-          {/* دکمه‌های ابزار بالای جدول */}
-           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 w-full lg:w-auto">
-            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-              <button
-                onClick={() => setIsAddLeaderModalOpen(true)}
-                title="افزودن لیدر جدید"
-                className="flex items-center justify-center bg-[#F9704E] hover:bg-[#e05b3a] text-black p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer"
-              >
-                <FaPlus size={16} />
-              </button>
+{/* دکمه‌های ابزار بالای جدول - اصلاح شده شبیه پنل تورلیدر */}
+<div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2.5 w-full lg:w-auto">
+  
+  {/* دکمه افزودن */}
+  <button
+    onClick={() => setIsAddLeaderModalOpen(true)}
+    title="افزودن لیدر جدید"
+    className="flex items-center justify-center bg-[#F9704E] hover:bg-[#e50b3a] text-black p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+  >
+    <FaPlus size={15} />
+  </button>
 
-              {hasPendingChanges && (
-                <button
-                  onClick={handleSaveStatusChanges}
-                  title={`ذخیره تغییرات وضعیت (${Object.keys(pendingStatusChanges).length})`}
-                  className="flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-black p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer animate-pulse"
-                >
-                  <FaSave size={16} />
-                </button>
-              )}
+  {/* دکمه ذخیره تغییرات (در صورت وجود) */}
+  {hasPendingChanges && (
+    <button
+      onClick={handleSaveStatusChanges}
+      title={`ذخیره تغییرات جدید (${Object.keys(hasPendingChanges).length})`}
+      className="flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-black p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer animate-pulse"
+    >
+      <FaSave size={15} />
+    </button>
+  )}
 
-              <button
-                onClick={() => setIsChangePassModalOpen(true)}
-                title="تغییر رمز مدیریت"
-                className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer"
-              >
-                <FaKey size={16} />
-              </button>
+  {/* دکمه خروجی اکسل */}
+  <button
+    onClick={exportToExcel}
+    title="خروجی اکسل"
+    className="flex items-center justify-center bg-emerald-600 hover:bg-emerald-500 text-white p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+  >
+    <FaFileExcel size={15} />
+  </button>
 
-              <button
-                onClick={handleDeleteAll}
-                title="حذف کلیه رکوردها"
-                className="flex items-center justify-center bg-red-950/50 hover:bg-red-900/80 text-red-400 p-2.5 rounded-xl transition-all border border-red-900/40 active:scale-95 cursor-pointer"
-              >
-                <FaTrash size={16} />
-              </button>
-            
-              <button
-                onClick={exportToExcel}
-                title="خروجی اکسل (Excel)"
-                className="flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer"
-              >
-                <FaFileExcel size={16} />
-              </button>
-            </div>
-                 
-            <button
-              onClick={handleLogout}
-              title="خروج از پنل"
-              className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2.5 rounded-xl transition-all border border-rose-900/30 active:scale-95 cursor-pointer"
-            >
-              <FaSignOutAlt size={16} />
-            </button>
-          </div>
-        </div>
+  {/* دکمه تغییر رمز */}
+  <button
+    onClick={() => setIsChangePassModalOpen(true)}
+    title="تغییر رمز مدیریت"
+    className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer"
+  >
+    <FaKey size={15} />
+  </button>
+
+  {/* دکمه حذف کلیه رکوردها */}
+  <button
+    onClick={handleDeleteAll}
+    title="حذف کلیه رکوردها"
+    className="flex items-center justify-center bg-red-950/50 hover:bg-red-900/80 text-red-400 p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all border border-red-900/40 active:scale-95 cursor-pointer"
+  >
+    <FaTrash size={15} />
+  </button>
+
+  {/* دکمه خروج از پنل (داخل همان کانتینر کنار بقیه) */}
+  <button
+    onClick={handleLogout}
+    title="خروج از پنل"
+    className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all border border-rose-900/30 active:scale-95 cursor-pointer"
+  >
+    <FaSignOutAlt size={15} />
+  </button>
+
+</div>
+
+</div>
        
         {/* ----------------- نمایش موبایل (Mobile Cards) ----------------- */}
         <div className="block md:hidden space-y-4">
