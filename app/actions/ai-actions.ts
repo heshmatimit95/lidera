@@ -36,8 +36,8 @@ export async function generateTourAiItinerary(tourId: string, destination: strin
     revalidatePath('/leader'); // رفرش کردن صفحه پنل لیدر برای نمایش تغییرات
     return { success: true, message: 'برنامه سفر با موفقیت توسط هوش مصنوعی تولید شد!' };
 
-  } catch (error) {
-    console.error("AI Generation Error:", error);
-    return { success: false, message: 'خطا در تولید برنامه‌ی سفر با هوش مصنوعی.' };
+ } catch (error: any) {
+    console.error("AI Generation Detailed Error:", error);
+    return { success: false, message: `خطا: ${error.message || 'مشکل ناشناخته'}` };
   }
 }
