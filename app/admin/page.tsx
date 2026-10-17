@@ -561,6 +561,7 @@ if (res.ok) {
 
                         <td className="p-5">
                           <div className="flex justify-center items-center gap-4">
+                           
                             {guide.instagram ? <a href={`https://instagram.com/${guide.instagram}`} target="_blank" rel="noreferrer" className="text-pink-500 hover:text-pink-400"><FaInstagram size={20} /></a> : <FaInstagram size={20} className="text-white/10" />}
                             {guide.telegram ? <a href={`https://t.me/${guide.telegram}`} target="_blank" rel="noreferrer" className="text-sky-400 hover:text-sky-300"><FaTelegramPlane size={20} /></a> : <FaTelegramPlane size={20} className="text-white/10" />}
                             {guide.whatsapp ? <a href={`https://wa.me/${guide.whatsapp}`} target="_blank" rel="noreferrer" className="text-emerald-400 hover:text-emerald-300"><FaWhatsapp size={20} /></a> : <FaWhatsapp size={20} className="text-white/10" />}
