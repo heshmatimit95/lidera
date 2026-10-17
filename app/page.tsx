@@ -504,7 +504,7 @@ return (
                         const current = parseInt(seatsCount, 10) || 1;
                         if (current > 1) setSeatsCount((current - 1).toString());
                       }}
-                      className="w-10 h-10 rounded-lg bg-neutral-800 text-white flex items-center justify-center text-lg font-bold hover:bg-[#F9704E] transition-colors cursor-pointer"
+                      className="w-10 h-10 rounded-lg bg-[#F9704E] text-white flex items-center justify-center text-lg font-bold hover:bg-[#F9704E] transition-colors cursor-pointer"
                     >
                       -
                     </button>
@@ -519,7 +519,7 @@ return (
                         const current = parseInt(seatsCount, 10) || 1;
                         if (current < 10) setSeatsCount((current + 1).toString());
                       }}
-                      className="w-10 h-10 rounded-lg bg-neutral-800 text-white flex items-center justify-center text-lg font-bold hover:bg-[#F9704E] transition-colors cursor-pointer"
+                      className="w-10 h-10 rounded-lg bg-[#F9704E] text-white flex items-center justify-center text-lg font-bold hover:bg-[#F9704E] transition-colors cursor-pointer"
                     >
                       +
                     </button>
@@ -582,7 +582,7 @@ return (
                             </div>
                           </div>
                         ) : (
-                          <button type="button" onClick={() => idCardInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${idCardError ? 'border-red-500/50 text-red-400' : 'border-neutral-800 hover:border-[#F9704E]/50 text-neutral-400'}`}>
+                          <button type="button" onClick={() => idCardInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#F9704E] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${idCardError ? 'border-red-500/50 text-red-400' : 'border-[#F9704E] hover:border-[#F9704E]/50 text-neutral-400'}`}>
                             <span className="text-lg">🪪</span>
                             <span>برای آپلود عکس کارت ملی کلیک کنید</span>
                           </button>
