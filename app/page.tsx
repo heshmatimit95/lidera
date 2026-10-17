@@ -340,7 +340,7 @@ return (
   <div className="flex items-center justify-start shrink-0">
     <img 
       src="/logo.png" 
-      className="h-7 sm:h-10 md:h-12 w-auto object-contain" 
+      className="h-15 sm:h-20 md:h-16 w-auto object-contain" 
       alt="Lidera Logo" 
     />
   </div>

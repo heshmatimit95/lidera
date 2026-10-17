@@ -361,64 +361,61 @@ if (res.ok) {
       </p>
     </div>
   </div>
+{/* دکمه‌های ابزار بالای جدول */}
+<div className="flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2.5 w-full overflow-x-auto py-1">
+  <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+    
+    {/* دکمه افزودن */}
+    <button
+      onClick={() => setIsAddLeaderModalOpen(true)}
+      title="افزودن لیدر جدید"
+      className="flex items-center justify-center bg-[#F9704E] hover:bg-[#e50b3a] text-black p-2 sm:p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer shrink-0"
+    >
+      <FaPlus size={14} />
+    </button>
 
+    {/* دکمه ذخیره تغییرات (در صورت وجود) */}
+{/* دکمه ذخیره تغییرات (در صورت وجود) */}
+    {hasPendingChanges && (
+      <button
+        onClick={handleSaveStatusChanges}
+        title={`ذخیره تغییرات جدید (${Object.keys(hasPendingChanges).length})`}
+        className="flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-black p-2 sm:p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer animate-pulse shrink-0"
+      >
+        <FaSave size={14} />
+      </button>
+    )}
 
-          {/* دکمه‌های ابزار بالای جدول */}
-           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-3 w-full lg:w-auto">
-            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-              <button
-                onClick={() => setIsAddLeaderModalOpen(true)}
-                title="افزودن لیدر جدید"
-                className="flex items-center justify-center bg-[#F9704E] hover:bg-[#e05b3a] text-black p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer"
-              >
-                <FaPlus size={16} />
-              </button>
+    {/* دکمه تغییر رمز */}
+    <button
+      onClick={() => setIsChangePassModalOpen(true)}
+      title="تغییر رمز مدیریت"
+      className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-2 sm:p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 shrink-0"
+    >
+      <FaKey size={14} />
+    </button>
 
-              {hasPendingChanges && (
-                <button
-                  onClick={handleSaveStatusChanges}
-                  title={`ذخیره تغییرات وضعیت (${Object.keys(pendingStatusChanges).length})`}
-                  className="flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-black p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer animate-pulse"
-                >
-                  <FaSave size={14} />
-                </button>
-              )}
+    {/* دکمه حذف */}
+    <button
+      onClick={handleDeleteAll}
+      title="حذف کلیه رکوردها"
+      className="flex items-center justify-center bg-red-950/50 hover:bg-red-900/80 text-red-400 p-2 sm:p-2.5 rounded-xl transition-all border border-red-900/40 active:scale-95 shrink-0"
+    >
+      <FaTrash size={14} />
+    </button>
 
-              <button
-                onClick={() => setIsChangePassModalOpen(true)}
-                title="تغییر رمز مدیریت"
-                className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer"
-              >
-                <FaKey size={14} />
-              </button>
+    {/* دکمه خروجی اکسل */}
+    <button
+      onClick={exportToExcel}
+      title="خروجی اکسل (Excel)"
+      className="flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white p-2 sm:p-2.5 rounded-xl transition-all shadow-lg active:scale-95 shrink-0"
+    >
+      <FaFileExcel size={14} />
+    </button>
 
-              <button
-                onClick={handleDeleteAll}
-                title="حذف کلیه رکوردها"
-                className="flex items-center justify-center bg-red-950/50 hover:bg-red-900/80 text-red-400 p-2.5 rounded-xl transition-all border border-red-900/40 active:scale-95 cursor-pointer"
-              >
-                <FaTrash size={14} />
-              </button>
-            
-              <button
-                onClick={exportToExcel}
-                title="خروجی اکسل (Excel)"
-                className="flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer"
-              >
-                <FaFileExcel size={14} />
-              </button>
-            </div>
-                 
-            <button
-              onClick={handleLogout}
-              title="خروج از پنل"
-              className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2.5 rounded-xl transition-all border border-rose-900/30 active:scale-95 cursor-pointer"
-            >
-              <FaSignOutAlt size={14} />
-            </button>
-          </div>
-        </div>
-       
+  </div>
+</div>
+      </div> 
         {/* ----------------- نمایش موبایل (Mobile Cards) ----------------- */}
         <div className="block md:hidden space-y-4">
           {guides.length === 0 ? (
@@ -478,7 +475,7 @@ if (res.ok) {
                   </div>
 
                   {/* شبکه‌های اجتماعی */}
-                  <div className="flex items-center justify-between bg-zinc-900/80 p-3 rounded-xl borderborder-[#F9704E]">
+                  <div className="flex items-center justify-between bg-zinc-900/80 p-3 rounded-xl border border-[#F9704E]">
                     <span className="text-xs text-zinc-400">ارتباط:</span>
                     <div className="flex items-center gap-3">
                       {guide.instagram ? <a href={`https://instagram.com/${guide.instagram}`} target="_blank" rel="noreferrer" className="text-pink-500"><FaInstagram size={18} /></a> : <FaInstagram size={18} className="text-white/10" />}
