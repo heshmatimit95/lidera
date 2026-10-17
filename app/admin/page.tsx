@@ -361,61 +361,64 @@ if (res.ok) {
       </p>
     </div>
   </div>
-{/* دکمه‌های ابزار بالای جدول */}
-<div className="flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2.5 w-full overflow-x-auto py-1">
-  <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-    
-    {/* دکمه افزودن */}
-    <button
-      onClick={() => setIsAddLeaderModalOpen(true)}
-      title="افزودن لیدر جدید"
-      className="flex items-center justify-center bg-[#F9704E] hover:bg-[#e50b3a] text-black p-2 sm:p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer shrink-0"
-    >
-      <FaPlus size={14} />
-    </button>
 
-    {/* دکمه ذخیره تغییرات (در صورت وجود) */}
-{/* دکمه ذخیره تغییرات (در صورت وجود) */}
-    {hasPendingChanges && (
-      <button
-        onClick={handleSaveStatusChanges}
-        title={`ذخیره تغییرات جدید (${Object.keys(hasPendingChanges).length})`}
-        className="flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-black p-2 sm:p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer animate-pulse shrink-0"
-      >
-        <FaSave size={14} />
-      </button>
-    )}
 
-    {/* دکمه تغییر رمز */}
-    <button
-      onClick={() => setIsChangePassModalOpen(true)}
-      title="تغییر رمز مدیریت"
-      className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-2 sm:p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 shrink-0"
-    >
-      <FaKey size={14} />
-    </button>
+          {/* دکمه‌های ابزار بالای جدول */}
+           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 w-full lg:w-auto">
+            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+              <button
+                onClick={() => setIsAddLeaderModalOpen(true)}
+                title="افزودن لیدر جدید"
+                className="flex items-center justify-center bg-[#F9704E] hover:bg-[#e05b3a] text-black p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer"
+              >
+                <FaPlus size={16} />
+              </button>
 
-    {/* دکمه حذف */}
-    <button
-      onClick={handleDeleteAll}
-      title="حذف کلیه رکوردها"
-      className="flex items-center justify-center bg-red-950/50 hover:bg-red-900/80 text-red-400 p-2 sm:p-2.5 rounded-xl transition-all border border-red-900/40 active:scale-95 shrink-0"
-    >
-      <FaTrash size={14} />
-    </button>
+              {hasPendingChanges && (
+                <button
+                  onClick={handleSaveStatusChanges}
+                  title={`ذخیره تغییرات وضعیت (${Object.keys(pendingStatusChanges).length})`}
+                  className="flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-black p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer animate-pulse"
+                >
+                  <FaSave size={16} />
+                </button>
+              )}
 
-    {/* دکمه خروجی اکسل */}
-    <button
-      onClick={exportToExcel}
-      title="خروجی اکسل (Excel)"
-      className="flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white p-2 sm:p-2.5 rounded-xl transition-all shadow-lg active:scale-95 shrink-0"
-    >
-      <FaFileExcel size={14} />
-    </button>
+              <button
+                onClick={() => setIsChangePassModalOpen(true)}
+                title="تغییر رمز مدیریت"
+                className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer"
+              >
+                <FaKey size={16} />
+              </button>
 
-  </div>
-</div>
-      </div> 
+              <button
+                onClick={handleDeleteAll}
+                title="حذف کلیه رکوردها"
+                className="flex items-center justify-center bg-red-950/50 hover:bg-red-900/80 text-red-400 p-2.5 rounded-xl transition-all border border-red-900/40 active:scale-95 cursor-pointer"
+              >
+                <FaTrash size={16} />
+              </button>
+            
+              <button
+                onClick={exportToExcel}
+                title="خروجی اکسل (Excel)"
+                className="flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer"
+              >
+                <FaFileExcel size={16} />
+              </button>
+            </div>
+                 
+            <button
+              onClick={handleLogout}
+              title="خروج از پنل"
+              className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2.5 rounded-xl transition-all border border-rose-900/30 active:scale-95 cursor-pointer"
+            >
+              <FaSignOutAlt size={16} />
+            </button>
+          </div>
+        </div>
+       
         {/* ----------------- نمایش موبایل (Mobile Cards) ----------------- */}
         <div className="block md:hidden space-y-4">
           {guides.length === 0 ? (
@@ -792,7 +795,7 @@ if (res.ok) {
                       required
                       value={editingLeader.fullName || ''}
                       onChange={e => setEditingLeader({ ...editingLeader, fullName: e.target.value })}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E]"
+                      className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E]"
                     />
                   </div>
 
@@ -803,7 +806,7 @@ if (res.ok) {
                       required
                       value={editingLeader.username || ''}
                       onChange={e => setEditingLeader({ ...editingLeader, username: e.target.value })}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
+                      className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
                     />
                   </div>
                 </div>
@@ -816,7 +819,7 @@ if (res.ok) {
                       required
                       value={editingLeader.mobile || ''}
                       onChange={e => setEditingLeader({ ...editingLeader, mobile: e.target.value })}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
+                      className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
                     />
                   </div>
 
@@ -826,7 +829,7 @@ if (res.ok) {
                       type="text"
                       value={editingLeader.nationalId || ''}
                       onChange={e => setEditingLeader({ ...editingLeader, nationalId: e.target.value })}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
+                      className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
                     />
                   </div>
                 </div>
@@ -839,7 +842,7 @@ if (res.ok) {
                       type="text"
                       value={editingLeader.instagram || ''}
                       onChange={e => setEditingLeader({ ...editingLeader, instagram: e.target.value })}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
+                      className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
                       placeholder="instagram_id"
                     />
                   </div>
@@ -849,7 +852,7 @@ if (res.ok) {
                       type="text"
                       value={editingLeader.telegram || ''}
                       onChange={e => setEditingLeader({ ...editingLeader, telegram: e.target.value })}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
+                      className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
                       placeholder="telegram_id"
                     />
                   </div>
@@ -862,7 +865,7 @@ if (res.ok) {
                       type="text"
                       value={editingLeader.whatsapp || ''}
                       onChange={e => setEditingLeader({ ...editingLeader, whatsapp: e.target.value })}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
+                      className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
                       placeholder="989123456789"
                     />
                   </div>
@@ -872,7 +875,7 @@ if (res.ok) {
                       type="text"
                       value={editingLeader.rubika || ''}
                       onChange={e => setEditingLeader({ ...editingLeader, rubika: e.target.value })}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
+                      className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono text-left"
                       placeholder="rubika_id"
                     />
                   </div>
@@ -884,7 +887,7 @@ if (res.ok) {
                     rows={2}
                     value={editingLeader.address || ''}
                     onChange={e => setEditingLeader({ ...editingLeader, address: e.target.value })}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#F9704E]"
+                    className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl p-3 text-xs text-white focus:outline-none focus:border-[#F9704E]"
                   />
                 </div>
 
@@ -911,8 +914,8 @@ if (res.ok) {
         {/* ----------------- 🔐 مودال تغییر پسورد ادمین ----------------- */}
         {isChangePassModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="bg-[#1e1e1e] border border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl" dir="rtl">
-              <h2 className="text-base font-bold mb-4 text-[#E5C060] flex items-center gap-2 border-b border-zinc-800 pb-3">
+            <div className="bg-[#1e1e1e] border border-[#F9704E] rounded-2xl w-full max-w-md p-6 shadow-2xl" dir="rtl">
+              <h2 className="text-base font-bold mb-4 text-[#E5C060] flex items-center gap-2 border-b border-[#F9704E] pb-3">
                 <FaKey /> تغییر رمز عبور مدیریت
               </h2>
 
@@ -924,7 +927,7 @@ if (res.ok) {
                     required
                     value={newPasswordInput}
                     onChange={e => setNewPasswordInput(e.target.value)}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#E5C060]"
+                    className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#E5C060]"
                   />
                 </div>
 
@@ -935,11 +938,11 @@ if (res.ok) {
                     required
                     value={confirmPasswordInput}
                     onChange={e => setConfirmPasswordInput(e.target.value)}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#E5C060]"
+                    className="w-full bg-zinc-900 border border[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#E5C060]"
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+                <div className="flex justify-end gap-2 pt-3 border-t border-[#F9704E]">
                   <button
                     type="button"
                     onClick={() => setIsChangePassModalOpen(false)}

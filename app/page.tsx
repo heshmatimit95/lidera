@@ -332,7 +332,6 @@ const handleRemoveReceipt = () => {
 return (
   <div className="min-h-screen bg-[#F9704E] text-white p-4 flex flex-col items-center justify-center" dir="rtl">
     <div className="w-full max-w-lg bg-[#121215] border-2 border-[#E5C060] rounded-[28px] sm:rounded-[28px] p-5 sm:p-8 overflow-hidden shadow-2xl shadow-black/80 my-2">
-
 {/* هدر لیدر و لوگو اصلاح شده کاملاً ریسپانسیو */}
 <div className="p-2.5 sm:p-4 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-row items-center justify-between bg-neutral-900/20 gap-2 sm:gap-4 w-full overflow-hidden">
   
@@ -340,7 +339,7 @@ return (
   <div className="flex items-center justify-start shrink-0">
     <img 
       src="/logo.png" 
-      className="h-15 sm:h-20 md:h-16 w-auto object-contain" 
+      className="h-7 sm:h-10 md:h-12 w-auto object-contain" 
       alt="Lidera Logo" 
     />
   </div>
@@ -367,7 +366,6 @@ return (
   </div>
 
 </div>
-
 
 
 {!isSuccess && (
