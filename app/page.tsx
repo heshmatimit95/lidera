@@ -345,7 +345,7 @@ return (
 </div>
 
   {/* ۲. وسط: نام و عنوان لیدر */}
-<div className="text-right flex-1 min-w-0 px-1 pl-6">
+<div className="text-right flex-1 min-w-0 px-1 pl-6 mr-2  ">
     <h1 className="text-xs sm:text-base md:text-lg font-bold text-white tracking-tight ">
       {currentLider.fullName || currentLider.name}
     </h1>
