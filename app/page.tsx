@@ -345,11 +345,11 @@ return (
 </div>
 
   {/* ۲. وسط: نام و عنوان لیدر */}
-<div className="text-right flex-1 min-w-0 px-1 pl-8">
+<div className="text-right flex-1 min-w-0 px-1 pl-6">
     <h1 className="text-xs sm:text-base md:text-lg font-bold text-white tracking-tight truncate">
       {currentLider.fullName || currentLider.name}
     </h1>
-    <p className="text-[9px] sm:text-xs font-base text-neutral-400 mt-0.5 truncate">
+    <p className="text-[8px] sm:text-xs font-base text-neutral-400 mt-0.5 truncate">
       {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
     </p>
   </div>
@@ -358,7 +358,7 @@ return (
   <div className="flex items-center justify-end shrink-0">
     <a
       href={`/login${window.location.search}`}
-      className="flex items-center justify-center px-2 sm:px-3 py-1 sm:py-1.5 bg-[#F9704E] text-white rounded-lg sm:rounded-xl transition-all duration-200 active:scale-95 text-[10px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap"
+      className="flex items-center justify-center px-1.5 sm:px-3 py-1 sm:py-1.5 bg-[#F9704E] text-white rounded-lg sm:rounded-xl transition-all duration-200 active:scale-95 text-[10px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap"
       title="ورود تورلیدر"
     >
       ورود لیدر
@@ -573,7 +573,7 @@ return (
                         <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
                         <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
                         {idCardPreview ? (
-                     <div className="relative w-full aspect-[4/2] rounded-xl overflow-hidden border border-[#F9704E] bg-neutral-900">
+                    <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
      
                             <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
                               <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-neutral-200 transition-all cursor-pointer">تغییر عکس</button>
@@ -581,7 +581,7 @@ return (
                             </div>
                           </div>
                         ) : (
-                          <button type="button" onClick={() => idCardInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#F9704E] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${idCardError ? 'border-red-500/50 text-red-400' : 'border-[#F9704E] hover:border-[#F9704E]/50 text-neutral-400'}`}>
+                          <button type="button" onClick={() => idCardInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${idCardError ? 'border-red-500/50 text-red-400' : 'border-[#F9704E] hover:border-[#F9704E]/50 text-neutral-400'}`}>
                             <span className="text-lg">🪪</span>
                             <span>برای آپلود عکس کارت ملی کلیک کنید</span>
                           </button>
