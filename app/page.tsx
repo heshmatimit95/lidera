@@ -336,7 +336,7 @@ return (
 <div className="p-3 sm:p-5 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-row items-center justify-between bg-neutral-900/20 gap-3">
   
   {/* سمت راست: لوگو */}
-  <div className="relative w-28 sm:w-36 h-10 sm:h-12 shrink-0 flex items-center justify-start">
+  <div className="relative w-48 sm:w-36 h-10 sm:h-12 shrink-0 flex items-center justify-start">
     <img 
       src="/logo.png" 
       className="w-full h-full object-contain object-right" 
@@ -345,7 +345,7 @@ return (
   </div>
 
   {/* وسط: نام و عنوان لیدر (مرکزی و یک‌خطی) */}
-  <div className="text-center flex-1 min-w-0">
+  <div className="text-rigth flex-1 min-w-0">
     <h1 className="text-sm sm:text-base md:text-lg font-bold text-white tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
       {currentLider.fullName || currentLider.name}
     </h1>
@@ -366,10 +366,10 @@ return (
 </div>
 
 {!isSuccess && (
-  <div className="px-2 pt-3 pb-2 flex items-center justify-center gap-2 sm:gap-4 text-[11px] font-bold text-neutral-400 w-full max-w-md mx-auto">
+  <div className="px-2 pt-3 pb-2 flex items-center justify-center gap-4 sm:gap-4 text-[11px] font-bold text-neutral-400 w-full max-w-md mx-auto">
     
     {/* استپ ۱ */}
-    <div className="flex items-center gap-1.5 shrink-0">
+    <div className="flex items-center gap-2.5 shrink-0">
       <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-[#F9704E] text-white' : 'bg-[#F9704E] text-neutral-500'}`}>1</span>
       <span className={step >= 1 ? 'text-white' : ''}>انتخاب تور</span>
     </div>
@@ -380,7 +380,7 @@ return (
     </div>
 
     {/* استپ ۲ */}
-    <div className="flex items-center gap-1.5 shrink-0">
+    <div className="flex items-center gap-2.5 shrink-0">
       <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-[#F9704E] text-white' : 'bg-[#F9704E] text-neutral-500'}`}>2</span>
       <span className={step >= 2 ? 'text-white' : ''}>مشخصات</span>
     </div>
@@ -391,7 +391,7 @@ return (
     </div>
 
     {/* استپ ۳ */}
-    <div className="flex items-center gap-1.5 shrink-0">
+    <div className="flex items-center gap-2.5 shrink-0">
       <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 3 ? 'bg-[#F9704E] text-white' : 'bg-[#F9704E] text-neutral-500'}`}>3</span>
       <span className={step >= 3 ? 'text-white' : ''}>پرداخت</span>
     </div>
@@ -666,7 +666,7 @@ return (
     </div>
   </div>
                     ) : (
-                      <button type="button" onClick={() => receiptInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${receiptError ? 'border-red-500/50 text-red-400' : 'border-neutral-800 hover:border-[#F9704E]/50 text-neutral-400'}`}>
+                      <button type="button" onClick={() => receiptInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${receiptError ? 'border-red-500/50 text-red-400' : ' border-[#F9704E] hover:border-[#F9704E]/50 text-neutral-400'}`}>
                         <span className="text-lg">📸</span>
                         <span>برای آپلود عکس فیش کلیک کنید</span>
                       </button>
@@ -684,7 +684,7 @@ return (
 
                 <div className="flex gap-3">
                   {step > 1 && (
-                    <button type="button" onClick={prevStep} className="w-1/3 bg-neutral-800 hover:bg-neutral-700 text-white font-bold py-4 rounded-xl text-xs transition-all border border-neutral-700/50 active:scale-95">
+                    <button type="button" onClick={prevStep} className="w-1/3 bg-amber-500/10 hover:bg-amber-500/10 text-white font-bold py-4 rounded-xl text-xs transition-all border border-[#F9704E] active:scale-95">
                       مرحله قبل
                     </button>
                   )}
