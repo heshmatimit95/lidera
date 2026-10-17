@@ -747,14 +747,14 @@ const exportToExcel = () => {
   title="خروجی اکسل"
   className="flex items-center justify-center bg-emerald-600 hover:bg-emerald-500 text-white p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex-1 sm:flex-none "
 >
-  <FaFileExcel size={15} className="sm:text-lg" />
+  <FaFileExcel size={14} className="sm:text-lg" />
   <span className="inline sm:inline"></span>
 </button>
             <button onClick={() => setIsChangePassModalOpen(true)} title="تغییر رمز" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-zinc-800 cursor-pointer flex-1 sm:flex-none">
-              <FaKey size={18} />
+              <FaKey size={14} />
             </button>
             <button onClick={handleLogout} title="خروج از پنل" className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-rose-900/30 cursor-pointer flex-1 sm:flex-none">
-              <FaSignOutAlt size={18} />
+              <FaSignOutAlt size={14} />
             </button>
           </div>
         </div>
