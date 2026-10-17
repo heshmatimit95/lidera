@@ -528,7 +528,7 @@ return (
                 {/* مجموع قیمت صندلی‌ها در مرحله اول */}
                 {currentTourDetails && (
                   <div className="mb-4 p-4 rounded-xl bg-neutral-900/60 border border-[#F9704E] flex items-center justify-between">
-                    <span className="text-xs text-neutral-400 font-medium">🧮 مجموع قیمت صندلی‌ها:</span>
+                    <span className="text-xs text-neutral-400 font-medium">🧮 قیمت کل:</span>
                     <span className="text-xs font-bold text-[#F9704E] tracking-wide">
                       {calculateTotalPrice()}
                     </span>
