@@ -332,61 +332,72 @@ const handleRemoveReceipt = () => {
 return (
   <div className="min-h-screen bg-[#F9704E] text-white p-4 flex flex-col items-center justify-center" dir="rtl">
     <div className="w-full max-w-lg bg-[#121215] border-2 border-[#E5C060] rounded-[28px] sm:rounded-[28px] p-5 sm:p-8 overflow-hidden shadow-2xl shadow-black/80 my-2">
-
-      {/* هدر لیدر و لوگو اصلاح شده */}
-     {/* هدر لیدر و لوگو اصلاح شده */}
-<div className="p-4 sm:p-6 pb-5 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-col sm:flex-row items-center sm:justify-between bg-neutral-900/20 mb-5 gap-2 text-center sm:text-right">
+{/* هدر لیدر و لوگو اصلاح شده */}
+<div className="p-3 sm:p-5 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-row items-center justify-between bg-neutral-900/20 gap-3">
   
-  {/* بخش لوگو */}
-  <div className="relative w-52 sm:w-56 h-16  sm:h-12 shrink-0">
-    <img
-      src="/logo.png"
-      className="w-full h-full object-contain"
-      alt="Lidara Logo"
+  {/* سمت راست: لوگو */}
+  <div className="relative w-28 sm:w-36 h-10 sm:h-12 shrink-0 flex items-center justify-start">
+    <img 
+      src="/logo.png" 
+      className="w-full h-full object-contain object-right" 
+      alt="Lidera Logo" 
     />
   </div>
 
-  {/* بخش نام و عنوان لیدر */}
-  <div className="text-right sm:text-right">
-    <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
+  {/* وسط: نام و عنوان لیدر (مرکزی و یک‌خطی) */}
+  <div className="text-center flex-1 min-w-0">
+    <h1 className="text-sm sm:text-base md:text-lg font-bold text-white tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
       {currentLider.fullName || currentLider.name}
     </h1>
-    <p className="text-[11px] sm:text-xs font-medium text-neutral-400 mt-0.5">
+    <p className="text-[10px] sm:text-xs font-medium text-neutral-400 mt-0.5 whitespace-nowrap">
       {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
     </p>
   </div>
 
-  {/* دکمه ورود لیدر */}
+  {/* سمت چپ: دکمه ورود لیدر */}
   <a
     href={`/login${window.location.search}`}
-    className="flex items-center justify-center px-3 py-1.5 bg-[#F9704E] text-white rounded-xl transition-all duration-200 active:scale-95 text-[11px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap shrink-0"
+    className="flex items-center justify-center px-2.5 sm:px-3 py-1.5 bg-[#F9704E] text-white rounded-xl transition-all duration-200 active:scale-95 text-[10px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap shrink-0"
     title="ورود تورلیدر"
   >
     ورود لیدر
   </a>
+
 </div>
-      {!isSuccess && (
-        <div className="px-2 pt-2 pb-4 flex items-center justify-between text-[11px] font-bold text-neutral-400">
-          <div className="flex items-center gap-2">
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-[#F9704E] text-white' : 'bg-[#F9704E] text-neutral-500'}`}>۱</span>
-            <span className={step >= 1 ? 'text-white' : ''}>انتخاب تور</span>
-          </div>
-          <div className="h-2px flex-1 mx-2 bg-neutral-800">
-            <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 1 ? '100%' : '0%' }}></div>
-          </div>
-          <div className="flex items-center gap-2">
-      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-[#F9704E] text-white' : 'bg-[#F9704E] text-neutral-500'}`}>۲</span>
-            <span className={step >= 2 ? 'text-white' : ''}>مشخصات</span>
-          </div>
-          <div className="h-2px flex-1 mx-2 bg-neutral-800">
-            <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step >= 3 ? '100%' : '0%' }}></div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step === 3 ? 'bg-[#F9704E] text-white' : 'bg-[#F9704E]text-neutral-500'}`}>۳</span>
-            <span className={step === 3 ? 'text-white' : ''}>پرداخت</span>
-          </div>
-        </div>
-      )}
+
+{!isSuccess && (
+  <div className="px-2 pt-3 pb-2 flex items-center justify-center gap-2 sm:gap-4 text-[11px] font-bold text-neutral-400 w-full max-w-md mx-auto">
+    
+    {/* استپ ۱ */}
+    <div className="flex items-center gap-1.5 shrink-0">
+      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-[#F9704E] text-white' : 'bg-[#F9704E] text-neutral-500'}`}>1</span>
+      <span className={step >= 1 ? 'text-white' : ''}>انتخاب تور</span>
+    </div>
+
+    {/* خط رابط ۱ */}
+    <div className="h-[2px] flex-1 bg-neutral-800 max-w-[40px]">
+      <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 1 ? '100%' : '0%' }}></div>
+    </div>
+
+    {/* استپ ۲ */}
+    <div className="flex items-center gap-1.5 shrink-0">
+      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-[#F9704E] text-white' : 'bg-[#F9704E] text-neutral-500'}`}>2</span>
+      <span className={step >= 2 ? 'text-white' : ''}>مشخصات</span>
+    </div>
+
+    {/* خط رابط ۲ */}
+    <div className="h-[2px] flex-1 bg-neutral-800 max-w-[40px]">
+      <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 2 ? '100%' : '0%' }}></div>
+    </div>
+
+    {/* استپ ۳ */}
+    <div className="flex items-center gap-1.5 shrink-0">
+      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 3 ? 'bg-[#F9704E] text-white' : 'bg-[#F9704E] text-neutral-500'}`}>3</span>
+      <span className={step >= 3 ? 'text-white' : ''}>پرداخت</span>
+    </div>
+
+  </div>
+)}
 
       <div className="p-2">
         {isSuccess ? (
