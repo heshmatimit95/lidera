@@ -339,17 +339,17 @@ return (
 <div className="flex items-center justify-start shrink-0">
   <img 
     src="/logo.png" 
-    className="h-11 sm:h-12 md:h-14 w-auto object-contain" 
+    className="h-10 sm:h-12 md:h-14 w-auto object-contain" 
     alt="Lidera Logo" 
   />
 </div>
 
   {/* ۲. وسط: نام و عنوان لیدر */}
-<div className="text-right flex-1 min-w-0 px-1 pl-6">
+<div className="text-right flex-1 min-w-0 px-1 pl-8">
     <h1 className="text-xs sm:text-base md:text-lg font-bold text-white tracking-tight truncate">
       {currentLider.fullName || currentLider.name}
     </h1>
-    <p className="text-[9px] sm:text-xs font-medium text-neutral-400 mt-0.5 truncate">
+    <p className="text-[9px] sm:text-xs font-base text-neutral-400 mt-0.5 truncate">
       {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
     </p>
   </div>
@@ -573,7 +573,8 @@ return (
                         <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
                         <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
                         {idCardPreview ? (
-                      <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
+                     <div className="relative w-full aspect-[4/2] rounded-xl overflow-hidden border border-[#F9704E] bg-neutral-900">
+     
                             <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
                               <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-neutral-200 transition-all cursor-pointer">تغییر عکس</button>
                               <button type="button" onClick={handleRemoveIdCard} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-bold transition-all cursor-pointer">حذف عکس</button>
