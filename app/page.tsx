@@ -339,13 +339,13 @@ return (
 <div className="flex items-center justify-start shrink-0">
   <img 
     src="/logo.png" 
-    className="h-9 sm:h-12 md:h-14 w-auto object-contain" 
+    className="h-12 sm:h-12 md:h-14 w-auto object-contain" 
     alt="Lidera Logo" 
   />
 </div>
 
   {/* ۲. وسط: نام و عنوان لیدر */}
-<div className="text-center flex-1 min-w-0 px-1 pr-3">
+<div className="text-center flex-1 min-w-0 px-1 pr-1">
     <h1 className="text-xs sm:text-base md:text-lg font-bold text-white tracking-tight truncate">
       {currentLider.fullName || currentLider.name}
     </h1>

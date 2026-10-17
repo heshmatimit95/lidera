@@ -349,16 +349,14 @@ if (res.ok) {
   <div className="flex items-center gap-2 sm:gap-3">
     <img 
       src="/logo.png" 
-      className="h-9 sm:h-12 w-auto object-contain" 
+      className="h-12 sm:h-16 w-auto object-contain" 
       alt="Lidera Logo" 
     />
     <div>
       <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
         پنل مدیریت لیدرا
       </h1>
-      <p className="text-[10px] sm:text-xs text-neutral-400 mt-0.5">
-        اتوماسیون هوشمند مدیریت و بررسی اطلاعات راهنمایان
-      </p>
+
     </div>
   </div>
 
@@ -371,9 +369,9 @@ if (res.ok) {
   <button
     onClick={() => setIsAddLeaderModalOpen(true)}
     title="افزودن لیدر جدید"
-    className="flex items-center justify-center bg-[#F9704E] hover:bg-[#e50b3a] text-black p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+    className="flex items-center justify-center bg-[#F9704E] hover:bg-[#e50b3a] text-black p-1.5 sm:p-2 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
   >
-    <FaPlus size={15} />
+    <FaPlus size={18} />
   </button>
 
   {/* دکمه ذخیره تغییرات (در صورت وجود) */}
@@ -381,9 +379,9 @@ if (res.ok) {
     <button
       onClick={handleSaveStatusChanges}
       title={`ذخیره تغییرات جدید (${Object.keys(hasPendingChanges).length})`}
-      className="flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-black p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer animate-pulse"
+      className="flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-black p-1.5 sm:px-2  rounded-xl transition-all shadow-md active:scale-95 cursor-pointer animate-pulse"
     >
-      <FaSave size={15} />
+      <FaSave size={18} />
     </button>
   )}
 
@@ -391,36 +389,36 @@ if (res.ok) {
   <button
     onClick={exportToExcel}
     title="خروجی اکسل"
-    className="flex items-center justify-center bg-emerald-600 hover:bg-emerald-500 text-white p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+    className="flex items-center justify-center bg-emerald-600 hover:bg-emerald-500 text-white p-1.5 sm:px-2  rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
   >
-    <FaFileExcel size={15} />
+    <FaFileExcel size={18} />
   </button>
 
   {/* دکمه تغییر رمز */}
   <button
     onClick={() => setIsChangePassModalOpen(true)}
     title="تغییر رمز مدیریت"
-    className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer"
+    className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-1.5 sm:px-2  rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer"
   >
-    <FaKey size={15} />
+    <FaKey size={18} />
   </button>
 
   {/* دکمه حذف کلیه رکوردها */}
   <button
     onClick={handleDeleteAll}
     title="حذف کلیه رکوردها"
-    className="flex items-center justify-center bg-red-950/50 hover:bg-red-900/80 text-red-400 p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all border border-red-900/40 active:scale-95 cursor-pointer"
+    className="flex items-center justify-center bg-red-950/50 hover:bg-red-900/80 text-red-400 p-1.5 sm:px-2  rounded-xl transition-all border border-red-900/40 active:scale-95 cursor-pointer"
   >
-    <FaTrash size={15} />
+    <FaTrash size={18} />
   </button>
 
   {/* دکمه خروج از پنل (داخل همان کانتینر کنار بقیه) */}
   <button
     onClick={handleLogout}
     title="خروج از پنل"
-    className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all border border-rose-900/30 active:scale-95 cursor-pointer"
+    className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-1.5 sm:px-2  rounded-xl transition-all border border-rose-900/30 active:scale-95 cursor-pointer"
   >
-    <FaSignOutAlt size={15} />
+    <FaSignOutAlt size={18} />
   </button>
 
 </div>
