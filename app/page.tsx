@@ -336,7 +336,7 @@ return (
 <div className="p-2.5 sm:p-4 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-row items-center justify-between bg-neutral-900/20 gap-2 sm:gap-4 w-full overflow-hidden">
   
   {/* ۱. سمت راست: لوگو */}
-<div className="flex items-center justify-start shrink-0 mr-1 sm:mr-2">
+<div className="flex items-center justify-start shrink-0 mr-3 sm:mr-4">
   <img 
     src="/logo.png" 
     className="h-10 sm:h-12 md:h-14 w-auto object-contain" 
@@ -349,7 +349,7 @@ return (
     <h1 className="text-xs sm:text-base md:text-lg font-bold text-white tracking-tight ">
       {currentLider.fullName || currentLider.name}
     </h1>
-    <p className="text-[8px] sm:text-xs font-base text-neutral-400 mt-0.5 ">
+    <p className="text-[8px] sm:text-xs font-base text-neutral-400 mt-0.5 truncate ">
       {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
     </p>
   </div>
