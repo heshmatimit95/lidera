@@ -364,7 +364,7 @@ if (res.ok) {
 
 
           {/* دکمه‌های ابزار بالای جدول */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
+           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-3 w-full lg:w-auto">
             <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
               <button
                 onClick={() => setIsAddLeaderModalOpen(true)}
@@ -444,31 +444,39 @@ if (res.ok) {
                       )}
                     </div>
                     
-{/* کانتینر دکمه‌های بالای پنل مدیریت */}
-<div className="flex items-center justify-center gap-1.5 sm:gap-3 my-3">
-  {/* دکمه‌ها */}
-  <button className="p-2 sm:p-2.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl active:scale-95 transition-all" title="خروجی اکسل">
-    <FaFileExcel size={18} />
-  </button>
-  
-  <button className="p-2 sm:p-2.5 bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl active:scale-95 transition-all" title="حذف">
-    <FaTrash size={18} />
-  </button>
+                    <div className="flex items-center gap-1">
 
-  <button className="p-2 sm:p-2.5 bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl active:scale-95 transition-all" title="تغییر رمز">
-    <FaKey size={18} />
-  </button>
+                            <button
+                              onClick={() => handleCopyLeaderLink(guide.username)}
+                              className="p-2 text-emerald-400 hover:text-emerald-400  bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
+                            >
+                              <FaLink size={15} />
+                            </button>
 
-  <button className="p-2 sm:p-2.5 bg-[#F9704E]/20 text-[#F9704E] border border-[#F9704E]/30 rounded-xl active:scale-95 transition-all" title="افزودن">
-    <FaPlus size={18} />
-  </button>
+                      <button
+                        onClick={() => handleOpenEditModal(guide)}
+                        className="p-2 text-sky-400 hover:text-sky-400 bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
+                        title="ویرایش اطلاعات"
+                      >
+                        <FaEdit size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleResetLeaderPassword(guide.id)}
+                        className="p-2 text-amber-400 hover:text-amber-400 bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
+                        title="ریست رمز"
+                      >
+                        <FaKey size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(guide.id)}
+                        className="p-2 text-rose-400 hover:text-rose-400 bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
+                        title="حذف"
+                      >
+                        <FaTrash size={14} />
+                      </button>
+                    </div>
+                  </div>
 
-  {/* دکمه خروج */}
-  <button className="p-2 sm:p-2.5 bg-rose-900/40 text-rose-300 border border-rose-800/50 rounded-xl active:scale-95 transition-all" title="خروج">
-    <FaSignOutAlt size={18} />
-  </button>
-</div>
-</div>
               {/* شبکه‌های اجتماعی */}
 <div className="flex items-center justify-between bg-zinc-900/80 p-3 rounded-xl border border-[#F9704E]">
   <span className="text-xs text-zinc-400">ارتباط:</span>
