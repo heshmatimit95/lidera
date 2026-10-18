@@ -1,6 +1,6 @@
 "use client";
 import { generateTourAiItinerary } from "../actions/ai-actions";
-
+import { FaWhatsapp, FaTelegramPlane, FaInstagram, FaCopy, } from 'react-icons/fa';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -1617,23 +1617,23 @@ const handleGenerateAi = async (
         )}
       </div>
 
-{/* فوتر و دکمه‌های کپی و ارسال مستقیم به پیام‌رسان‌ها */}
-<div className="p-4 border-t border-zinc-800 bg-zinc-950/50 flex flex-wrap items-center justify-between gap-2.5">
+{/* فوتر و دکمه‌های شکیل و تجاری ارسال/کپی */}
+<div className="p-4 border-t border-zinc-800 bg-zinc-950/60 flex flex-wrap items-center justify-between gap-3">
   
-  {/* دکمه کپی متن */}
+  {/* دکمه کپی متن اصلی */}
   <button
     onClick={() => handleCopyText(
       activeTab === 'program' ? aiData.dayByDay :
       activeTab === 'packing' ? aiData.packingList : aiData.promoText
     )}
-    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-md active:scale-95"
+    className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700/60 px-4 py-2.5 rounded-xl text-xs font-medium transition-all active:scale-95 shadow-sm"
   >
-    <FaCheck size={14} />
-    <span>{copied ? "کپی شد! ✓" : "کپی متن"}</span>
+    {copied ? <FaCheck size={14} className="text-emerald-400" /> : <FaCopy size={14} className="text-zinc-400" />}
+    <span>{copied ? "کپی شد" : "کپی متن"}</span>
   </button>
 
-  {/* دکمه‌های ارسال سریع */}
-  <div className="flex items-center gap-2 flex-wrap">
+  {/* آیکون‌ها و شبکه ارتباطی شکیل */}
+  <div className="flex items-center gap-2 dir-ltr">
     
     {/* واتساپ */}
     <a
@@ -1643,9 +1643,11 @@ const handleGenerateAi = async (
       )}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-1.5 bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-md active:scale-95"
+      title="واتساپ"
+      className="flex items-center gap-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
     >
-      <span>واتساپ 📱</span>
+      <FaWhatsapp size={16} />
+      <span>WhatsApp</span>
     </a>
 
     {/* تلگرام */}
@@ -1656,9 +1658,11 @@ const handleGenerateAi = async (
       )}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-1.5 bg-sky-500 hover:bg-sky-400 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-md active:scale-95"
+      title="تلگرام"
+      className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
     >
-      <span>تلگرام ✈️</span>
+      <FaTelegramPlane size={16} />
+      <span>Telegram</span>
     </a>
 
     {/* روبیکا */}
@@ -1669,28 +1673,31 @@ const handleGenerateAi = async (
       )}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-md active:scale-95"
+      title="روبیکا"
+      className="flex items-center gap-1.5 bg-indigo-950/40 hover:bg-indigo-900/60 text-indigo-400 border border-indigo-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
     >
-      <span>روبیکا 🇮🇷</span>
+      <span className="font-bold text-xs leading-none">R</span>
+      <span>Rubika</span>
     </a>
 
-    {/* کپی مخصوص اینستاگرام */}
+    {/* اینستاگرام */}
     <button
       onClick={() => handleCopyText(
         activeTab === 'program' ? aiData.dayByDay :
         activeTab === 'packing' ? aiData.packingList : aiData.promoText
       )}
-      className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-all shadow-md active:scale-95"
-      title="متن را کپی کرده و در پست/استوری اینستاگرام پیست کنید"
+      title="کپی متن جهت پیست در اینستاگرام"
+      className="flex items-center gap-1.5 bg-pink-950/40 hover:bg-pink-900/60 text-pink-400 border border-pink-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
     >
-      <span>اینستاگرام 📸</span>
+      <FaInstagram size={16} />
+      <span>Instagram</span>
     </button>
   </div>
 
   {/* دکمه بستن */}
   <button
     onClick={() => setIsAiModalOpen(false)}
-    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3.5 py-2 rounded-xl text-xs transition-all"
+    className="bg-zinc-800/80 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-700/50 px-4 py-2.5 rounded-xl text-xs font-medium transition-all"
   >
     بستن
   </button>
