@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     const genAI = new GoogleGenerativeAI(apiKey);
     const { tourName, days, category } = await req.json();
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
     const prompt = `یک برنامه سفر ${days} روزه برای تور "${tourName}" در دسته‌بندی "${category}" بساز. پاسخ را به‌صورت یک JSON معتبر شامل ۳ بخش dayByDay، packingList و promoText برگردان. از قرار دادن هرگونه توضیح اضافی یا علامت‌های مارک‌داون مثل \`\`\`json خودداری کن و فقط JSON خالص برگردان.`;
 
