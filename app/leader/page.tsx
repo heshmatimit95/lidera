@@ -1647,7 +1647,7 @@ const handleGenerateAi = async (
       className="flex items-center gap-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
     >
       <FaWhatsapp size={16} />
-      <span>WhatsApp</span>
+     
     </a>
 
     {/* تلگرام */}
@@ -1662,7 +1662,7 @@ const handleGenerateAi = async (
       className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
     >
       <FaTelegramPlane size={16} />
-      <span>Telegram</span>
+    
     </a>
 
     {/* روبیکا */}
@@ -1677,7 +1677,7 @@ const handleGenerateAi = async (
       className="flex items-center gap-1.5 bg-indigo-950/40 hover:bg-indigo-900/60 text-indigo-400 border border-indigo-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
     >
       <span className="font-bold text-xs leading-none">R</span>
-      <span>Rubika</span>
+
     </a>
 
     {/* اینستاگرام */}
@@ -1690,7 +1690,7 @@ const handleGenerateAi = async (
       className="flex items-center gap-1.5 bg-pink-950/40 hover:bg-pink-900/60 text-pink-400 border border-pink-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
     >
       <FaInstagram size={16} />
-      <span>Instagram</span>
+      
     </button>
   </div>
 
