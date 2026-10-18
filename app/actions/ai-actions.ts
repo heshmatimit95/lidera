@@ -1,22 +1,60 @@
 'use server'
+
 import { prisma } from "../lib/db";
- // یا مسیر صحیحی که بقیه اکشن‌ها استفاده می‌کنند// مسیر دقیق پرایزما کلاینت پروژه خودت
 import { revalidatePath } from "next/cache";
 
-// تابع اصلی برای تولید برنامه‌ی سفر با هوش مصنوعی
-export async function generateTourAiItinerary(tourId: string, destination: string, days: number, theme: string) {
+export async function generateTourAiItinerary(tourId: string, destination: string, days: number = 3, theme: string = "گردشگری و طبیعت‌گردی") {
   try {
-    // ۱. شبیه‌سازی / ساخت محتوای هوشمند بر اساس پارامترهای تور
-    // (در صورت اتصال به سرویس‌های هوش مصنوعی مثل OpenAI یا پروکسی‌های داخلی، خروجی از آنجا گرفته می‌شود)
-    
-    const dayByDayContent = `برنامه سفر ${days} روزه به ${destination} با سبک ${theme}:\n` +
-      Array.from({ length: days }, (_, i) => `روز ${i + 1}: گشت و گذار در جاذبه‌های برتر ${destination}، عکاسی و استراحت در اقامتگاه بومگردی.`).join('\n');
+    const prompt = `شما یک تورلیدر و برنامه‌ریز حرفه‌ای تورهای گردشگری در ایران هستید.
+لطفاً برای یک تور ${days} روزه به مقصد "${destination}" با سبک "${theme}" موارد زیر را به زبان فارسی و با لحن جذاب تولید کنید:
 
-    const packingListContent = `چک‌لیست وسایل ضروری برای ${destination}:\n- کفش پیاده‌روی مناسب\n- مدارک شناسایی و بیمه\n- لباس مناسب فصل\n- داروهای شخصی و آب‌معدنی`;
+1. برنامه‌ی کامل روزانه (به تفکیک روزها و بازدیدها)
+2. چک‌لیست کامل وسایل ضروری مسافر
+3. یک متن جذاب تبلیغاتی برای اینستاگرام و واتس‌اپ همراه با ایموجی و هشتگ
 
-    const promoTextContent = `🌟 تور فوق‌العاده ${destination} (${days} روزه)!\n\nاگر به دنبال یک سفر خاطره‌انگیز با سبک ${theme} هستید، همین حالا ثبت‌نام کنید!\n\n✨ ظرفیت محدود است.\nاطلاعات بیشتر در پنل لیدرا.`;
+پاسخ را دقیقاً در قالب فرمت زیر ارسال کنید:
+---PROGRAM---
+(برنامه روزانه)
+---PACKING---
+(چک‌لیست وسایل)
+---PROMO---
+(متن تبلیغاتی)
+`;
 
-    // ۲. ذخیره یا آپدیت رکورد هوش مصنوعی در جدول AiItinerary
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY || ''}`
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7
+      })
+    });
+
+    let dayByDayContent = "";
+    let packingListContent = "";
+    let promoTextContent = "";
+
+    if (response.ok) {
+      const aiData = await response.json();
+      const rawText = aiData.choices[0]?.message?.content || "";
+      
+      const parts = rawText.split(/---PROGRAM---|---PACKING---|---PROMO---/);
+      dayByDayContent = parts[1]?.trim() || rawText;
+      packingListContent = parts[2]?.trim() || "کفش مناسب، مدارک شناسایی، داروهای شخصی، لباس مناسب فصل";
+      promoTextContent = parts[3]?.trim() || `🌟 تور استثنایی ${destination}!\nثبت‌نام در سامانه لیدرا.`;
+    } else {
+      dayByDayContent = `📌 برنامه سفر ${days} روزه به ${destination}:\n` +
+        Array.from({ length: days }, (_, i) => `• روز ${i + 1}: بازدید از جاذبه‌های برتر و دیدنی‌های ${destination}، صرف غذاهای محلی و اقامت.`).join('\n');
+      
+      packingListContent = `🎒 چک‌لیست وسایل تور ${destination}:\n- کفش پیاده‌روی راحت\n- مدارک شناسایی و کارت شناسایی\n- داروها و لوازم شخصی\n- لباس مناسب فصل و دوربین عکاسی`;
+      
+      promoTextContent = `✨ تور جذاب ${destination} (${days} روزه)\n\nبا ما در یک سفر بی‌نظیر به ${destination} همراه شوید!\n📍 اطلاعات بیشتر و ثبت‌نام در پنل اختصاصی لیدرا.`;
+    }
+
     const aiRecord = await prisma.aiItinerary.create({
       data: {
         dayByDay: dayByDayContent,
@@ -25,21 +63,26 @@ export async function generateTourAiItinerary(tourId: string, destination: strin
       }
     });
 
-// ۳. اتصال این رکوردِ هوش مصنوعی به تورِ مربوطه (چون فعلاً tourId واقعی نداریم، موقتاً کامنتش می‌کنیم)
-    /*
-    await prisma.tour.update({
-      where: { id: tourId },
-      data: {
-        aiItineraryId: aiRecord.id
-      }
-    });
-    */
+    revalidatePath('/leader');
+    return { 
+      success: true, 
+      message: 'برنامه سفر هوشمند با موفقیت تولید شد!',
+      data: aiRecord 
+    };
 
-    revalidatePath('/leader'); // رفرش کردن صفحه پنل لیدر برای نمایش تغییرات
-    return { success: true, message: 'برنامه سفر با موفقیت توسط هوش مصنوعی تولید شد!' };
-
- } catch (error: any) {
+  } catch (error: any) {
     console.error("AI Generation Detailed Error:", error);
-    return { success: false, message: `خطا: ${error.message || 'مشکل ناشناخته'}` };
+    return { success: false, message: `خطا: ${error.message || 'مشکل در ارتباط با دیتابیس'}` };
+  }
+}
+
+export async function getLatestAiItinerary() {
+  try {
+    const itinerary = await prisma.aiItinerary.findFirst({
+      orderBy: { createdAt: 'desc' },
+    });
+    return { success: true, data: itinerary };
+  } catch (error) {
+    return { success: false, data: null };
   }
 }
