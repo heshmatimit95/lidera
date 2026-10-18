@@ -738,7 +738,7 @@ const handleGenerateAi = async (
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
       <div className="max-w-7xl mx-auto">
         
-<div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl text-center md:text-right">
+<div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border border-[#E5C060] shadow-xl text-center md:text-right">
 <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 mb-4">
   
   {/* لوگو و عنوان در موبایل با فاصله بسیار کم */}
