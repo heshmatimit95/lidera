@@ -369,7 +369,7 @@ return (
 
 
 {!isSuccess && (
-  <div className="px-2 pt-3 pb-2 flex items-center justify-between text-[11px] font-bold text-neutral-400 w-full max-w-[280px] sm:max-w-md mx-auto">
+  <div className="px-2 pt-3 pb-2 flex items-center justify-between text-[11px] font-bold text-neutral-400 w-full max-w-sm sm:max-w-md mx-auto">
     
     {/* استپ ۱ */}
     <div className="flex items-center gap-1 shrink-0">
@@ -401,7 +401,6 @@ return (
 
   </div>
 )}
-
 
       <div className="p-2">
         {isSuccess ? (
