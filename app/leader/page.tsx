@@ -1434,14 +1434,20 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                             <button onClick={() => handleDeleteTour(t.id, t.name)} className="p-1.5 bg-zinc-800 text-rose-500 rounded cursor-pointer">
                               <FaTrash size={12} />
                             </button>
-                         <button
+{/* دکمه اختصاصی جمینی (Gemini Sparkle) */}
+<button
   onClick={() => handleGenerateAi(t.id || String(idx), t.name, 3, "طبیعت‌گردی")}
-  title="ساخت برنامه سفر با هوش مصنوعی (جمینی)"
-  className="p-1.5 bg-purple-900/60 hover:bg-purple-700 text-purple-200 border border-purple-500/50 rounded-lg transition-all active:scale-95 flex items-center justify-center cursor-pointer shadow-sm"
+  title="ساخت برنامه سفر با هوش مصنوعی (Gemini)"
+  className="p-1.5 bg-purple-900/60 hover:bg-purple-700 text-purple-200 border border-purple-500/50 rounded-lg transition-all active:scale-95 flex items-center justify-center cursor-pointer shadow-sm group"
 >
-  <FaMagic size={12} className="text-purple-300 animate-pulse" />
-</button>
-                         
+  {/* لوگوی رسمی ستاره جمینی */}
+  <svg 
+    viewBox="0 0 24 24" 
+    className="w-3.5 h-3.5 fill-purple-300 group-hover:scale-110 transition-transform"
+  >
+    <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" />
+  </svg>
+</button>             
                          
                           </div>
                         </div>
