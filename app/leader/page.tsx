@@ -759,26 +759,25 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
           
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-3 w-full lg:w-auto">
 
-     
+
+
+
+
+
+                      
             <button onClick={() => setIsTourModalOpen(true)} title="مدیریت تورها" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#F9704E] p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer flex-1 sm:flex-none">
               <FaMapMarkedAlt size={18} />
 
             </button>
           
+
           
            <button onClick={() => openAddModal()} title="افزودن مسافر جدید" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-orange-500 p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer flex-1 sm:flex-none">
               <FaUserPlus size={18} />
             </button>
 
 
-<button
-  onClick={exportToExcel}
-  title="خروجی اکسل"
-  className="flex items-center justify-center bg-emerald-600 hover:bg-emerald-500 text-white p-2 sm:px-3 sm:py-2.5 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex-1 sm:flex-none "
->
-  <FaFileExcel size={14} className="sm:text-lg" />
-  <span className="inline sm:inline"></span>
-</button>
+
             <button onClick={() => setIsChangePassModalOpen(true)} title="تغییر رمز" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-zinc-800 cursor-pointer flex-1 sm:flex-none">
               <FaKey size={14} />
             </button>
@@ -1423,7 +1422,8 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
                           <div className="flex items-center gap-1.5">
                             {editingTourIndex === idx ? (
-                              <button onClick={() => handleSaveEditTour(t.id, idx)} className="bg-emerald-600 text-white px-2.5 py-1 rounded text-[11px] cursor-pointer">
+                             
+                             <button onClick={() => handleSaveEditTour(t.id, idx)} className="bg-emerald-600 text-white px-2.5 py-1 rounded text-[11px] cursor-pointer">
                                 ذخیره
                               </button>
                             ) : (
@@ -1434,16 +1434,18 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                             <button onClick={() => handleDeleteTour(t.id, t.name)} className="p-1.5 bg-zinc-800 text-rose-500 rounded cursor-pointer">
                               <FaTrash size={12} />
                             </button>
+                         <button
+  onClick={() => handleGenerateAi(t.id || String(idx), t.name, 3, "طبیعت‌گردی")}
+  title="ساخت برنامه سفر با هوش مصنوعی (جمینی)"
+  className="p-1.5 bg-purple-900/60 hover:bg-purple-700 text-purple-200 border border-purple-500/50 rounded-lg transition-all active:scale-95 flex items-center justify-center cursor-pointer shadow-sm"
+>
+  <FaMagic size={12} className="text-purple-300 animate-pulse" />
+</button>
+                         
+                         
                           </div>
                         </div>
-{/* دکمه اختصاصی هوش مصنوعی برای هر تور */}
-<button
-  onClick={() => handleGenerateAi(t.id || String(idx), t.name, 3, "طبیعت‌گردی")}
-  title="ساخت برنامه سفر با هوش مصنوعی"
-  className="p-1.5 bg-purple-950/50 hover:bg-purple-900/80 text-purple-400 border border-purple-800/60 rounded-lg transition-all active:scale-95 flex items-center justify-center"
->
-  <FaMagic size={13} />
-</button>                        {/* مدیریت تصاویر تور */}
+                        {/* مدیریت تصاویر تور */}
                         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-800/80">
                           {t.images?.map((img, imgIdx) => (
                             <div key={imgIdx} className="relative w-12 h-12 rounded-lg overflow-hidden border border-zinc-700 group">
