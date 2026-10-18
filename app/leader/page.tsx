@@ -48,7 +48,6 @@ interface BankCard {
 
 export default function LeaderDashboard() {
 const [loadingAiId, setLoadingAiId] = useState<string | null>(null);
-
 const handleGenerateAi = async (tourId: string, tourName: string) => {
   setLoadingAiId(tourId);
   const result = await generateTourAiItinerary(tourId, tourName, 3, "طبیعت‌گردی و گردشگری");
@@ -56,6 +55,11 @@ const handleGenerateAi = async (tourId: string, tourName: string) => {
   alert(result.message);
 };
   
+const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+const [aiData, setAiData] = useState<{ dayByDay: string; packingList: string; promoText: string } | null>(null);
+const [activeTab, setActiveTab] = useState<'program' | 'packing' | 'promo'>('program');
+const [copied, setCopied] = useState(false);
+
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -171,6 +175,8 @@ const handleGenerateAi = async (tourId: string, tourName: string) => {
     setCurrentTenantSlug(slugFromCookie);
     fetchLeaderData(slugFromCookie);
   }, [router]);
+
+  
 
   const fetchLeaderData = async (slug: string) => {
     try {
@@ -703,6 +709,12 @@ const exportToExcel = () => {
     return <div className="min-h-screen bg-[#351913]" />;
   }
 
+const handleCopyText = (text: string) => {
+  navigator.clipboard.writeText(text);
+  setCopied(true);
+  setTimeout(() => setCopied(false), 2000);
+};
+  
   return (
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
       <div className="max-w-7xl mx-auto">
@@ -1509,8 +1521,88 @@ const exportToExcel = () => {
             </div>
           </div>
         )}
-
+    
       </div>
+{/* --- مدال گزارش‌گیری هوش مصنوعی --- */}
+{isAiModalOpen && aiData && (
+  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 dir-rtl">
+    <div className="bg-zinc-900 border border-zinc-800 text-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      
+      {/* هدر مدال */}
+      <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/50">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-purple-600/20 text-purple-400 rounded-lg">
+            <FaMagic size={18} />
+          </div>
+          <h3 className="font-bold text-base text-zinc-100">گزارش هوشمند برنامه سفر (AI)</h3>
+        </div>
+        <button 
+          onClick={() => setIsAiModalOpen(false)}
+          className="text-zinc-400 hover:text-white p-1.5 rounded-lg hover:bg-zinc-800 transition-all"
+        >
+          <FaTimes size={16} />
+        </button>
+      </div>
+
+      {/* تب‌های انتخاب گزارش */}
+      <div className="flex border-b border-zinc-800 bg-zinc-900/80 p-2 gap-2 text-xs font-medium">
+        <button
+          onClick={() => setActiveTab('program')}
+          className={`flex-1 py-2 px-3 rounded-xl transition-all ${activeTab === 'program' ? 'bg-purple-600 text-white shadow-lg' : 'text-zinc-400 hover:bg-zinc-800'}`}
+        >
+          📅 برنامه روزانه
+        </button>
+        <button
+          onClick={() => setActiveTab('packing')}
+          className={`flex-1 py-2 px-3 rounded-xl transition-all ${activeTab === 'packing' ? 'bg-purple-600 text-white shadow-lg' : 'text-zinc-400 hover:bg-zinc-800'}`}
+        >
+          🎒 چک‌لیست وسایل
+        </button>
+        <button
+          onClick={() => setActiveTab('promo')}
+          className={`flex-1 py-2 px-3 rounded-xl transition-all ${activeTab === 'promo' ? 'bg-purple-600 text-white shadow-lg' : 'text-zinc-400 hover:bg-zinc-800'}`}
+        >
+          📱 متن اینستاگرام/واتس‌اپ
+        </button>
+      </div>
+
+      {/* محتوای گزارش */}
+      <div className="p-5 overflow-y-auto flex-1 text-sm leading-relaxed text-zinc-200 whitespace-pre-line bg-zinc-950/30">
+        {activeTab === 'program' && aiData.dayByDay}
+        {activeTab === 'packing' && aiData.packingList}
+        {activeTab === 'promo' && aiData.promoText}
+      </div>
+
+      {/* فوتر و دکمه کپی */}
+      <div className="p-4 border-t border-zinc-800 bg-zinc-950/50 flex items-center justify-between gap-3">
+        <button
+          onClick={() => handleCopyText(
+            activeTab === 'program' ? aiData.dayByDay :
+            activeTab === 'packing' ? aiData.packingList : aiData.promoText
+          )}
+          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-md active:scale-95"
+        >
+          <FaCheck size={14} />
+          <span>{copied ? "کپی شد! ✓" : "کپی متن جهت ارسال در پیام‌رسان‌ها"}</span>
+        </button>
+
+        <button
+          onClick={() => setIsAiModalOpen(false)}
+          className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-4 py-2 rounded-xl text-xs transition-all"
+        >
+          بستن
+        </button>
+      </div>
+
     </div>
+  </div>
+)}
+
+
+
+
+
+    </div>
+
   );
 }
