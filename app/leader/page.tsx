@@ -709,19 +709,25 @@ const handleCopyText = (text: string) => {
   setTimeout(() => setCopied(false), 2000);
 };
   
-const handleGenerateAi = async (tourId: string, tourName: string) => {
+const handleGenerateAi = async (
+  tourId: string, 
+  tourName: string, 
+  days: number = 3, 
+  category: string = "طبیعت‌گردی"
+) => {
   setLoadingAiId(tourId);
-  const result = await generateTourAiItinerary(tourId, tourName, 3, "طبیعت‌گردی و گردشگری");
+  const result = await generateTourAiItinerary(tourId, tourName, days, category);
   setLoadingAiId(null);
 
   if (result.success && result.data) {
     setAiData(result.data);
     setIsAiModalOpen(true);
   } else {
+    // Fallback در صورت عدم دسترسی به AI API
     setAiData({
-      dayByDay: `📅 برنامه سفر ${tourName}:\n• روز ۱: حرکت و استقرار در اقامتگاه.\n• روز ۲: بازدید از جاذبه‌های منطقه.\n• روز ۳: خرید سوغات و بازگشت.`,
-      packingList: `🎒 چک‌لیست وسایل:\n- مدارک شناسایی\n- کفش مناسب پیاده‌روی\n- داروها و لوازم شخصی`,
-      promoText: `🌟 تور استثنایی ${tourName}!\nهمین حالا ثبت‌نام کنید.`
+      dayByDay: `📌 برنامه سفر ${days} روزه به ${tourName}:\n• روز ۱: حرکت و استقرار در اقامتگاه.\n• روز ۲: بازدید از جاذبه‌های برتر ${tourName}.\n• روز ۳: خرید سوغات و بازگشت.`,
+      packingList: `🎒 چک‌لیست وسایل تور ${tourName}:\n- مدارک شناسایی و بیمه\n- کفش مناسب ${category}\n- داروها و لوازم شخصی`,
+      promoText: `🌟 تور استثنایی ${days} روزه ${tourName}!\nهمین حالا جهت ثبت‌نام و دریافت اطلاعات بیشتر پیام دهید.`
     });
     setIsAiModalOpen(true);
   }
@@ -751,13 +757,13 @@ const handleGenerateAi = async (tourId: string, tourName: string) => {
           </div>
           
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-3 w-full lg:w-auto">
-            <button
-  onClick={() => handleGenerateAi("تور-فعلی", "کویر مرنجاب")}
+<button
+  onClick={() => handleGenerateAi("tour-فعلی", "کویر مرنجاب")}
   disabled={loadingAiId !== null}
   className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-md transition-all disabled:opacity-50"
 >
   <FaMagic size={14} />
-  <span>{loadingAiId ? "در حال ساخت برنامه..." : "✨ ساخت برنامه سفر با AI"}</span>
+  <span>{loadingAiId ? "...در حال ساخت برنامه" : "✨ ساخت برنامه سفر با AI"}</span>
 </button>
                       
             <button onClick={() => setIsTourModalOpen(true)} title="مدیریت تورها" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#F9704E] p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer flex-1 sm:flex-none">
@@ -1536,7 +1542,7 @@ const handleGenerateAi = async (tourId: string, tourName: string) => {
         )}
     
       </div>
-{/* --- مدال گزارش‌گیری هوش مصنوعی --- */}
+{/* --- مدال گزارش‌گیری هوش مصنوعی (با قابلیت ویرایش آنلاین) --- */}
 {isAiModalOpen && aiData && (
   <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 dir-rtl">
     <div className="bg-zinc-900 border border-zinc-800 text-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -1579,11 +1585,36 @@ const handleGenerateAi = async (tourId: string, tourName: string) => {
         </button>
       </div>
 
-      {/* محتوای گزارش */}
-      <div className="p-5 overflow-y-auto flex-1 text-sm leading-relaxed text-zinc-200 whitespace-pre-line bg-zinc-950/30">
-        {activeTab === 'program' && aiData.dayByDay}
-        {activeTab === 'packing' && aiData.packingList}
-        {activeTab === 'promo' && aiData.promoText}
+      {/* محتوای گزارش با قابلیت ویرایش مستقیم */}
+      <div className="p-4 flex-1 flex flex-col bg-zinc-950/30">
+        <label className="text-[11px] text-zinc-400 mb-2 flex items-center justify-between">
+          <span>✏️ می‌توانید متن زیر را قبل از کپی کردن ویرایش کنید:</span>
+          <span className="text-[10px] text-purple-400">قابلیت ویرایش آنلاین</span>
+        </label>
+
+        {activeTab === 'program' && (
+          <textarea
+            className="w-full h-56 p-3 rounded-xl bg-zinc-900 text-zinc-100 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm leading-relaxed resize-none font-sans"
+            value={aiData.dayByDay}
+            onChange={(e) => setAiData({ ...aiData, dayByDay: e.target.value })}
+          />
+        )}
+
+        {activeTab === 'packing' && (
+          <textarea
+            className="w-full h-56 p-3 rounded-xl bg-zinc-900 text-zinc-100 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm leading-relaxed resize-none font-sans"
+            value={aiData.packingList}
+            onChange={(e) => setAiData({ ...aiData, packingList: e.target.value })}
+          />
+        )}
+
+        {activeTab === 'promo' && (
+          <textarea
+            className="w-full h-56 p-3 rounded-xl bg-zinc-900 text-zinc-100 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm leading-relaxed resize-none font-sans"
+            value={aiData.promoText}
+            onChange={(e) => setAiData({ ...aiData, promoText: e.target.value })}
+          />
+        )}
       </div>
 
       {/* فوتر و دکمه کپی */}
@@ -1593,7 +1624,7 @@ const handleGenerateAi = async (tourId: string, tourName: string) => {
             activeTab === 'program' ? aiData.dayByDay :
             activeTab === 'packing' ? aiData.packingList : aiData.promoText
           )}
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-md active:scale-95"
+          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-md active:scale-95"
         >
           <FaCheck size={14} />
           <span>{copied ? "کپی شد! ✓" : "کپی متن جهت ارسال در پیام‌رسان‌ها"}</span>
@@ -1601,7 +1632,7 @@ const handleGenerateAi = async (tourId: string, tourName: string) => {
 
         <button
           onClick={() => setIsAiModalOpen(false)}
-          className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-4 py-2 rounded-xl text-xs transition-all"
+          className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-4 py-2.5 rounded-xl text-xs transition-all"
         >
           بستن
         </button>
@@ -1610,10 +1641,6 @@ const handleGenerateAi = async (tourId: string, tourName: string) => {
     </div>
   </div>
 )}
-
-
-
-
 
     </div>
 
