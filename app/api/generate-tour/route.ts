@@ -1,86 +1,40 @@
 import { NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function POST(req: Request) {
   try {
-    const { tourName, days = 3, category = 'طبیعت‌گردی' } = await req.json();
-
-    if (!tourName) {
-      return NextResponse.json(
-        { error: 'نام تور الزامی است.' },
-        { status: 400 }
-      );
-    }
-
-    // استفاده از API Key ذخیره شده در محیط (Environment Variable)
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-      // اگر کلید API تنظیم نشده بود، خروجی هوشمند فال‌بک آماده می‌شود
-      return NextResponse.json({
-        success: true,
-        data: {
-          dayByDay: `📌 برنامه پیشنهادی سفر ${days} روزه به ${tourName}:\n• روز ۱: حرکت، استقرار در اقامتگاه و گشت اولیه در منطقه ${tourName}.\n• روز ۲: بازدید از اصلی‌ترین جاذبه‌ها، عکاسی و صرف غذای محلی.\n• روز ۳: زمان آزاد برای خرید سوغات، جمع‌آوری وسایل و بازگشت.`,
-          packingList: `🎒 چک‌لیست وسایل ضروری برای تور ${category} (${tourName}):\n- مدارک شناسایی، کارت بانکی و بیمه\n- کفش مناسب پیاده‌روی و لباس متناسب با فصل\n- داروها و لوازم بهداشتی شخصی\n- پاوربانک و شارژر`,
-          promoText: `🌟 تور استثنایی ${days} روزه ${tourName}!\n✨ تجربه یک سفر فراموش‌نشدنی همراه با تور لیدر مجرب.\nجهت ثبت‌نام و رزرو صندلی همین حالا پیام دهید! 🚀`
-        }
-      });
+      return NextResponse.json(
+        { success: false, error: 'کلید GEMINI_API_KEY تنظیم نشده است' },
+        { status: 500 }
+      );
     }
 
-    // ساخت پرامپت دقیق برای دریافت خروجی ساختاریافته JSON از Gemini
-    const prompt = `تو یک تور لیدر و برنامه‌ریز ارشد گردشگری هستی.
-برای یک تور با مشخصات زیر:
-- نام مقصد/تور: ${tourName}
-- تعداد روز: ${days} روز
-- دسته‌بندی: ${category}
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const { tourName, days, category } = await req.json();
 
-لطفاً دقیقاً یک پاسخ در قالب JSON خالص (بدون هیچ متن اضافی، بدون markdown code block) به شکل زیر تولید کن:
-{
-  "dayByDay": "برنامه ریز به ریز روزها با ایموجی‌های مناسب",
-  "packingList": "چک‌لیست وسایل ضروری همراه با ایموجی",
-  "promoText": "متن جذاب و تبلیغاتی برای پست/استوری اینستاگرام و واتس‌اپ"
-}`;
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: prompt }]
-            }
-          ]
-        })
-      }
-    );
+    const prompt = `یک برنامه سفر ${days} روزه برای تور "${tourName}" در دسته‌بندی "${category}" بساز. پاسخ را به‌صورت یک JSON معتبر شامل ۳ بخش dayByDay، packingList و promoText برگردان. از قرار دادن هرگونه توضیح اضافی یا علامت‌های مارک‌داون مثل \`\`\`json خودداری کن و فقط JSON خالص برگردان.`;
 
-    const aiResult = await response.json();
-    const rawText = aiResult?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
 
-    if (!rawText) {
-      throw new Error('پاسخی از هوش مصنوعی دریافت نشد.');
-    }
+    // پاکسازی کامل مارک‌داون‌های احتمالی
+    const cleanJson = responseText
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .trim();
 
-    // پاکسازی احتمالی تگ‌های مارک‌داون کد از پاسخ JSON
-    const cleanJsonText = rawText.replace(/```json|```/g, '').trim();
-    const parsedData = JSON.parse(cleanJsonText);
+    const data = JSON.parse(cleanJson);
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        dayByDay: parsedData.dayByDay || '',
-        packingList: parsedData.packingList || '',
-        promoText: parsedData.promoText || ''
-      }
-    });
-
-  } catch (error) {
-    console.error('AI Generation Error:', error);
+    return NextResponse.json({ success: true, data });
+  } catch (error: any) {
+    console.error('Gemini API Error:', error);
     return NextResponse.json(
-      { error: 'خطا در برقراری ارتباط با هوش مصنوعی.' },
+      { success: false, error: error?.message || 'خطا در برقراری ارتباط با هوش مصنوعی' },
       { status: 500 }
     );
   }
