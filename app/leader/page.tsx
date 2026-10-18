@@ -1664,21 +1664,23 @@ const handleGenerateAi = async (
       <FaTelegramPlane size={16} />
     
     </a>
-
-    {/* روبیکا */}
-    <a
-      href={`rubika://post?text=${encodeURIComponent(
-        activeTab === 'program' ? aiData.dayByDay :
-        activeTab === 'packing' ? aiData.packingList : aiData.promoText
-      )}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      title="روبیکا"
-      className="flex items-center gap-1.5 bg-indigo-950/40 hover:bg-indigo-900/60 text-indigo-400 border border-indigo-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
-    >
-      <span className="font-bold text-xs leading-none">R</span>
-
-    </a>
+{/* روبیکا */}
+<a
+  href={`rubika://post?text=${encodeURIComponent(
+    activeTab === 'program' ? aiData.dayByDay :
+    activeTab === 'packing' ? aiData.packingList : aiData.promoText
+  )}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  title="روبیکا"
+  className="flex items-center gap-1.5 bg-indigo-950/40 hover:bg-indigo-900/60 text-indigo-400 border border-indigo-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
+>
+  {/* آیکون SVG اختصاصی و تمیز روبیکا */}
+  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.64 12.5c-.32.32-.75.5-1.2.5h-4.88c-.94 0-1.7-.76-1.7-1.7V8.42c0-.94.76-1.7 1.7-1.7h4.88c.45 0 .88.18 1.2.5.32.32.5.75.5 1.2v4.88c0 .45-.18.88-.5 1.2zM12 8.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z" />
+  </svg>
+  <span>Rubika</span>
+</a>
 
     {/* اینستاگرام */}
     <button
