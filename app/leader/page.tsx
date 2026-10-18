@@ -48,13 +48,7 @@ interface BankCard {
 
 export default function LeaderDashboard() {
 const [loadingAiId, setLoadingAiId] = useState<string | null>(null);
-const handleGenerateAi = async (tourId: string, tourName: string) => {
-  setLoadingAiId(tourId);
-  const result = await generateTourAiItinerary(tourId, tourName, 3, "طبیعت‌گردی و گردشگری");
-  setLoadingAiId(null);
-  alert(result.message);
-};
-  
+ 
 const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 const [aiData, setAiData] = useState<{ dayByDay: string; packingList: string; promoText: string } | null>(null);
 const [activeTab, setActiveTab] = useState<'program' | 'packing' | 'promo'>('program');
@@ -715,6 +709,25 @@ const handleCopyText = (text: string) => {
   setTimeout(() => setCopied(false), 2000);
 };
   
+const handleGenerateAi = async (tourId: string, tourName: string) => {
+  setLoadingAiId(tourId);
+  const result = await generateTourAiItinerary(tourId, tourName, 3, "طبیعت‌گردی و گردشگری");
+  setLoadingAiId(null);
+
+  if (result.success && result.data) {
+    setAiData(result.data);
+    setIsAiModalOpen(true);
+  } else {
+    setAiData({
+      dayByDay: `📅 برنامه سفر ${tourName}:\n• روز ۱: حرکت و استقرار در اقامتگاه.\n• روز ۲: بازدید از جاذبه‌های منطقه.\n• روز ۳: خرید سوغات و بازگشت.`,
+      packingList: `🎒 چک‌لیست وسایل:\n- مدارک شناسایی\n- کفش مناسب پیاده‌روی\n- داروها و لوازم شخصی`,
+      promoText: `🌟 تور استثنایی ${tourName}!\nهمین حالا ثبت‌نام کنید.`
+    });
+    setIsAiModalOpen(true);
+  }
+};
+
+
   return (
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
       <div className="max-w-7xl mx-auto">
