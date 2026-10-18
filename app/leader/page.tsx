@@ -759,23 +759,16 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
           
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-3 w-full lg:w-auto">
 
-                      
+     
             <button onClick={() => setIsTourModalOpen(true)} title="مدیریت تورها" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#F9704E] p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer flex-1 sm:flex-none">
               <FaMapMarkedAlt size={18} />
 
             </button>
           
-
           
            <button onClick={() => openAddModal()} title="افزودن مسافر جدید" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-orange-500 p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer flex-1 sm:flex-none">
               <FaUserPlus size={18} />
             </button>
-
-
-
-
-
-
 
 
 <button
