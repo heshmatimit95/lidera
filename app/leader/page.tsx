@@ -709,27 +709,28 @@ const handleCopyText = (text: string) => {
   setTimeout(() => setCopied(false), 2000);
 };
   
-const handleGenerateAi = async (
-  tourId: string, 
-  tourName: string, 
-  days: number = 3, 
-  category: string = "طبیعت‌گردی"
-) => {
+const handleGenerateAi = async (tourId: string, tourName: string, days: number = 3, category: string = "طبیعت‌گردی") => {
   setLoadingAiId(tourId);
-  const result = await generateTourAiItinerary(tourId, tourName, days, category);
-  setLoadingAiId(null);
-
-  if (result.success && result.data) {
-    setAiData(result.data);
-    setIsAiModalOpen(true);
-  } else {
-    // Fallback در صورت عدم دسترسی به AI API
-    setAiData({
-      dayByDay: `📌 برنامه سفر ${days} روزه به ${tourName}:\n• روز ۱: حرکت و استقرار در اقامتگاه.\n• روز ۲: بازدید از جاذبه‌های برتر ${tourName}.\n• روز ۳: خرید سوغات و بازگشت.`,
-      packingList: `🎒 چک‌لیست وسایل تور ${tourName}:\n- مدارک شناسایی و بیمه\n- کفش مناسب ${category}\n- داروها و لوازم شخصی`,
-      promoText: `🌟 تور استثنایی ${days} روزه ${tourName}!\nهمین حالا جهت ثبت‌نام و دریافت اطلاعات بیشتر پیام دهید.`
+  try {
+    const res = await fetch('/api/generate-tour', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tourName, days, category })
     });
-    setIsAiModalOpen(true);
+
+    const result = await res.json();
+
+    if (result.success && result.data) {
+      setAiData(result.data);
+      setIsAiModalOpen(true);
+    } else {
+      console.error("خطا در پاسخ هوش مصنوعی:", result.error);
+      alert("خطا در تولید برنامه توسط هوش مصنوعی. لطفاً دوباره تلاش کنید.");
+    }
+  } catch (err) {
+    console.error("خطا در ارتباط با سرور:", err);
+  } finally {
+    setLoadingAiId(null);
   }
 };
 
@@ -757,14 +758,7 @@ const handleGenerateAi = async (
           </div>
           
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-3 w-full lg:w-auto">
-<button
-  onClick={() => handleGenerateAi("tour-فعلی", "کویر مرنجاب")}
-  disabled={loadingAiId !== null}
-  className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-md transition-all disabled:opacity-50"
->
-  <FaMagic size={14} />
-  <span>{loadingAiId ? "...در حال ساخت برنامه" : "✨ ساخت برنامه سفر با AI"}</span>
-</button>
+
                       
             <button onClick={() => setIsTourModalOpen(true)} title="مدیریت تورها" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#F9704E] p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer flex-1 sm:flex-none">
               <FaMapMarkedAlt size={18} />
@@ -776,6 +770,14 @@ const handleGenerateAi = async (
            <button onClick={() => openAddModal()} title="افزودن مسافر جدید" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-orange-500 p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer flex-1 sm:flex-none">
               <FaUserPlus size={18} />
             </button>
+
+
+
+
+
+
+
+
 <button
   onClick={exportToExcel}
   title="خروجی اکسل"
@@ -1441,8 +1443,14 @@ const handleGenerateAi = async (
                             </button>
                           </div>
                         </div>
-
-                        {/* مدیریت تصاویر تور */}
+{/* دکمه اختصاصی هوش مصنوعی برای هر تور */}
+<button
+  onClick={() => handleGenerateAi(t.id || String(idx), t.name, 3, "طبیعت‌گردی")}
+  title="ساخت برنامه سفر با هوش مصنوعی"
+  className="p-1.5 bg-purple-950/50 hover:bg-purple-900/80 text-purple-400 border border-purple-800/60 rounded-lg transition-all active:scale-95 flex items-center justify-center"
+>
+  <FaMagic size={13} />
+</button>                        {/* مدیریت تصاویر تور */}
                         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-800/80">
                           {t.images?.map((img, imgIdx) => (
                             <div key={imgIdx} className="relative w-12 h-12 rounded-lg overflow-hidden border border-zinc-700 group">
