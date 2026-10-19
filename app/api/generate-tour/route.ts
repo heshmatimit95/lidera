@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function POST(req: Request) {
   try {
@@ -11,9 +12,14 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { tourName, days, category, customInstruction } = body;
 
+    // راه‌اندازی با کتابخانه رسمی گوگل
+    const genAI = new GoogleGenerativeAI(apiKey);
+    // استفاده از مدل استاندارد و پایدار
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
     let prompt = `برنامه سفر ${days || 3} روزه برای تور "${tourName || 'طبیعت‌گردی'}" در دسته "${category || 'عمومی'}".`;
     if (customInstruction) {
-      prompt += ` دستور ویژه: "${customInstruction}".`;
+      prompt += ` دستور ویژه لیدر: "${customInstruction}".`;
     }
 
     prompt += ` پاسخ را فقط در قالب یک JSON معتبر بدون هیچ مارک‌داونی بدهید:
@@ -23,25 +29,10 @@ export async function POST(req: Request) {
   "promoText": "متن تبلیغاتی"
 }`;
 
-const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
-        }),
-      }
-    );
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const rawText = response.text();
 
-    const resultData = await response.json();
-    
-    if (!response.ok) {
-      return NextResponse.json({ success: false, error: resultData.error?.message || 'خطا از سمت گوگل' }, { status: response.status });
-    }
-
-    const rawText = resultData.candidates?.[0]?.content?.parts?.[0]?.text || '';
     const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
     
     let parsedData;
@@ -58,6 +49,7 @@ const response = await fetch(
     return NextResponse.json({ success: true, data: parsedData });
 
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message || 'خطای سرور' }, { status: 500 });
+    console.error('Gemini SDK Error:', error);
+    return NextResponse.json({ success: false, error: error.message || 'خطای ارتباط با هوش مصنوعی' }, { status: 500 });
   }
 }
