@@ -742,10 +742,11 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
   }
 };
 
-const handleCustomPromptSubmit = async () => {
+const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
+  if (e) e.preventDefault(); // جلوی ریفرش و بسته شدن مودال را می‌گیرد
   if (!customPrompt.trim()) return;
 
-  setIsLoading(true); // <--- حتماً این سطر باشه تا انیمیشن تفکر ظاهر بشه و باکس خالی نشه
+  setIsLoading(true); // فعال کردن حالت تفکر و انیمیشن مربع‌ها
 
   try {
     const res = await fetch("/api/generate-tour", {
@@ -762,14 +763,14 @@ const handleCustomPromptSubmit = async () => {
     const result = await res.json();
     if (result.success) {
       setAiData(result.data);
-      setCustomPrompt(""); // پاک کردن متن ورودی بعد از موفقیت
+      setCustomPrompt(""); // پاک کردن ورودی کادر
     } else {
       alert("خطا در هوش مصنوعی: " + result.error);
     }
   } catch (err: any) {
     alert("خطا در ارتباط: " + err.message);
   } finally {
-    setIsLoading(false); // <--- در نهایت خاموش میشه
+    setIsLoading(false); // خاموش کردن حالت تفکر
   }
 };
   return (
