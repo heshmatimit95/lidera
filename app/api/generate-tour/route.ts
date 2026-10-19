@@ -37,7 +37,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "model": "meta-llama/llama-3.3-70b-instruct:free", // مدل پرسرعت، قدرتمند و رایگان
+        "model": "deepseek/deepseek-chat", // مدل پرسرعت، قدرتمند و رایگان
         "messages": [
           { "role": "user", "content": prompt }
         ],
