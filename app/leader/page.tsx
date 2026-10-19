@@ -1597,106 +1597,182 @@ const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
 {/* --- مدال گزارش‌گیری هوش مصنوعی (با قابلیت ویرایش آنلاین) --- */}
 {/* --- مدال گزارش‌گیری هوش مصنوعی (با قابلیت ویرایش آنلاین) --- */}
 {/* مودال هوش مصنوعی */}
-      {isAiModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="bg-[#18181b] border border-purple-500/30 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            
-            {/* هدر مودال */}
-            <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
-              <h3 className="text-white font-bold text-base">گزارش و چت هوشمند تور (AI)</h3>
-              <button
-                onClick={() => setIsAiModalOpen(false)}
-                className="text-zinc-400 hover:text-white transition-colors cursor-pointer text-lg font-bold"
-              >
-                ✕
-              </button>
-            </div>
-{/* تب‌ها و دکمه کپی */}
-<div className="p-4 flex items-center justify-between border-b border-zinc-800 bg-zinc-900/30">
-  <div className="flex gap-2">
-    <button
-      onClick={() => setAiTab('dayByDay')}
-      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiTab === 'dayByDay' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
-    >
-      📅 برنامه سفر
-    </button>
-    <button
-      onClick={() => setAiTab('packingList')}
-      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiTab === 'packingList' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
-    >
-      🎒 مشاوره و نکات سفر
-    </button>
-    <button
-      onClick={() => setAiTab('promoText')}
-      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiTab === 'promoText' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
-    >
-      ✨ کپشن اینستاگرام
-    </button>
-  </div>
-
-  {/* دکمه کپی متن با یک کلیک */}
-<button
-  onClick={() => {
-    const textToCopy = 
-      aiTab === 'dayByDay' ? tourPlanData :
-      aiTab === 'packingList' ? consultData :
-      promoData;
-    
-    if (!textToCopy) {
-      alert("متنی برای کپی کردن وجود ندارد!");
-      return;
-    }
-
-    navigator.clipboard.writeText(textToCopy);
-    alert("متن این تب با موفقیت کپی شد! 📋");
-  }}
-  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer"
->
-  📋 کپی متن
-</button>
-</div>
-{/* بدنه نمایش متن */}
-<div className="p-5 overflow-y-auto space-y-4 flex-1">
-  {isLoading ? (
-    <div className="flex flex-col items-center justify-center p-16 space-y-4 my-auto">
-      <div className="flex space-x-2 space-x-reverse">
-        <div className="w-4 h-4 bg-purple-500 rounded-md animate-bounce"></div>
-        <div className="w-4 h-4 bg-purple-400 rounded-md animate-bounce [animation-delay:-.2s]"></div>
-        <div className="w-4 h-4 bg-purple-300 rounded-md animate-bounce [animation-delay:-.4s]"></div>
+{/* مودال هوش مصنوعی */}
+{isAiModalOpen && (
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+    <div className="bg-[#18181b] border border-purple-500/30 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      
+      {/* هدر مودال */}
+      <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
+        <h3 className="text-white font-bold text-base">گزارش و چت هوشمند تور (Gemini AI)</h3>
+        <button
+          onClick={() => setIsAiModalOpen(false)}
+          className="text-zinc-400 hover:text-white transition-colors cursor-pointer text-lg font-bold"
+        >
+          ✕
+        </button>
       </div>
-      <p className="text-sm text-purple-200 animate-pulse font-medium">
-        در حال تفکر و پردازش هوش مصنوعی...
-      </p>
-    </div>
-  ) : (
-    <div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-xl text-zinc-200 text-sm leading-relaxed min-h-160px whitespace-pre-line">
-      {aiTab === "dayByDay" && (aiData?.dayByDay?.[0] || "برنامه‌ای یافت نشد.")}
-      {aiTab === "packingList" && (aiData?.packingList?.[0] || "نکته‌ای ثبت نشده است.")}
-      {aiTab === "promoText" && (aiData?.promoText || "متنی یافت نشد.")}
-    </div>
-  )}
-</div>
-            {/* بخش چت و دستور جدید */}
-            <div className="p-4 border-t border-zinc-800 bg-zinc-900/50">
-              <form onSubmit={handleCustomPromptSubmit} className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="...هر سوالی داری میتونی بپرسی"
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  disabled={isLoading}
-                  className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
-                />
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer"
-                >
-                  {isLoading ? "در حال تفکر..." : "پرسیدن از هوش مصنوعی"}
-                </button>
-              </form>
-            </div>
 
+      {/* تب‌ها و دکمه کپی */}
+      <div className="p-4 flex items-center justify-between border-b border-zinc-800 bg-zinc-900/30 gap-2 flex-wrap">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setAiTab('dayByDay')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+              aiTab === 'dayByDay' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+            }`}
+          >
+            📅 برنامه سفر
+          </button>
+          <button
+            onClick={() => setAiTab('packingList')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+              aiTab === 'packingList' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+            }`}
+          >
+            🎒 مشاوره و نکات سفر
+          </button>
+          <button
+            onClick={() => setAiTab('promoText')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+              aiTab === 'promoText' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+            }`}
+          >
+            ✨ کپشن اینستاگرام
+          </button>
+        </div>
+
+        {/* دکمه کپی اختصاصی برای همان تب */}
+        <button
+          onClick={() => {
+            const currentText =
+              aiTab === 'dayByDay' ? tourPlanData :
+              aiTab === 'packingList' ? consultData :
+              promoData;
+
+            if (!currentText) {
+              alert("متنی برای کپی در این تب وجود ندارد!");
+              return;
+            }
+            navigator.clipboard.writeText(currentText);
+            alert("متن این تب کپی شد! 📋");
+          }}
+          className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer"
+        >
+          📋 کپی متن
+        </button>
+      </div>
+
+      {/* بدنه نمایش محتوای مستقل هر تب */}
+      <div className="p-5 overflow-y-auto space-y-4 flex-1 min-h-220px]">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center p-12 space-y-4 my-auto">
+            <div className="flex space-x-2 space-x-reverse">
+              <div className="w-4 h-4 bg-purple-500 rounded-md animate-bounce"></div>
+              <div className="w-4 h-4 bg-purple-400 rounded-md animate-bounce [animation-delay:-.2s]"></div>
+              <div className="w-4 h-4 bg-purple-300 rounded-md animate-bounce [animation-delay:-.4s]"></div>
+            </div>
+            <p className="text-sm text-purple-200 animate-pulse font-medium">
+              در حال پردازش هوش مصنوعی...
+            </p>
+          </div>
+        ) : (
+          <div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-xl text-zinc-200 text-sm leading-relaxed min-h-180px] whitespace-pre-line">
+            {aiTab === "dayByDay" && (tourPlanData || "برنامه روزانه سفر هنوز ساخته نشده است.")}
+            {aiTab === "packingList" && (consultData || "سوال یا درخواست مشاوره‌ای ثبت نکرده‌اید. کادر پایین را پر کنید!")}
+            {aiTab === "promoText" && (promoData || "کپشن اینستاگرامی ثبت نشده است.")}
+          </div>
+        )}
+      </div>
+
+      {/* بخش اینپوت و دکمه اختصاصی متناسب با هر تب */}
+      <div className="p-4 border-t border-zinc-800 bg-zinc-900/50">
+        <form onSubmit={handleCustomPromptSubmit} className="flex gap-2">
+          <input
+            type="text"
+            value={customPrompt}
+            onChange={(e) => setCustomPrompt(e.target.value)}
+            disabled={isLoading}
+            placeholder={
+              aiTab === 'dayByDay' ? "دستور اصلاح برنامه (مثلاً: روز دوم رو بارونی کن یا جاذبه جدید اضافه کن)..." :
+              aiTab === 'packingList' ? "سوال یا مشاوره آزاد (مثلاً: اگر مسافر در ارتفاع بدحال شد چه کنم؟)..." :
+              "دستور برای ساخت کپشن (مثلاً: با لحن هیجانی و تخفیف ویژه بنویس)..."
+            }
+            className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
+          />
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl text-xs font-medium transition-colors cursor-pointer shrink-0"
+          >
+            {isLoading ? "در حال تفکر..." : (
+              aiTab === 'dayByDay' ? "اصلاح برنامه سفر" :
+              aiTab === 'packingList' ? "پرسش از هوش مصنوعی" :
+              "تولید کپشن اینستاگرام"
+            )}
+          </button>
+        </form>
+      </div>
+
+      {/* فوتر مودال و شبکه‌های اجتماعی */}
+      <div className="p-4 border-t border-zinc-800 bg-zinc-900/80 flex items-center justify-between">
+        <div className="flex items-center gap-2 dir-ltr">
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(
+              aiTab === 'dayByDay' ? tourPlanData : aiTab === 'packingList' ? consultData : promoData
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/50 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors"
+          >
+            واتساپ
+          </a>
+          <a
+            href={`https://t.me/share/url?url=&text=${encodeURIComponent(
+              aiTab === 'dayByDay' ? tourPlanData : aiTab === 'packingList' ? consultData : promoData
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors"
+          >
+            تلگرام
+          </a>
+        </div>
+        <button
+          onClick={() => setIsAiModalOpen(false)}
+          className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-4 py-1.5 rounded-xl text-xs font-medium transition-colors cursor-pointer"
+        >
+          بستن
+        </button>
+      </div>
+{/* بخش چت و دستور جدید (متناسب با تب فعال) */}
+<div className="p-4 border-t border-zinc-800 bg-zinc-900/50">
+  <form onSubmit={handleCustomPromptSubmit} className="flex gap-2">
+    <input
+      type="text"
+      value={customPrompt}
+      onChange={(e) => setCustomPrompt(e.target.value)}
+      disabled={isLoading}
+      placeholder={
+        aiTab === 'dayByDay' ? "دستور اصلاح برنامه (مثلاً: روز دوم رو بارونی کن)..." :
+        aiTab === 'packingList' ? "سوال یا مشاوره آزاد (مثلاً: اگر مسافر بدحال شد چه کنم؟)..." :
+        "دستور برای کپشن (مثلاً: با لحن هیجانی بنویس)..."
+      }
+      className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
+    />
+    <button
+      type="submit"
+      disabled={isLoading}
+      className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer shrink-0"
+    >
+      {isLoading ? "در حال تفکر..." : (
+        aiTab === 'dayByDay' ? "اصلاح برنامه سفر" :
+        aiTab === 'packingList' ? "پرسش از هوش مصنوعی" :
+        "تولید کپشن"
+      )}
+    </button>
+  </form>
+</div>
 
       {/* Footer مدال */}
       <div className="p-4 border-t border-zinc-800 bg-zinc-900/50 flex items-center justify-between">
