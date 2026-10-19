@@ -713,9 +713,9 @@ const handleCopyText = (text: string) => {
 };
   
 const handleGenerateAi = async (tourId: string, tourName: string, days: number = 3, category: string = "طبیعت‌گردی") => {
-  setSelectedTourName(tourName); // اگر اسم متغیرت متفاوته حتماً چک کن
+  setSelectedTourName(tourName);
   setIsAiModalOpen(true);
-  setIsLoading(true); // اصلاح شده از setAiLoading به setIsLoading
+  setIsLoading(true); // حتماً اینجا باید باشه تا مدال روی حالت لودینگ باز بشه
 
   try {
     const res = await fetch("/api/generate-tour", {
@@ -723,22 +723,29 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tourName, days, category }),
     });
+
+    const contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("خطای سرور یا پاسخ نامعتبر (404/502)");
+    }
+
     const result = await res.json();
     if (result.success) {
       setAiData(result.data);
     } else {
       alert("خطا در هوش مصنوعی: " + result.error);
     }
-  } catch (err) {
-    alert("خطا در برقراری ارتباط با هوش مصنوعی.");
+  } catch (err: any) {
+    alert("خطا در برقراری ارتباط با هوش مصنوعی: " + err.message);
   } finally {
-    setIsLoading(false); // اصلاح شده
+    setIsLoading(false); // اینجا لودینگ خاموش میشه و محتوا میاد
   }
 };
 
 const handleCustomPromptSubmit = async () => {
   if (!customPrompt.trim()) return;
-  setIsLoading(true); // اصلاح شده
+  setIsLoading(true);
+  
   try {
     const res = await fetch("/api/generate-tour", {
       method: "POST",
@@ -750,6 +757,12 @@ const handleCustomPromptSubmit = async () => {
         customInstruction: customPrompt,
       }),
     });
+
+    const contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("خطا در ارتباط با سرور (پاسخ نامعتبر یا 404)");
+    }
+
     const result = await res.json();
     if (result.success) {
       setAiData(result.data);
@@ -757,10 +770,10 @@ const handleCustomPromptSubmit = async () => {
     } else {
       alert("خطا: " + result.error);
     }
-  } catch (err) {
-    alert("ارتباط با هوش مصنوعی برقرار نشد.");
+  } catch (err: any) {
+    alert("ارتباط با هوش مصنوعی برقرار نشد: " + (err.message || 'خطای ناشناخته'));
   } finally {
-    setIsLoading(false); // اصلاح شده
+    setIsLoading(false);
   }
 };
 
@@ -788,12 +801,7 @@ const handleCustomPromptSubmit = async () => {
           
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-3 w-full lg:w-auto">
 
-
-
-
-
-
-                      
+                     
             <button onClick={() => setIsTourModalOpen(true)} title="مدیریت تورها" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#F9704E] p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer flex-1 sm:flex-none">
               <FaMapMarkedAlt size={18} />
 

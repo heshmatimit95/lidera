@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 }`;
 
     // استفاده از endpoint معتبر جمینی
-    const response = await fetch(
+const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 800,
+            maxOutputTokens: 1000,
           }
         }),
       }
