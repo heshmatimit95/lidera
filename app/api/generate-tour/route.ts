@@ -1,81 +1,65 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    // کلید خوانده شده از Environment Variables
-    const apiKey = process.env.OPENROUTER_API_KEY || process.env.GEMINI_API_KEY;
+    const { tourName, days = 3, category = "طبیعت‌گردی", customInstruction } = await req.json();
 
+    const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
-      return NextResponse.json(
-        { success: false, error: 'کلید API OpenRouter تنظیم نشده است' },
-        { status: 500 }
-      );
+      return NextResponse.json({ success: false, error: "کلید هوش مصنوعی تنظیم نشده است." }, { status: 500 });
     }
 
-    const body = await req.json();
-    const { tourName, days, category, customInstruction } = body;
+    // پرامپت سیستمی برای آزادی کامل هوش مصنوعی به عنوان مشاور تورلیدر
+    const systemPrompt = `
+تو یک دستیار، مشاور و همراهِ کاملاً هوشمند، باانگیزه و همه‌فن‌حریف برای تورلیدرهای پلتفرم «لیدرا» هستی.
+برخلاف ربات‌های خشک، تو کاملاً آزاد هستی که به هر پرسش، دغدغه، ایده، دستورالعمل یا چالشِ تورلیدر (از وضعیت آب‌وهوا، مدیریت بحران در سفر، معرفی جاذبه‌های تاریخی و طبیعی، تا پیشنهاد برنامه‌های سفر جدید یا گپ آزاد) با بالاترین دقت، جذابیت و به زبان فارسی روان، صمیمانه و حرفه‌ای پاسخ دهی.
 
-    let prompt = `برنامه سفر ${days || 3} روزه برای تور "${tourName || 'طبیعت‌گردی'}" در دسته "${category || 'عمومی'}".`;
-    if (customInstruction) {
-      prompt += ` دستور ویژه لیدر: "${customInstruction}".`;
-    }
+اطلاعات تور فعلی که تورلیدر درباره‌اش صحبت می‌کند:
+- نام تور: ${tourName}
+- مدت زمان: ${days} روز
+- دسته‌بندی: ${category}
 
-    prompt += ` پاسخ را فقط و فقط در قالب یک JSON معتبر بدون هیچ مارک‌داون یا توضیحات اضافی بدهید:
-{
-  "dayByDay": ["روز ۱: توضیحات", "روز ۲: توضیحات"],
-  "packingList": ["مورد ۱", "مورد ۲"],
-  "promoText": "متن تبلیغاتی جذاب"
-}`;
+اگر تورلیدر درخواستی برای اصلاح برنامه سفر داشت، برنامه را بازنویسی کن. اگر سوالی پرسید یا درباره موضوعی آزاد صحبت کرد، کاملاً آزاد، مشروح و مفید به او مشاوره بده. هیچ محدودیتی نداری!
+`;
 
-    // ارسال درخواست مستقیم به OpenRouter با مدل رایگان و پرسرعت Llama / DeepSeek
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const userMessage = customInstruction 
+      ? customInstruction 
+      : `لطفاً یک تحلیل جامع و برنامه کامل برای تور ${tourName} ارائه بده و هر نکته مشاوره‌ای که برای یک تورلیدر حرفه‌ای لازم است را بگو.`;
+
+    const response = "https://openrouter.ai/api/v1/chat/completions";
+    const apiResponse = await fetch(response, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        "Authorization": `Bearer ` + apiKey,
+        "Content-Type": "application/json",
         "HTTP-Referer": "https://lidera.ir",
-        "X-Title": "Lidera Tour Assistant",
-        "Content-Type": "application/json"
+        "X-Title": "Lidera AI",
       },
       body: JSON.stringify({
-        "model": "deepseek/deepseek-chat", // مدل پرسرعت، قدرتمند و رایگان
-        "messages": [
-          { "role": "user", "content": prompt }
+        model: "deepseek/deepseek-chat", // یا مدلی که داری
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMessage }
         ],
-        "temperature": 0.7
-      })
+        temperature: 0.8,
+      }),
     });
 
-    const resultData = await response.json();
+    const data = await apiResponse.json();
+    const replyText = data.choices?.[0]?.message?.content || "پاسخی دریافت نشد.";
 
-    if (!response.ok) {
-      console.error("OpenRouter API Error:", resultData);
-      return NextResponse.json(
-        { success: false, error: resultData.error?.message || 'خطا در دریافت پاسخ از هوش مصنوعی' },
-        { status: response.status }
-      );
-    }
-
-    const rawText = resultData.choices?.[0]?.message?.content || '';
-    const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-
-    let parsedData;
-    try {
-      parsedData = JSON.parse(cleanJson);
-    } catch (e) {
-      parsedData = {
-        dayByDay: [rawText],
-        packingList: ["کفش پیاده‌روی", "کوله پشتی", "داروهای شخصی"],
-        promoText: `یک تجربه فوق‌العاده و فراموش‌نشدنی با تور ${tourName || ''}!`
-      };
-    }
-
-    return NextResponse.json({ success: true, data: parsedData });
+    // برگرداندن متن به صورت کاملاً آزاد و متنی (بدون اجبار به ساختار JSON خشک)
+    return NextResponse.json({ 
+      success: true, 
+      data: {
+        // اینجا متن آزاد رو توی همون ساختار روزانه یا به عنوان متن پاسخ برمی‌گردونیم
+        dayByDay: [replyText],
+        packingList: ["پاسخ هوش مصنوعی به صورت آزاد و پویا ارائه شد."],
+        promoText: replyText
+      } 
+    });
 
   } catch (error: any) {
-    console.error("Server Internal Error:", error);
-    return NextResponse.json(
-      { success: false, error: error.message || 'خطای داخلی سرور' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
