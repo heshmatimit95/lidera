@@ -1598,65 +1598,73 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                 ✕
               </button>
             </div>
+{/* تب‌ها و دکمه کپی */}
+<div className="p-4 flex items-center justify-between border-b border-zinc-800 bg-zinc-900/30">
+  <div className="flex gap-2">
+    <button
+      onClick={() => setAiTab('dayByDay')}
+      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiTab === 'dayByDay' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
+    >
+      📅 برنامه سفر
+    </button>
+    <button
+      onClick={() => setAiTab('packingList')}
+      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiTab === 'packingList' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
+    >
+      🎒 مشاوره و نکات سفر
+    </button>
+    <button
+      onClick={() => setAiTab('promoText')}
+      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiTab === 'promoText' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
+    >
+      ✨ کپشن اینستاگرام
+    </button>
+  </div>
 
-            {/* تب‌های بالا */}
-            <div className="p-4 flex gap-2 border-b border-zinc-800 bg-zinc-900/30">
-              <button
-                onClick={() => setAiTab('dayByDay')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiTab === 'dayByDay' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
-              >
-                📅 برنامه روزانه
-              </button>
-              <button
-                onClick={() => setAiTab('packingList')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiTab === 'packingList' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
-              >
-                🎒 چک‌لیست وسایل
-              </button>
-              <button
-                onClick={() => setAiTab('promoText')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiTab === 'promoText' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
-              >
-                📱 متن اینستاگرام
-              </button>
-            </div>
+  {/* دکمه کپی متن با یک کلیک */}
+  <button
+    onClick={() => {
+      const textToCopy = 
+        aiTab === 'dayByDay' ? (aiData?.dayByDay?.[0] || '') :
+        aiTab === 'packingList' ? (aiData?.packingList?.[0] || '') :
+        (aiData?.promoText || '');
+      
+      navigator.clipboard.writeText(textToCopy);
+      alert("متن با موفقیت کپی شد! 📋");
+    }}
+    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer"
+  >
+    📋 کپی متن
+  </button>
+</div>
 
-            {/* بدنه اصلی (حالت لودینگ با مربع‌های متحرک یا نمایش دیتا) */}
-            <div className="p-5 overflow-y-auto space-y-4 flex-1">
-              {isLoading ? (
-                <div className="flex flex-col items-center justify-center p-16 space-y-4 my-auto">
-                  <div className="flex space-x-2 space-x-reverse">
-                    <div className="w-4 h-4 bg-purple-500 rounded-md animate-bounce"></div>
-                    <div className="w-4 h-4 bg-purple-400 rounded-md animate-bounce [animation-delay:-.2s]"></div>
-                    <div className="w-4 h-4 bg-purple-300 rounded-md animate-bounce [animation-delay:-.4s]"></div>
-                  </div>
-                  <p className="text-sm text-purple-200 animate-pulse font-medium">
-                    در حال جستجو و پردازش هوش مصنوعی...
-                  </p>
-                </div>
-              ) : (
-                <div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-xl text-zinc-200 text-sm leading-relaxed min-h-160px whitespace-pre-line">
-                  {aiTab === "dayByDay" && (
-                    Array.isArray(aiData?.dayByDay)
-                      ? aiData.dayByDay.join("\n\n")
-                      : aiData?.dayByDay || "برنامه‌ای یافت نشد."
-                  )}
-                  {aiTab === "packingList" && (
-                    Array.isArray(aiData?.packingList)
-                      ? aiData.packingList.map((item: string) => `• ${item}`).join("\n")
-                      : aiData?.packingList || "چکلیستی یافت نشد."
-                  )}
-                  {aiTab === "promoText" && (aiData?.promoText || "متنی یافت نشد.")}
-                </div>
-              )}
-            </div>
-
+{/* بدنه نمایش متن */}
+<div className="p-5 overflow-y-auto space-y-4 flex-1">
+  {isLoading ? (
+    <div className="flex flex-col items-center justify-center p-16 space-y-4 my-auto">
+      <div className="flex space-x-2 space-x-reverse">
+        <div className="w-4 h-4 bg-purple-500 rounded-md animate-bounce"></div>
+        <div className="w-4 h-4 bg-purple-400 rounded-md animate-bounce [animation-delay:-.2s]"></div>
+        <div className="w-4 h-4 bg-purple-300 rounded-md animate-bounce [animation-delay:-.4s]"></div>
+      </div>
+      <p className="text-sm text-purple-200 animate-pulse font-medium">
+        در حال تفکر و پردازش هوش مصنوعی...
+      </p>
+    </div>
+  ) : (
+    <div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-xl text-zinc-200 text-sm leading-relaxed min-h-160px whitespace-pre-line">
+      {aiTab === "dayByDay" && (aiData?.dayByDay?.[0] || "برنامه‌ای یافت نشد.")}
+      {aiTab === "packingList" && (aiData?.packingList?.[0] || "نکته‌ای ثبت نشده است.")}
+      {aiTab === "promoText" && (aiData?.promoText || "متنی یافت نشد.")}
+    </div>
+  )}
+</div>
             {/* بخش چت و دستور جدید */}
             <div className="p-4 border-t border-zinc-800 bg-zinc-900/50">
               <form onSubmit={handleCustomPromptSubmit} className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="...مثال: درجه سختی را کمتر کن یا تم عکاسی اضافه کن"
+                  placeholder="...هر سوالی داری میتونی بپرسی"
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
                   disabled={isLoading}
@@ -1667,7 +1675,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                   disabled={isLoading}
                   className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer"
                 >
-                  {isLoading ? "در حال تفکر..." : "اعمال دستور"}
+                  {isLoading ? "در حال تفکر..." : "پرسیدن از هوش مصنوعی"}
                 </button>
               </form>
             </div>
