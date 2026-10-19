@@ -1714,65 +1714,7 @@ const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
         </form>
       </div>
 
-      {/* فوتر مودال و شبکه‌های اجتماعی */}
-      <div className="p-4 border-t border-zinc-800 bg-zinc-900/80 flex items-center justify-between">
-        <div className="flex items-center gap-2 dir-ltr">
-          <a
-            href={`https://wa.me/?text=${encodeURIComponent(
-              aiTab === 'dayByDay' ? tourPlanData : aiTab === 'packingList' ? consultData : promoData
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/50 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors"
-          >
-            واتساپ
-          </a>
-          <a
-            href={`https://t.me/share/url?url=&text=${encodeURIComponent(
-              aiTab === 'dayByDay' ? tourPlanData : aiTab === 'packingList' ? consultData : promoData
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors"
-          >
-            تلگرام
-          </a>
-        </div>
-        <button
-          onClick={() => setIsAiModalOpen(false)}
-          className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-4 py-1.5 rounded-xl text-xs font-medium transition-colors cursor-pointer"
-        >
-          بستن
-        </button>
-      </div>
-{/* بخش چت و دستور جدید (متناسب با تب فعال) */}
-<div className="p-4 border-t border-zinc-800 bg-zinc-900/50">
-  <form onSubmit={handleCustomPromptSubmit} className="flex gap-2">
-    <input
-      type="text"
-      value={customPrompt}
-      onChange={(e) => setCustomPrompt(e.target.value)}
-      disabled={isLoading}
-      placeholder={
-        aiTab === 'dayByDay' ? "دستور اصلاح برنامه (مثلاً: روز دوم رو بارونی کن)..." :
-        aiTab === 'packingList' ? "سوال یا مشاوره آزاد (مثلاً: اگر مسافر بدحال شد چه کنم؟)..." :
-        "دستور برای کپشن (مثلاً: با لحن هیجانی بنویس)..."
-      }
-      className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
-    />
-    <button
-      type="submit"
-      disabled={isLoading}
-      className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer shrink-0"
-    >
-      {isLoading ? "در حال تفکر..." : (
-        aiTab === 'dayByDay' ? "اصلاح برنامه سفر" :
-        aiTab === 'packingList' ? "پرسش از هوش مصنوعی" :
-        "تولید کپشن"
-      )}
-    </button>
-  </form>
-</div>
+
 
       {/* Footer مدال */}
       <div className="p-4 border-t border-zinc-800 bg-zinc-900/50 flex items-center justify-between">
@@ -1860,6 +1802,28 @@ const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
     </div>
   </div>
 )}
+
+
+         {/* بخش چت و دستور جدید */}
+            <div className="p-4 border-t border-zinc-800 bg-zinc-900/50">
+              <form onSubmit={handleCustomPromptSubmit} className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="...هر سوالی داری میتونی بپرسی"
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  disabled={isLoading}
+                  className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
+                />
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer"
+                >
+                  {isLoading ? "در حال تفکر..." : "پرسیدن از هوش مصنوعی"}
+                </button>
+              </form>
+            </div>
 
     </div>
   );
