@@ -715,7 +715,7 @@ const handleCopyText = (text: string) => {
 const handleGenerateAi = async (tourId: string, tourName: string, days: number = 3, category: string = "طبیعت‌گردی") => {
   setSelectedTourName(tourName);
   setIsAiModalOpen(true);
-  setIsLoading(true); // حتماً اینجا باید باشه تا مدال روی حالت لودینگ باز بشه
+  setIsLoading(true);
 
   try {
     const res = await fetch("/api/generate-tour", {
@@ -724,55 +724,51 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       body: JSON.stringify({ tourName, days, category }),
     });
 
-    const contentType = res.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      throw new Error("خطای سرور یا پاسخ نامعتبر (404/502)");
-    }
-
     const result = await res.json();
     if (result.success) {
       setAiData(result.data);
-    } else {
-      alert("خطا در هوش مصنوعی: " + result.error);
-    }
-  } catch (err: any) {
-    alert("خطا در برقراری ارتباط با هوش مصنوعی: " + err.message);
-  } finally {
-    setIsLoading(false); // اینجا لودینگ خاموش میشه و محتوا میاد
-  }
-};
-
-const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
-  if (e) e.preventDefault(); // جلوی ریفرش و بسته شدن مودال را می‌گیرد
-  if (!customPrompt.trim()) return;
-
-  setIsLoading(true); // فعال کردن حالت تفکر و انیمیشن مربع‌ها
-
-  try {
-    const res = await fetch("/api/generate-tour", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        tourName: selectedTourName,
-        days: 3,
-        category: "طبیعت‌گردی",
-        customInstruction: customPrompt,
-      }),
-    });
-
-    const result = await res.json();
-    if (result.success) {
-      setAiData(result.data);
-      setCustomPrompt(""); // پاک کردن ورودی کادر
     } else {
       alert("خطا در هوش مصنوعی: " + result.error);
     }
   } catch (err: any) {
     alert("خطا در ارتباط: " + err.message);
   } finally {
-    setIsLoading(false); // خاموش کردن حالت تفکر
+    setIsLoading(false);
   }
 };
+
+  // تابع ارسال دستور جدید (بدون بستن مودال و با نمایش انیمیشن تفکر)
+  const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!customPrompt.trim()) return;
+
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("/api/generate-tour", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tourName: selectedTourName,
+          days: 3,
+          category: "طبیعت‌گردی",
+          customInstruction: customPrompt,
+        }),
+      });
+
+      const result = await res.json();
+      if (result.success) {
+        setAiData(result.data);
+        setCustomPrompt("");
+      } else {
+        alert("خطا در هوش مصنوعی: " + result.error);
+      }
+    } catch (err: any) {
+      alert("خطا در ارتباط: " + err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
       <div className="max-w-7xl mx-auto">
@@ -1587,122 +1583,95 @@ const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
 {/* --- مدال گزارش‌گیری هوش مصنوعی (با قابلیت ویرایش آنلاین) --- */}
 {/* --- مدال گزارش‌گیری هوش مصنوعی (با قابلیت ویرایش آنلاین) --- */}
 {/* --- مدال گزارش‌گیری هوش مصنوعی (با قابلیت ویرایش آنلاین) --- */}
-{isAiModalOpen && (
-  <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
-    <div className="bg-[#18181b] border border-purple-500/30 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-      
-      {/* هدر مدال */}
-      <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
-        <div className="flex items-center gap-2">
-          <svg viewBox="0 0 24 24" className="w-5 h-5 fill-purple-400 animate-pulse">
-            <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" />
-          </svg>
-          <h3 className="text-white font-bold text-base">گزارش و چت هوشمند تور (Gemini AI)</h3>
-        </div>
-
-      </div>
-
-      {/* بدنه اصلی */}
-      <div className="p-5 overflow-y-auto space-y-4 flex-1">
-        
-        {/* حالت لودینگ در حال پردازش */}
-{isLoading ? (
-  /* این همون حالت لودینگ و مربع‌های متحرک حرفه‌ایه که خواسته بودی */
-  <div className="flex flex-col items-center justify-center p-12 space-y-4">
-    <div className="flex space-x-2 space-x-reverse">
-      <div className="w-4 h-4 bg-purple-500 rounded-md animate-bounce"></div>
-      <div className="w-4 h-4 bg-purple-400 rounded-md animate-bounce [animation-delay:-.2s]"></div>
-      <div className="w-4 h-4 bg-purple-300 rounded-md animate-bounce [animation-delay:-.4s]"></div>
-    </div>
-    <p className="text-sm text-purple-200 animate-pulse font-medium">
-      در حال جستجو و پردازش هوش مصنوعی...
-    </p>
-  </div>
-        ) : (
-          <>
-            {/* تب‌های خروجی */}
-            <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800 text-xs font-medium">
+{/* مودال هوش مصنوعی */}
+      {isAiModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="bg-[#18181b] border border-purple-500/30 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            
+            {/* هدر مودال */}
+            <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
+              <h3 className="text-white font-bold text-base">گزارش و چت هوشمند تور (AI)</h3>
               <button
-                onClick={() => setAiTab("dayByDay")}
-                className={`flex-1 py-2 rounded-lg transition-all cursor-pointer ${
-                  aiTab === "dayByDay" ? "bg-purple-600 text-white shadow" : "text-zinc-400 hover:text-white"
-                }`}
+                onClick={() => setIsAiModalOpen(false)}
+                className="text-zinc-400 hover:text-white transition-colors cursor-pointer text-lg font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* تب‌های بالا */}
+            <div className="p-4 flex gap-2 border-b border-zinc-800 bg-zinc-900/30">
+              <button
+                onClick={() => setAiTab('dayByDay')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiTab === 'dayByDay' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
               >
                 📅 برنامه روزانه
               </button>
               <button
-                onClick={() => setAiTab("packingList")}
-                className={`flex-1 py-2 rounded-lg transition-all cursor-pointer ${
-                  aiTab === "packingList" ? "bg-purple-600 text-white shadow" : "text-zinc-400 hover:text-white"
-                }`}
+                onClick={() => setAiTab('packingList')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiTab === 'packingList' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
               >
                 🎒 چک‌لیست وسایل
               </button>
               <button
-                onClick={() => setAiTab("promoText")}
-                className={`flex-1 py-2 rounded-lg transition-all cursor-pointer ${
-                  aiTab === "promoText" ? "bg-purple-600 text-white shadow" : "text-zinc-400 hover:text-white"
-                }`}
+                onClick={() => setAiTab('promoText')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiTab === 'promoText' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
               >
-                📲 متن اینستاگرام / واتساپ
+                📱 متن اینستاگرام
               </button>
             </div>
 
-            {/* نمایش محتوا */}
-{/* بخش نمایش محتوا یا حالت لودینگ هوش مصنوعی */}
-{isLoading ? (
-  <div className="flex flex-col items-center justify-center p-12 space-y-4 my-auto">
-    <div className="flex space-x-2 space-x-reverse">
-      <div className="w-4 h-4 bg-purple-500 rounded-md animate-bounce"></div>
-      <div className="w-4 h-4 bg-purple-400 rounded-md animate-bounce [animation-delay:-.2s]"></div>
-      <div className="w-4 h-4 bg-purple-300 rounded-md animate-bounce [animation-delay:-.4s]"></div>
-    </div>
-    <p className="text-sm text-purple-200 animate-pulse font-medium">
-      در حال جستجو و پردازش هوش مصنوعی...
-    </p>
-  </div>
-) : (
+            {/* بدنه اصلی (حالت لودینگ با مربع‌های متحرک یا نمایش دیتا) */}
+            <div className="p-5 overflow-y-auto space-y-4 flex-1">
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center p-16 space-y-4 my-auto">
+                  <div className="flex space-x-2 space-x-reverse">
+                    <div className="w-4 h-4 bg-purple-500 rounded-md animate-bounce"></div>
+                    <div className="w-4 h-4 bg-purple-400 rounded-md animate-bounce [animation-delay:-.2s]"></div>
+                    <div className="w-4 h-4 bg-purple-300 rounded-md animate-bounce [animation-delay:-.4s]"></div>
+                  </div>
+                  <p className="text-sm text-purple-200 animate-pulse font-medium">
+                    در حال جستجو و پردازش هوش مصنوعی...
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-xl text-zinc-200 text-sm leading-relaxed min-h-160px whitespace-pre-line">
+                  {aiTab === "dayByDay" && (
+                    Array.isArray(aiData?.dayByDay)
+                      ? aiData.dayByDay.join("\n\n")
+                      : aiData?.dayByDay || "برنامه‌ای یافت نشد."
+                  )}
+                  {aiTab === "packingList" && (
+                    Array.isArray(aiData?.packingList)
+                      ? aiData.packingList.map((item: string) => `• ${item}`).join("\n")
+                      : aiData?.packingList || "چکلیستی یافت نشد."
+                  )}
+                  {aiTab === "promoText" && (aiData?.promoText || "متنی یافت نشد.")}
+                </div>
+              )}
+            </div>
 
-  <div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-xl text-zinc-200 text-sm leading-relaxed min-h-160px whitespace-pre-line">
-    {aiTab === "dayByDay" && (
-      Array.isArray(aiData?.dayByDay)
-        ? aiData.dayByDay.join("\n\n")
-        : aiData?.dayByDay || "برنامه‌ای یافت نشد."
-    )}
-    {aiTab === "packingList" && (
-      Array.isArray(aiData?.packingList)
-        ? aiData.packingList.map((item: string) => `• ${item}`).join("\n")
-        : aiData?.packingList || "چکلیستی یافت نشد."
-    )}
-    {aiTab === "promoText" && (aiData?.promoText || "متنی یافت نشد.")}
-  </div>
-)}
-            {/* بخش چت و سفارشی‌سازی هوشمند با لیدر */}
-            <div className="pt-2 border-t border-zinc-800 space-y-2">
-              <label className="text-xs text-purple-300 font-medium block">
-                💬 دستور جدید به هوش مصنوعی (اصلاح یا تغییر برنامه):
-              </label>
-              <div className="flex gap-2">
+            {/* بخش چت و دستور جدید */}
+            <div className="p-4 border-t border-zinc-800 bg-zinc-900/50">
+              <form onSubmit={handleCustomPromptSubmit} className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="مثال: درجه سختی را کمتر کن یا تم عکاسی اضافه کن..."
+                  placeholder="...مثال: درجه سختی را کمتر کن یا تم عکاسی اضافه کن"
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleCustomPromptSubmit()}
+                  disabled={isLoading}
                   className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
                 />
                 <button
-                  onClick={handleCustomPromptSubmit}
-                  disabled={isLoading || !customPrompt.trim()}
-                  className="bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-xs font-medium transition-all flex items-center gap-1 cursor-pointer"
+                  type="submit"
+                  disabled={isLoading}
+                  className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer"
                 >
-                  اعمال دستور
+                  {isLoading ? "در حال تفکر..." : "اعمال دستور"}
                 </button>
-              </div>
+              </form>
             </div>
-          </>
-        )}
-      </div>
+
 
       {/* Footer مدال */}
       <div className="p-4 border-t border-zinc-800 bg-zinc-900/50 flex items-center justify-between">
