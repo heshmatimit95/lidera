@@ -145,7 +145,9 @@ const [copied, setCopied] = useState(false);
 
   // --- استیت‌های مودال تورها ---
   const [isTourModalOpen, setIsTourModalOpen] = useState<boolean>(false);
-
+const [tourPlanData, setTourPlanData] = useState<string>(''); // مخصوص تب اول (برنامه سفر)
+const [consultData, setConsultData] = useState<string>('');     // مخصوص تب دوم (مشاوره و چت آزاد)
+const [promoData, setPromoData] = useState<string>('');         // مخصوص تب سوم (کپشن اینستاگرام)
   const [newTourName, setNewTourName] = useState<string>('');
   const [editingTourIndex, setEditingTourIndex] = useState<number | null>(null);
   const [editingTourNameValue, setEditingTourNameValue] = useState<string>('');
@@ -738,37 +740,48 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 };
 
   // تابع ارسال دستور جدید (بدون بستن مودال و با نمایش انیمیشن تفکر)
-  const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!customPrompt.trim()) return;
+const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
+  if (e) e.preventDefault();
+  if (!customPrompt.trim()) return;
 
-    setIsLoading(true);
+  setIsLoading(true);
 
-    try {
-      const res = await fetch("/api/generate-tour", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tourName: selectedTourName,
-          days: 3,
-          category: "طبیعت‌گردی",
-          customInstruction: customPrompt,
-        }),
-      });
+  try {
+    const res = await fetch("/api/generate-tour", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tourName: selectedTourName,
+        days: 3,
+        category: "طبیعت‌گردی",
+        customInstruction: customPrompt,
+      }),
+    });
 
-      const result = await res.json();
-      if (result.success) {
-        setAiData(result.data);
-        setCustomPrompt("");
-      } else {
-        alert("خطا در هوش مصنوعی: " + result.error);
+    const result = await res.json();
+    if (result.success) {
+      const resultData = result.data;
+
+      // ذخیره و تفکیک پاسخ فقط در تبِ فعال فعلی
+      if (aiTab === 'dayByDay') {
+        setTourPlanData(resultData.dayByDay?.[0] || resultData.promoText || '');
+      } else if (aiTab === 'packingList') {
+        setConsultData(resultData.packingList?.[0] || resultData.promoText || '');
+      } else if (aiTab === 'promoText') {
+        setPromoData(resultData.promoText || '');
       }
-    } catch (err: any) {
-      alert("خطا در ارتباط: " + err.message);
-    } finally {
-      setIsLoading(false);
+
+      setCustomPrompt(""); // پاک کردن کادر ورودی بعد از موفقیت
+    } else {
+      alert("خطا در هوش مصنوعی: " + result.error);
     }
-  };
+  } catch (err: any) {
+    alert("خطا در ارتباط: " + err.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
   return (
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
       <div className="max-w-7xl mx-auto">
@@ -1622,22 +1635,26 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
   </div>
 
   {/* دکمه کپی متن با یک کلیک */}
-  <button
-    onClick={() => {
-      const textToCopy = 
-        aiTab === 'dayByDay' ? (aiData?.dayByDay?.[0] || '') :
-        aiTab === 'packingList' ? (aiData?.packingList?.[0] || '') :
-        (aiData?.promoText || '');
-      
-      navigator.clipboard.writeText(textToCopy);
-      alert("متن با موفقیت کپی شد! 📋");
-    }}
-    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer"
-  >
-    📋 کپی متن
-  </button>
-</div>
+<button
+  onClick={() => {
+    const textToCopy = 
+      aiTab === 'dayByDay' ? tourPlanData :
+      aiTab === 'packingList' ? consultData :
+      promoData;
+    
+    if (!textToCopy) {
+      alert("متنی برای کپی کردن وجود ندارد!");
+      return;
+    }
 
+    navigator.clipboard.writeText(textToCopy);
+    alert("متن این تب با موفقیت کپی شد! 📋");
+  }}
+  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1 cursor-pointer"
+>
+  📋 کپی متن
+</button>
+</div>
 {/* بدنه نمایش متن */}
 <div className="p-5 overflow-y-auto space-y-4 flex-1">
   {isLoading ? (
