@@ -1690,16 +1690,13 @@ const handleCustomPromptSubmit = async () => {
                   onKeyDown={(e) => e.key === "Enter" && handleCustomPromptSubmit()}
                   className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
                 />
-<button 
-  onClick={(e) => {
-    e.preventDefault();
-    handleCustomPromptSubmit();
-  }}
-  disabled={isLoading}
-  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl disabled:opacity-50"
->
-  {isLoading ? 'در حال تفکر...' : 'اعمال دستور'}
-</button>
+                <button
+                  onClick={handleCustomPromptSubmit}
+                  disabled={isLoading || !customPrompt.trim()}
+                  className="bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-xs font-medium transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  اعمال دستور
+                </button>
               </div>
             </div>
           </>
