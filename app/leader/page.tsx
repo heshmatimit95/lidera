@@ -744,8 +744,9 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
 const handleCustomPromptSubmit = async () => {
   if (!customPrompt.trim()) return;
-  setIsLoading(true);
-  
+
+  setIsLoading(true); // <--- حتماً این سطر باشه تا انیمیشن تفکر ظاهر بشه و باکس خالی نشه
+
   try {
     const res = await fetch("/api/generate-tour", {
       method: "POST",
@@ -758,25 +759,19 @@ const handleCustomPromptSubmit = async () => {
       }),
     });
 
-    const contentType = res.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      throw new Error("خطا در ارتباط با سرور (پاسخ نامعتبر یا 404)");
-    }
-
     const result = await res.json();
     if (result.success) {
       setAiData(result.data);
-      setCustomPrompt("");
+      setCustomPrompt(""); // پاک کردن متن ورودی بعد از موفقیت
     } else {
-      alert("خطا: " + result.error);
+      alert("خطا در هوش مصنوعی: " + result.error);
     }
   } catch (err: any) {
-    alert("ارتباط با هوش مصنوعی برقرار نشد: " + (err.message || 'خطای ناشناخته'));
+    alert("خطا در ارتباط: " + err.message);
   } finally {
-    setIsLoading(false);
+    setIsLoading(false); // <--- در نهایت خاموش میشه
   }
 };
-
   return (
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
       <div className="max-w-7xl mx-auto">
@@ -1603,12 +1598,16 @@ const handleCustomPromptSubmit = async () => {
           </svg>
           <h3 className="text-white font-bold text-base">گزارش و چت هوشمند تور (Gemini AI)</h3>
         </div>
-        <button 
-          onClick={() => setIsAiModalOpen(false)}
-          className="text-zinc-400 hover:text-white transition-colors cursor-pointer"
-        >
-          ✕
-        </button>
+<button 
+  onClick={(e) => {
+    e.preventDefault();
+    handleCustomPromptSubmit();
+  }}
+  disabled={isLoading}
+  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl disabled:opacity-50"
+>
+  {isLoading ? 'در حال تفکر...' : 'اعمال دستور'}
+</button>
       </div>
 
       {/* بدنه اصلی */}
