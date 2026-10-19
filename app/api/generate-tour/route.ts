@@ -11,16 +11,21 @@ export async function POST(req: Request) {
       );
     }
 
-    const { tourName, days, category } = await req.json();
+    const { tourName, days, category, customInstruction } = await req.json();
 
-    const prompt = `یک برنامه سفر ${days || 3} روزه برای تور "${tourName}" در دسته‌بندی "${category || "گردشگری"}" بساز. پاسخ را به‌صورت یک JSON معتبر و بدون هیچ متن اضافی یا مارک‌داون برگردان. فرمت پاسخ:
+    let prompt = `یک برنامه سفر ${days || 3} روزه برای تور "${tourName}" در دسته‌بندی "${category || "گردشگری"}" بساز.`;
+    
+    if (customInstruction) {
+      prompt += ` همچنین این دستور ویژه از طرف تورلیدر را حتماً اعمال کن: "${customInstruction}".`;
+    }
+
+    prompt += ` پاسخ را به‌صورت یک JSON معتبر و بدون هیچ متن اضافی یا مارک‌داون برگردان. فرمت پاسخ:
 {
   "dayByDay": ["روز ۱: ...", "روز ۲: ..."],
   "packingList": ["کفش مناسب", "عینک"],
-  "promoText": "متن تبلیغاتی کوتاه"
+  "promoText": "متن تبلیغاتی جذاب برای اینستاگرام و واتساپ"
 }`;
 
-    // فراخوانی مستقیم API رسمی با مدل gemini-3.8-flash
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
       {
@@ -35,8 +40,7 @@ export async function POST(req: Request) {
     const resultData = await response.json();
 
     if (!response.ok) {
-      console.error('Google API Error:', resultData);
-      throw new Error(resultData.error?.message || 'خطا در فراخوانی مدل جمینی');
+      throw new Error(resultData.error?.message || 'خطا در فراخوانی هوش مصنوعی');
     }
 
     const rawText = resultData.candidates?.[0]?.content?.parts?.[0]?.text || '';

@@ -47,9 +47,12 @@ interface BankCard {
 }
 
 export default function LeaderDashboard() {
-const [loadingAiId, setLoadingAiId] = useState<string | null>(null);
- 
-const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+
+const [aiTab, setAiTab] = useState<"dayByDay" | "packingList" | "promoText">("dayByDay");
+const [customPrompt, setCustomPrompt] = useState("");
+const [selectedTourName, setSelectedTourName] = useState("");
+  const [loadingAiId, setLoadingAiId] = useState<string | null>(null);
+ const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 const [aiData, setAiData] = useState<{ dayByDay: string; packingList: string; promoText: string } | null>(null);
 const [activeTab, setActiveTab] = useState<'program' | 'packing' | 'promo'>('program');
 const [copied, setCopied] = useState(false);
@@ -710,30 +713,56 @@ const handleCopyText = (text: string) => {
 };
   
 const handleGenerateAi = async (tourId: string, tourName: string, days: number = 3, category: string = "طبیعت‌گردی") => {
-  setLoadingAiId(tourId);
+  setSelectedTourName(tourName); // اگر اسم متغیرت متفاوته حتماً چک کن
+  setIsAiModalOpen(true);
+  setIsLoading(true); // اصلاح شده از setAiLoading به setIsLoading
+
   try {
-    const res = await fetch('/api/generate-tour', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tourName, days, category })
+    const res = await fetch("/api/generate-tour", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tourName, days, category }),
     });
-
     const result = await res.json();
-
-    if (result.success && result.data) {
+    if (result.success) {
       setAiData(result.data);
-      setIsAiModalOpen(true);
     } else {
-      console.error("خطا در پاسخ هوش مصنوعی:", result.error);
-      alert("خطا در تولید برنامه توسط هوش مصنوعی. لطفاً دوباره تلاش کنید.");
+      alert("خطا در هوش مصنوعی: " + result.error);
     }
   } catch (err) {
-    console.error("خطا در ارتباط با سرور:", err);
+    alert("خطا در برقراری ارتباط با هوش مصنوعی.");
   } finally {
-    setLoadingAiId(null);
+    setIsLoading(false); // اصلاح شده
   }
 };
 
+const handleCustomPromptSubmit = async () => {
+  if (!customPrompt.trim()) return;
+  setIsLoading(true); // اصلاح شده
+  try {
+    const res = await fetch("/api/generate-tour", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tourName: selectedTourName,
+        days: 3,
+        category: "طبیعت‌گردی",
+        customInstruction: customPrompt,
+      }),
+    });
+    const result = await res.json();
+    if (result.success) {
+      setAiData(result.data);
+      setCustomPrompt("");
+    } else {
+      alert("خطا: " + result.error);
+    }
+  } catch (err) {
+    alert("ارتباط با هوش مصنوعی برقرار نشد.");
+  } finally {
+    setIsLoading(false); // اصلاح شده
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
@@ -1552,171 +1581,201 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     
       </div>
 {/* --- مدال گزارش‌گیری هوش مصنوعی (با قابلیت ویرایش آنلاین) --- */}
-{isAiModalOpen && aiData && (
-  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 dir-rtl">
-    <div className="bg-zinc-900 border border-zinc-800 text-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+{/* --- مدال گزارش‌گیری هوش مصنوعی (با قابلیت ویرایش آنلاین) --- */}
+{/* --- مدال گزارش‌گیری هوش مصنوعی (با قابلیت ویرایش آنلاین) --- */}
+{isAiModalOpen && (
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
+    <div className="bg-[#18181b] border border-purple-500/30 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
       
       {/* هدر مدال */}
-      <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/50">
+      <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-purple-600/20 text-purple-400 rounded-lg">
-            <FaMagic size={18} />
-          </div>
-          <h3 className="font-bold text-base text-zinc-100">گزارش هوشمند برنامه سفر (AI)</h3>
+          <svg viewBox="0 0 24 24" className="w-5 h-5 fill-purple-400 animate-pulse">
+            <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" />
+          </svg>
+          <h3 className="text-white font-bold text-base">گزارش و چت هوشمند تور (Gemini AI)</h3>
         </div>
         <button 
           onClick={() => setIsAiModalOpen(false)}
-          className="text-zinc-400 hover:text-white p-1.5 rounded-lg hover:bg-zinc-800 transition-all"
+          className="text-zinc-400 hover:text-white transition-colors cursor-pointer"
         >
-          <FaTimes size={16} />
+          ✕
         </button>
       </div>
 
-      {/* تب‌های انتخاب گزارش */}
-      <div className="flex border-b border-zinc-800 bg-zinc-900/80 p-2 gap-2 text-xs font-medium">
-        <button
-          onClick={() => setActiveTab('program')}
-          className={`flex-1 py-2 px-3 rounded-xl transition-all ${activeTab === 'program' ? 'bg-purple-600 text-white shadow-lg' : 'text-zinc-400 hover:bg-zinc-800'}`}
-        >
-          📅 برنامه روزانه
-        </button>
-        <button
-          onClick={() => setActiveTab('packing')}
-          className={`flex-1 py-2 px-3 rounded-xl transition-all ${activeTab === 'packing' ? 'bg-purple-600 text-white shadow-lg' : 'text-zinc-400 hover:bg-zinc-800'}`}
-        >
-          🎒 چک‌لیست وسایل
-        </button>
-        <button
-          onClick={() => setActiveTab('promo')}
-          className={`flex-1 py-2 px-3 rounded-xl transition-all ${activeTab === 'promo' ? 'bg-purple-600 text-white shadow-lg' : 'text-zinc-400 hover:bg-zinc-800'}`}
-        >
-          📱 متن اینستاگرام/واتس‌اپ
-        </button>
+      {/* بدنه اصلی */}
+      <div className="p-5 overflow-y-auto space-y-4 flex-1">
+        
+        {/* حالت لودینگ در حال پردازش */}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+            <div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"></div>
+            <div className="text-center space-y-1">
+              <p className="text-purple-300 font-medium text-sm animate-pulse">
+                هوش مصنوعی در حال تنظیم و تحلیل برنامه سفر است...
+              </p>
+              <p className="text-zinc-500 text-xs">لطفاً چند لحظه شکیبا باشید (پردازش اطلاعات تور)</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* تب‌های خروجی */}
+            <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800 text-xs font-medium">
+              <button
+                onClick={() => setAiTab("dayByDay")}
+                className={`flex-1 py-2 rounded-lg transition-all cursor-pointer ${
+                  aiTab === "dayByDay" ? "bg-purple-600 text-white shadow" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                📅 برنامه روزانه
+              </button>
+              <button
+                onClick={() => setAiTab("packingList")}
+                className={`flex-1 py-2 rounded-lg transition-all cursor-pointer ${
+                  aiTab === "packingList" ? "bg-purple-600 text-white shadow" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                🎒 چک‌لیست وسایل
+              </button>
+              <button
+                onClick={() => setAiTab("promoText")}
+                className={`flex-1 py-2 rounded-lg transition-all cursor-pointer ${
+                  aiTab === "promoText" ? "bg-purple-600 text-white shadow" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                📲 متن اینستاگرام / واتساپ
+              </button>
+            </div>
+
+            {/* نمایش محتوا */}
+            <div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-xl text-zinc-200 text-sm leading-relaxed min-h-160px] whitespace-pre-line">
+              {aiTab === "dayByDay" && (
+                Array.isArray(aiData?.dayByDay) 
+                  ? aiData.dayByDay.join("\n\n") 
+                  : aiData?.dayByDay || "برنامه‌ای یافت نشد."
+              )}
+              {aiTab === "packingList" && (
+                Array.isArray(aiData?.packingList)
+                  ? aiData.packingList.map((item: string) => `• ${item}`).join("\n")
+                  : aiData?.packingList || "چک‌لیستی یافت نشد."
+              )}
+              {aiTab === "promoText" && (aiData?.promoText || "متنی یافت نشد.")}
+            </div>
+
+            {/* بخش چت و سفارشی‌سازی هوشمند با لیدر */}
+            <div className="pt-2 border-t border-zinc-800 space-y-2">
+              <label className="text-xs text-purple-300 font-medium block">
+                💬 دستور جدید به هوش مصنوعی (اصلاح یا تغییر برنامه):
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="مثال: درجه سختی را کمتر کن یا تم عکاسی اضافه کن..."
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleCustomPromptSubmit()}
+                  className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
+                />
+                <button
+                  onClick={handleCustomPromptSubmit}
+                  disabled={isLoading || !customPrompt.trim()}
+                  className="bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-xs font-medium transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  اعمال دستور
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* محتوای گزارش با قابلیت ویرایش مستقیم */}
-      <div className="p-4 flex-1 flex flex-col bg-zinc-950/30">
-        <label className="text-[11px] text-zinc-400 mb-2 flex items-center justify-between">
-          <span>✏️ می‌توانید متن زیر را قبل از کپی کردن ویرایش کنید:</span>
-          <span className="text-[10px] text-purple-400">قابلیت ویرایش آنلاین</span>
-        </label>
+      {/* Footer مدال */}
+      <div className="p-4 border-t border-zinc-800 bg-zinc-900/50 flex items-center justify-between">
+        
+        {/* آیکون‌ها و شبکه ارتباطی شکیل */}
+        <div className="flex items-center gap-2 dir-ltr">
+          {/* واتساپ */}
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(
+              aiTab === 'dayByDay' 
+                ? (Array.isArray(aiData?.dayByDay) ? aiData.dayByDay.join('\n\n') : aiData?.dayByDay || '') 
+                : aiTab === 'packingList' 
+                ? (Array.isArray(aiData?.packingList) ? aiData.packingList.join('\n') : aiData?.packingList || '') 
+                : aiData?.promoText || ''
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="واتساپ"
+            className="flex items-center gap-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
+          >
+            <FaWhatsapp size={16} />
+          </a>
 
-        {activeTab === 'program' && (
-          <textarea
-            className="w-full h-56 p-3 rounded-xl bg-zinc-900 text-zinc-100 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm leading-relaxed resize-none font-sans"
-            value={aiData.dayByDay}
-            onChange={(e) => setAiData({ ...aiData, dayByDay: e.target.value })}
-          />
-        )}
+          {/* تلگرام */}
+          <a
+            href={`https://t.me/share/url?url=&text=${encodeURIComponent(
+              aiTab === 'dayByDay' 
+                ? (Array.isArray(aiData?.dayByDay) ? aiData.dayByDay.join('\n\n') : aiData?.dayByDay || '') 
+                : aiTab === 'packingList' 
+                ? (Array.isArray(aiData?.packingList) ? aiData.packingList.join('\n') : aiData?.packingList || '') 
+                : aiData?.promoText || ''
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="تلگرام"
+            className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
+          >
+            <FaTelegramPlane size={16} />
+          </a>
 
-        {activeTab === 'packing' && (
-          <textarea
-            className="w-full h-56 p-3 rounded-xl bg-zinc-900 text-zinc-100 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm leading-relaxed resize-none font-sans"
-            value={aiData.packingList}
-            onChange={(e) => setAiData({ ...aiData, packingList: e.target.value })}
-          />
-        )}
+          {/* روبیکا */}
+          <a
+            href={`rubika://post?text=${encodeURIComponent(
+              aiTab === 'dayByDay' 
+                ? (Array.isArray(aiData?.dayByDay) ? aiData.dayByDay.join('\n\n') : aiData?.dayByDay || '') 
+                : aiTab === 'packingList' 
+                ? (Array.isArray(aiData?.packingList) ? aiData.packingList.join('\n') : aiData?.packingList || '') 
+                : aiData?.promoText || ''
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="ارسال در روبیکا"
+            className="flex items-center justify-center bg-purple-950/40 hover:bg-purple-900/60 text-purple-400 border border-purple-800/50 p-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer"
+          >
+            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.8 13.7c-.4.4-1.1.4-1.5 0l-2.3-2.3-2.3 2.3c-.4.4-1.1.4-1.5 0s-.4-1.1 0-1.5l2.3-2.3-2.3-2.3c-.4-.4-.4-1.1 0-1.5s1.1-.4 1.5 0l2.3 2.3 2.3-2.3c.4-.4 1.1-.4 1.5 0s.4 1.1 0 1.5l-2.3 2.3 2.3 2.3c.4.4.4 1.1 0 1.5z" />
+            </svg>
+          </a>
 
-        {activeTab === 'promo' && (
-          <textarea
-            className="w-full h-56 p-3 rounded-xl bg-zinc-900 text-zinc-100 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm leading-relaxed resize-none font-sans"
-            value={aiData.promoText}
-            onChange={(e) => setAiData({ ...aiData, promoText: e.target.value })}
-          />
-        )}
+        {/* اینستاگرام (کپی متن) */}
+          <button
+            onClick={() => handleCopyText(
+              aiTab === 'dayByDay' 
+                ? (Array.isArray(aiData?.dayByDay) ? aiData.dayByDay.join('\n\n') : aiData?.dayByDay || '') 
+                : aiTab === 'packingList' 
+                ? (Array.isArray(aiData?.packingList) ? aiData.packingList.join('\n') : aiData?.packingList || '') 
+                : aiData?.promoText || ''
+            )}
+            title="کپی متن جهت پیست در اینستاگرام"
+            className="flex items-center gap-1.5 bg-pink-950/40 hover:bg-pink-900/60 text-pink-400 border border-pink-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
+          >
+            <FaInstagram size={16} />
+          </button>
+        </div>
+{/* دکمه بستن */}
+        <button
+          onClick={() => setIsAiModalOpen(false)}
+          className="bg-zinc-800/80 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-700/50 px-4 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer"
+        >
+          بستن
+        </button>
+
       </div>
-
-{/* فوتر و دکمه‌های شکیل و تجاری ارسال/کپی */}
-<div className="p-4 border-t border-zinc-800 bg-zinc-950/60 flex flex-wrap items-center justify-between gap-3">
-  
-  {/* دکمه کپی متن اصلی */}
-  <button
-    onClick={() => handleCopyText(
-      activeTab === 'program' ? aiData.dayByDay :
-      activeTab === 'packing' ? aiData.packingList : aiData.promoText
-    )}
-    className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700/60 px-4 py-2.5 rounded-xl text-xs font-medium transition-all active:scale-95 shadow-sm"
-  >
-    {copied ? <FaCheck size={14} className="text-emerald-400" /> : <FaCopy size={14} className="text-zinc-400" />}
-    <span>{copied ? "کپی شد" : "کپی متن"}</span>
-  </button>
-
-  {/* آیکون‌ها و شبکه ارتباطی شکیل */}
-  <div className="flex items-center gap-2 dir-ltr">
-    
-    {/* واتساپ */}
-    <a
-      href={`https://wa.me/?text=${encodeURIComponent(
-        activeTab === 'program' ? aiData.dayByDay :
-        activeTab === 'packing' ? aiData.packingList : aiData.promoText
-      )}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      title="واتساپ"
-      className="flex items-center gap-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
-    >
-      <FaWhatsapp size={16} />
-     
-    </a>
-
-    {/* تلگرام */}
-    <a
-      href={`https://t.me/share/url?url=&text=${encodeURIComponent(
-        activeTab === 'program' ? aiData.dayByDay :
-        activeTab === 'packing' ? aiData.packingList : aiData.promoText
-      )}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      title="تلگرام"
-      className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
-    >
-      <FaTelegramPlane size={16} />
-    
-    </a>
-{/* روبیکا (آیکون واقعی و اصلی روبیکا) */}
-  <a
-    href={`rubika://post?text=${encodeURIComponent(
-      activeTab === 'program' ? aiData.dayByDay :
-      activeTab === 'packing' ? aiData.packingList : aiData.promoText
-    )}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    title="ارسال در روبیکا"
-    className="flex items-center justify-center bg-purple-950/40 hover:bg-purple-900/60 text-purple-400 border border-purple-800/50 p-2.5 rounded-xl transition-all shadow-sm active:scale-95"
-  >
-    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-      <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.8 13.7c-.4.4-1.1.4-1.5 0l-2.3-2.3-2.3 2.3c-.4.4-1.1.4-1.5 0s-.4-1.1 0-1.5l2.3-2.3-2.3-2.3c-.4-.4-.4-1.1 0-1.5s1.1-.4 1.5 0l2.3 2.3 2.3-2.3c.4-.4 1.1-.4 1.5 0s.4 1.1 0 1.5l-2.3 2.3 2.3 2.3c.4.4.4 1.1 0 1.5z" />
-    </svg>
-  </a>
-
-    {/* اینستاگرام */}
-    <button
-      onClick={() => handleCopyText(
-        activeTab === 'program' ? aiData.dayByDay :
-        activeTab === 'packing' ? aiData.packingList : aiData.promoText
-      )}
-      title="کپی متن جهت پیست در اینستاگرام"
-      className="flex items-center gap-1.5 bg-pink-950/40 hover:bg-pink-900/60 text-pink-400 border border-pink-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
-    >
-      <FaInstagram size={16} />
-      
-    </button>
-  </div>
-
-  {/* دکمه بستن */}
-  <button
-    onClick={() => setIsAiModalOpen(false)}
-    className="bg-zinc-800/80 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-700/50 px-4 py-2.5 rounded-xl text-xs font-medium transition-all"
-  >
-    بستن
-  </button>
-</div>
 
     </div>
   </div>
 )}
 
     </div>
-
   );
 }
