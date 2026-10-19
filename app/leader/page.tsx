@@ -47,7 +47,7 @@ interface BankCard {
 }
 
 export default function LeaderDashboard() {
-
+const [loadingMessage, setLoadingMessage] = useState('در حال ارتباط با هوش مصنوعی...');
 const [aiTab, setAiTab] = useState<"dayByDay" | "packingList" | "promoText">("dayByDay");
 const [customPrompt, setCustomPrompt] = useState("");
 const [selectedTourName, setSelectedTourName] = useState("");
@@ -1615,16 +1615,18 @@ const handleCustomPromptSubmit = async () => {
       <div className="p-5 overflow-y-auto space-y-4 flex-1">
         
         {/* حالت لودینگ در حال پردازش */}
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"></div>
-            <div className="text-center space-y-1">
-              <p className="text-purple-300 font-medium text-sm animate-pulse">
-                هوش مصنوعی در حال تنظیم و تحلیل برنامه سفر است...
-              </p>
-              <p className="text-zinc-500 text-xs">لطفاً چند لحظه شکیبا باشید (پردازش اطلاعات تور)</p>
-            </div>
-          </div>
+{isLoading ? (
+  /* این همون حالت لودینگ و مربع‌های متحرک حرفه‌ایه که خواسته بودی */
+  <div className="flex flex-col items-center justify-center p-12 space-y-4">
+    <div className="flex space-x-2 space-x-reverse">
+      <div className="w-4 h-4 bg-purple-500 rounded-md animate-bounce"></div>
+      <div className="w-4 h-4 bg-purple-400 rounded-md animate-bounce [animation-delay:-.2s]"></div>
+      <div className="w-4 h-4 bg-purple-300 rounded-md animate-bounce [animation-delay:-.4s]"></div>
+    </div>
+    <p className="text-sm text-purple-200 animate-pulse font-medium">
+      در حال جستجو و پردازش هوش مصنوعی...
+    </p>
+  </div>
         ) : (
           <>
             {/* تب‌های خروجی */}
@@ -1656,20 +1658,34 @@ const handleCustomPromptSubmit = async () => {
             </div>
 
             {/* نمایش محتوا */}
-            <div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-xl text-zinc-200 text-sm leading-relaxed min-h-160px] whitespace-pre-line">
-              {aiTab === "dayByDay" && (
-                Array.isArray(aiData?.dayByDay) 
-                  ? aiData.dayByDay.join("\n\n") 
-                  : aiData?.dayByDay || "برنامه‌ای یافت نشد."
-              )}
-              {aiTab === "packingList" && (
-                Array.isArray(aiData?.packingList)
-                  ? aiData.packingList.map((item: string) => `• ${item}`).join("\n")
-                  : aiData?.packingList || "چک‌لیستی یافت نشد."
-              )}
-              {aiTab === "promoText" && (aiData?.promoText || "متنی یافت نشد.")}
-            </div>
+{/* بخش نمایش محتوا یا حالت لودینگ هوش مصنوعی */}
+{isLoading ? (
+  <div className="flex flex-col items-center justify-center p-12 space-y-4 my-auto">
+    <div className="flex space-x-2 space-x-reverse">
+      <div className="w-4 h-4 bg-purple-500 rounded-md animate-bounce"></div>
+      <div className="w-4 h-4 bg-purple-400 rounded-md animate-bounce [animation-delay:-.2s]"></div>
+      <div className="w-4 h-4 bg-purple-300 rounded-md animate-bounce [animation-delay:-.4s]"></div>
+    </div>
+    <p className="text-sm text-purple-200 animate-pulse font-medium">
+      در حال جستجو و پردازش هوش مصنوعی...
+    </p>
+  </div>
+) : (
 
+  <div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-xl text-zinc-200 text-sm leading-relaxed min-h-160px whitespace-pre-line">
+    {aiTab === "dayByDay" && (
+      Array.isArray(aiData?.dayByDay)
+        ? aiData.dayByDay.join("\n\n")
+        : aiData?.dayByDay || "برنامه‌ای یافت نشد."
+    )}
+    {aiTab === "packingList" && (
+      Array.isArray(aiData?.packingList)
+        ? aiData.packingList.map((item: string) => `• ${item}`).join("\n")
+        : aiData?.packingList || "چکلیستی یافت نشد."
+    )}
+    {aiTab === "promoText" && (aiData?.promoText || "متنی یافت نشد.")}
+  </div>
+)}
             {/* بخش چت و سفارشی‌سازی هوشمند با لیدر */}
             <div className="pt-2 border-t border-zinc-800 space-y-2">
               <label className="text-xs text-purple-300 font-medium block">
