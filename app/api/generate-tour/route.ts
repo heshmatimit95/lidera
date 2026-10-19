@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function POST(req: Request) {
   try {
@@ -6,7 +7,7 @@ export async function POST(req: Request) {
 
     if (!apiKey) {
       return NextResponse.json(
-        { success: false, error: 'متغیر GEMINI_API_KEY تنظیم نشده است' },
+        { success: false, error: 'کلید GEMINI_API_KEY تنظیم نشده است' },
         { status: 500 }
       );
     }
@@ -14,59 +15,29 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { tourName, days, category, customInstruction } = body;
 
-    let prompt = `یک برنامه سفر کوتاه و جالب ${days || 3} روزه برای تور "${tourName || 'طبیعت‌گردی'}" در دسته "${category || 'عمومی'}".`;
+    // استفاده از کتابخانه رسمی گوگل
+    const genAI = new GoogleGenerativeAI(apiKey);
+    
+    // استفاده از مدل gemini-pro که روی تمام کلیدهای قدیمی و جدید فعال است
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+
+    let prompt = `برنامه سفر ${days || 3} روزه برای تور "${tourName || 'طبیعت‌گردی'}" در دسته "${category || 'عمومی'}".`;
     
     if (customInstruction) {
-      prompt += ` دستور ویژه لیدر: "${customInstruction}".`;
+      prompt += ` دستور ویژه: "${customInstruction}".`;
     }
 
-    prompt += ` لطفاً پاسخ را دقیقاً در قالب فرمت JSON زیر برگردان (بدون هیچ کد یا متن اضافی):
+    prompt += ` پاسخ را فقط در قالب یک JSON معتبر بدون هیچ مارک‌داونی بدهید:
 {
-  "dayByDay": ["روز ۱: توضیحات کوتاه", "روز ۲: توضیحات کوتاه"],
-  "packingList": ["وسایل ضروری ۱", "وسایل ضروری ۲"],
-  "promoText": "متن کوتاه جذاب برای اینستاگرام"
+  "dayByDay": ["روز ۱: توضیحات", "روز ۲: توضیحات"],
+  "packingList": ["مورد ۱", "مورد ۲"],
+  "promoText": "متن تبلیغاتی"
 }`;
 
-    // لیست مدل‌های معتبر برای امتحان کردن به ترتیب اولویت
-    const modelsToTry = ['gemini-2.0-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash'];
-    let response: Response | null = null;
-    let lastErrorText = '';
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const rawText = response.text();
 
-    for (const modelName of modelsToTry) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-      
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1000,
-          }
-        }),
-      });
-
-      if (res.ok) {
-        response = res;
-        break;
-      } else {
-        lastErrorText = await res.text();
-      }
-    }
-
-    if (!response) {
-      console.error('Gemini API Error All Models Failed:', lastErrorText);
-      return NextResponse.json(
-        { success: false, error: 'عدم دسترسی به مدل‌های جمینی: ' + lastErrorText },
-        { status: 400 }
-      );
-    }
-
-    const resultData = await response.json();
-    const rawText = resultData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    
-    // پاکسازی تگ‌های مارک‌داون
     const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
     
     let parsedData;
@@ -74,18 +45,18 @@ export async function POST(req: Request) {
       parsedData = JSON.parse(cleanJson);
     } catch (e) {
       parsedData = {
-        dayByDay: [cleanJson],
-        packingList: ["وسایل عمومی سفر"],
-        promoText: "برنامه سفر تور " + (tourName || '')
+        dayByDay: [rawText],
+        packingList: ["لوازم عمومی سفر"],
+        promoText: "تور فوق‌العاده " + (tourName || '')
       };
     }
 
     return NextResponse.json({ success: true, data: parsedData });
 
   } catch (error: any) {
-    console.error('Server Route Error:', error);
+    console.error('API Error:', error);
     return NextResponse.json(
-      { success: false, error: error?.message || 'خطای داخلی سرور' },
+      { success: false, error: error?.message || 'خطای ارتباط با هوش مصنوعی' },
       { status: 500 }
     );
   }
