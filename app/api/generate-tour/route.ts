@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     // راه‌اندازی با کتابخانه رسمی گوگل
     const genAI = new GoogleGenerativeAI(apiKey);
     // استفاده از مدل استاندارد و پایدار
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
     let prompt = `برنامه سفر ${days || 3} روزه برای تور "${tourName || 'طبیعت‌گردی'}" در دسته "${category || 'عمومی'}".`;
     if (customInstruction) {
