@@ -27,7 +27,6 @@ export async function POST(req: Request) {
   "promoText": "متن کوتاه تبلیغاتی"
 }`;
 
-    // استفاده از endpoint معتبر جمینی
 const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
