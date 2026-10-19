@@ -760,16 +760,14 @@ const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
 
     const result = await res.json();
     if (result.success) {
-      const resultData = result.data;
-
-      // ذخیره و تفکیک پاسخ فقط در تبِ فعال فعلی
-      if (aiTab === 'dayByDay') {
-        setTourPlanData(resultData.dayByDay?.[0] || resultData.promoText || '');
-      } else if (aiTab === 'packingList') {
-        setConsultData(resultData.packingList?.[0] || resultData.promoText || '');
-      } else if (aiTab === 'promoText') {
-        setPromoData(resultData.promoText || '');
-      }
+const resultData = result.data;
+if (aiTab === 'dayByDay') {
+  setTourPlanData(resultData.dayByDay?.[0] || resultData.promoText || '');
+} else if (aiTab === 'packingList') {
+  setConsultData(resultData.packingList?.[0] || resultData.promoText || '');
+} else if (aiTab === 'promoText') {
+  setPromoData(resultData.promoText || '');
+}
 
       setCustomPrompt(""); // پاک کردن کادر ورودی بعد از موفقیت
     } else {
@@ -1604,7 +1602,7 @@ const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
       
       {/* هدر مودال */}
       <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
-        <h3 className="text-white font-bold text-base">گزارش و چت هوشمند تور (Gemini AI)</h3>
+        <h3 className="text-white font-bold text-base">گزارش و چت هوشمند تور )</h3>
         <button
           onClick={() => setIsAiModalOpen(false)}
           className="text-zinc-400 hover:text-white transition-colors cursor-pointer text-lg font-bold"
@@ -1720,15 +1718,15 @@ const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
       <div className="p-4 border-t border-zinc-800 bg-zinc-900/50 flex items-center justify-between">
         
         {/* آیکون‌ها و شبکه ارتباطی شکیل */}
-        <div className="flex items-center gap-2 dir-ltr">
+<div className="flex items-center gap-2 dir-ltr">
           {/* واتساپ */}
           <a
             href={`https://wa.me/?text=${encodeURIComponent(
               aiTab === 'dayByDay' 
-                ? (Array.isArray(aiData?.dayByDay) ? aiData.dayByDay.join('\n\n') : aiData?.dayByDay || '') 
+                ? (tourPlanData || '') 
                 : aiTab === 'packingList' 
-                ? (Array.isArray(aiData?.packingList) ? aiData.packingList.join('\n') : aiData?.packingList || '') 
-                : aiData?.promoText || ''
+                ? (consultData || '') 
+                : (promoData || '')
             )}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -1742,10 +1740,10 @@ const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
           <a
             href={`https://t.me/share/url?url=&text=${encodeURIComponent(
               aiTab === 'dayByDay' 
-                ? (Array.isArray(aiData?.dayByDay) ? aiData.dayByDay.join('\n\n') : aiData?.dayByDay || '') 
+                ? (tourPlanData || '') 
                 : aiTab === 'packingList' 
-                ? (Array.isArray(aiData?.packingList) ? aiData.packingList.join('\n') : aiData?.packingList || '') 
-                : aiData?.promoText || ''
+                ? (consultData || '') 
+                : (promoData || '')
             )}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -1759,10 +1757,10 @@ const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
           <a
             href={`rubika://post?text=${encodeURIComponent(
               aiTab === 'dayByDay' 
-                ? (Array.isArray(aiData?.dayByDay) ? aiData.dayByDay.join('\n\n') : aiData?.dayByDay || '') 
+                ? (tourPlanData || '') 
                 : aiTab === 'packingList' 
-                ? (Array.isArray(aiData?.packingList) ? aiData.packingList.join('\n') : aiData?.packingList || '') 
-                : aiData?.promoText || ''
+                ? (consultData || '') 
+                : (promoData || '')
             )}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -1774,20 +1772,27 @@ const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
             </svg>
           </a>
 
-        {/* اینستاگرام (کپی متن) */}
+          {/* اینستاگرام (کپی متن) */}
           <button
-            onClick={() => handleCopyText(
-              aiTab === 'dayByDay' 
-                ? (Array.isArray(aiData?.dayByDay) ? aiData.dayByDay.join('\n\n') : aiData?.dayByDay || '') 
-                : aiTab === 'packingList' 
-                ? (Array.isArray(aiData?.packingList) ? aiData.packingList.join('\n') : aiData?.packingList || '') 
-                : aiData?.promoText || ''
-            )}
+            onClick={() => {
+              const textToCopy = 
+                aiTab === 'dayByDay' ? tourPlanData : 
+                aiTab === 'packingList' ? consultData : 
+                promoData;
+
+              if (!textToCopy) {
+                alert("متنی برای کپی در این تب وجود ندارد!");
+                return;
+              }
+              navigator.clipboard.writeText(textToCopy);
+              alert("متن این تب کپی شد! 📸");
+            }}
             title="کپی متن جهت پیست در اینستاگرام"
             className="flex items-center gap-1.5 bg-pink-950/40 hover:bg-pink-900/60 text-pink-400 border border-pink-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
           >
             <FaInstagram size={16} />
           </button>
+        
         </div>
 {/* دکمه بستن */}
         <button
