@@ -729,12 +729,22 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     const result = await res.json();
     if (result.success) {
       const data = result.data;
-      // تفکیک دقیق داده‌ها برای برنامه‌سفر و کپشن اینستاگرام
-      setTourPlanData(data.dayByDay?.[0] || data.tourPlan || '');
-      setPromoData(data.caption || data.promoText || 'کپشن اختصاصی این تور به زودی...');
-      setConsultData("سلام! من دستیار هوشمند این تور هستم. هر سوالی درباره تجهیزات، مسکات، یا راهنمایی‌های سفر داری بپرس تا راهنماییت کنم.");
+
+      // ۱. برنامه سفر (تب اول)
+      const itinerary = data.dayByDay?.[0] || data.tourPlan || data.dayByDay || 'برنامه سفر آماده شد.';
+      setTourPlanData(itinerary);
+
+      // ۲. کپشن اینستاگرام (تب سوم - عدم تکرار متن برنامه سفر)
+      const instagramCaption = data.caption || 
+        `📸 **کپشن اینستاگرام تور ${tourName}**\n\nاماده‌ای برای یک سفر بی‌نظیر ${days} روزه به ${tourName}؟ 🔥\n\n✨ **ویژگی‌های این سفر:**\n- برنامه گشت کامل و حرفه‌ای\n- اقامتگاه و لیدر مجرب\n- عکاسی و خاطره‌سازی در طبیعت\n\n📌 **برای ثبت‌نام و دریافت اطلاعات بیشتر دایرکت پیام بدید!**\n\n#تور #${tourName.replace(/\s+/g, '_')} #گردشگری #سفر_گروهی`;
+
+      setPromoData(instagramCaption);
+
+      // ۳. تب مشاوره و چت (تب دوم)
+      setConsultData("سلام! من دستیار هوشمند این تور هستم. هر سوالی درباره تجهیزات، شرایط سفر یا نکات ایمنی داری بپرس تا راهنماییت کنم.");
+
     } else {
-      alert("خطا در هوش مصنوعی: " + result.error);
+      alert("خطا در دریافت اطلاعات: " + result.error);
     }
   } catch (err: any) {
     alert("خطا در ارتباط: " + err.message);
@@ -797,7 +807,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     }
   };
 
-  
+
   return (
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
       <div className="max-w-7xl mx-auto">
@@ -847,7 +857,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
         {/* بخش تنظیمات مالی و کارت‌های بانکی لیدر */}
         <div className="mb-6 bg-[#1e1e1e] p-5 rounded-2xl border-2 border-[#E5C060] shadow-xl space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+          <div className="flex items-center justify-between pb-3 border-b border-[#F9704E]">
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
               <FaCreditCard className="text-[#F9704E]" /> تنظیمات مالی و شماره کارت‌ها 
             </h2>
@@ -866,7 +876,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
               <select 
                 value={paymentMethod} 
                 onChange={(e) => setPaymentMethod(e.target.value as any)}
-                className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-[#F9704E]"
+                className="w-full bg-zinc-900 border border-[#F9704E] p-3 rounded-xl text-xs text-white focus:outline-none focus:border-[#F9704E]"
               >
                 <option value="card">فقط کارت به کارت</option>
                 <option value="gateway">فقط درگاه آنلاین</option>
@@ -880,7 +890,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
               <div className="flex items-center justify-between">
                 <span className="text-xs text-zinc-400">مدیریت شماره کارت‌ها (حداکثر ۴ کارت):</span>
                 {leaderCards.length < 4 && (
-                  <button type="button" onClick={handleAddCard} className="bg-zinc-900 hover:bg-zinc-800 text-[#F9704E] border border-zinc-800 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer">
+                  <button type="button" onClick={handleAddCard} className="bg-zinc-900 hover:bg-zinc-800 text-[#F9704E] border border-[#F9704E] px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer">
                     <FaPlus size={10} /> افزودن کارت جدید
                   </button>
                 )}
@@ -888,7 +898,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {leaderCards.map((card, idx) => (
-                  <div key={card.id || idx} className="bg-zinc-900 p-3 rounded-xl border border-zinc-800 space-y-2.5">
+                  <div key={card.id || idx} className="bg-zinc-900 p-3 rounded-xl border border-[#F9704E] space-y-2.5">
                     <div className="flex justify-between items-center">
                       <span className="text-[11px] font-bold text-zinc-400">کارت شماره {idx + 1}</span>
                       {leaderCards.length > 1 && (
@@ -904,7 +914,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                         placeholder="شماره کارت (۱۶ رقمی)" 
                         value={card.cardNumber} 
                         onChange={(e) => handleCardChange(idx, 'cardNumber', e.target.value.replace(/[^0-9]/g, ''))}
-                        className="bg-zinc-800 border border-zinc-700 p-2.5 rounded-lg text-xs text-left font-mono text-white placeholder-zinc-500"
+                        className="bg-zinc-800 border border-[#F9704E] p-2.5 rounded-lg text-xs text-left font-mono text-white placeholder-zinc-500"
                         style={{ direction: 'ltr' }}
                       />
                       <input 
@@ -912,7 +922,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                         placeholder="نام بانک (مثلا: پاسارگاد)" 
                         value={card.bankName} 
                         onChange={(e) => handleCardChange(idx, 'bankName', e.target.value)}
-                        className="bg-zinc-800 border border-zinc-700 p-2.5 rounded-lg text-xs text-white placeholder-zinc-500"
+                        className="bg-zinc-800 border [#F9704E] p-2.5 rounded-lg text-xs text-white placeholder-zinc-500"
                       />
                     </div>
                     <input 
@@ -920,7 +930,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                       placeholder="نام صاحب کارت (اختیاری)" 
                       value={card.cardHolder} 
                       onChange={(e) => handleCardChange(idx, 'cardHolder', e.target.value)}
-                      className="w-full bg-zinc-800 border border-zinc-700 p-2 rounded-lg text-xs text-white placeholder-zinc-500"
+                      className="w-full bg-zinc-800 border border-[#F9704E] p-2 rounded-lg text-xs text-white placeholder-zinc-500"
                     />
                   </div>
                 ))}
@@ -934,7 +944,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
           <div className="flex flex-wrap items-center justify-start gap-3 w-full md:w-auto">
             <div className="flex items-center gap-2">
               <FaFilter className="text-zinc-500 text-xs" />
-              <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }} className="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-300 focus:outline-none cursor-pointer">
+              <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }} className="bg-zinc-900 border border-[#F9704E] rounded-xl px-3 py-2 text-xs text-zinc-300 focus:outline-none cursor-pointer">
                 <option value="all">همه وضعیت‌ها</option>
                 <option value="پرداخت شده">پرداخت شده</option>
                 <option value="بیعانه">بیعانه</option>
@@ -1011,7 +1021,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                           {p.insurance ? (
                             <span className="bg-emerald-950/50 text-emerald-400 border border-emerald-900/40 px-2 py-0.5 rounded-md text-[10px]">دارد</span>
                           ) : (
-                            <span className="bg-zinc-950/50 text-zinc-500 border border-zinc-800 px-2 py-0.5 rounded-md text-[10px]">ندارد</span>
+                            <span className="bg-zinc-950/50 text-zinc-500 border border-[#F9704E] px-2 py-0.5 rounded-md text-[10px]">ندارد</span>
                           )}
                         </td>
                         <td className="p-3 sm:p-4 text-center">
@@ -1019,7 +1029,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                             <select 
                               value={p.paymentStatus} 
                               onChange={(e) => handleInlineStatusChange(p.id, e.target.value)}
-                              className="bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer"
+                              className="bg-zinc-900 border border-[#F9704E] rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer"
                             >
                               <option value="پرداخت شده">پرداخت شده</option>
                               <option value="بیعانه">بیعانه</option>
@@ -1811,7 +1821,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 {/* دکمه بستن */}
         <button
           onClick={() => setIsAiModalOpen(false)}
-          className="bg-[#F9704E] hover:bg-[#F9704E] text-zinc-200 hover:text-zinc-200 border border-zinc-700/50 px-4 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer"
+          className="bg-[#F9704E] hover:bg-[#F9704E] text-zinc-900 hover:text-zinc-900 border border-zinc-700/50 px-4 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer"
         >
           بستن
         </button>
@@ -1821,29 +1831,6 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     </div>
   </div>
 )}
-
-
-         {/* بخش چت و دستور جدید */}
-            <div className="p-4 border-t border-zinc-800 bg-zinc-900/50">
-              <form onSubmit={handleCustomPromptSubmit} className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="...هر سوالی داری میتونی بپرسی"
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  disabled={isLoading}
-                  className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
-                />
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer"
-                >
-                  {isLoading ? "در حال تفکر..." : "پرسیدن از هوش مصنوعی"}
-                </button>
-              </form>
-            </div>
-
     </div>
   );
 }
