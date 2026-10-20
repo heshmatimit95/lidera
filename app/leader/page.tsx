@@ -729,10 +729,10 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     const result = await res.json();
     if (result.success) {
       const data = result.data;
-      // پر کردن استیت‌های مستقل برای هر تب به محض کلیک روی تور
-      setTourPlanData(data.dayByDay?.[0] || data.promoText || '');
-      setPromoData(data.promoText || '');
-      setConsultData("می‌توانید سوالات آزاد، نکات ایمنی یا راهنمایی‌های مربوط به این تور و هچیز دیگر را از اینجا بپرسید.");
+      // تفکیک دقیق داده‌ها برای برنامه‌سفر و کپشن اینستاگرام
+      setTourPlanData(data.dayByDay?.[0] || data.tourPlan || '');
+      setPromoData(data.caption || data.promoText || 'کپشن اختصاصی این تور به زودی...');
+      setConsultData("سلام! من دستیار هوشمند این تور هستم. هر سوالی درباره تجهیزات، مسکات، یا راهنمایی‌های سفر داری بپرس تا راهنماییت کنم.");
     } else {
       alert("خطا در هوش مصنوعی: " + result.error);
     }
@@ -744,47 +744,49 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 };
 
   // تابع ارسال دستور جدید (بدون بستن مودال و با نمایش انیمیشن تفکر)
-const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
-  if (e) e.preventDefault();
-  if (!customPrompt.trim()) return;
+// تابع ارسال دستور جدید (بدون بستن مودال و با نمایش انیمیشن تفکر)
+  const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!customPrompt.trim()) return;
 
-  setIsLoading(true);
+    setIsLoading(true);
 
-  try {
-    const res = await fetch("/api/generate-tour", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        tourName: selectedTourName,
-        days: 3,
-        category: "طبیعت‌گردی",
-        customInstruction: customPrompt,
-      }),
-    });
+    try {
+      const res = await fetch("/api/generate-tour", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tourName: selectedTourName,
+          days: 3,
+          category: "طبیعت‌گردی",
+          customInstruction: customPrompt,
+        }),
+      });
 
-    const result = await res.json();
-    if (result.success) {
-const resultData = result.data;
-if (aiTab === 'dayByDay') {
-        setTourPlanData(resultData.dayByDay?.[0] || resultData.promoText || '');
-      } else if (aiTab === 'packingList') {
-        // اگر جواب مشاوره در هر کدوم از فیلدها بود، به زور و با موفقیت نمایشش میده
-        const consultAnswer = resultData.consult || resultData.packingList?.[0] || resultData.promoText || resultData.dayByDay?.[0] || "پاسخی دریافت شد.";
-        setConsultData(consultAnswer);
-      } else if (aiTab === 'promoText') {
-        setPromoData(resultData.promoText || '');
+      const result = await res.json();
+      if (result.success) {
+        const rd = result.data;
+
+        // هدایت هوشمند پاسخ به تب فعالِ کاربر
+        if (aiTab === 'dayByDay') {
+          setTourPlanData(rd.dayByDay?.[0] || rd.tourPlan || rd.promoText || '');
+        } else if (aiTab === 'packingList') {
+          const aiAnswer = rd.consult || rd.answer || rd.packingList?.[0] || rd.promoText || rd.dayByDay?.[0] || "پاسخ دریافت شد.";
+          setConsultData(aiAnswer);
+        } else if (aiTab === 'promoText') {
+          setPromoData(rd.caption || rd.promoText || '');
+        }
+
+        setCustomPrompt(""); 
+      } else {
+        alert("خطا در هوش مصنوعی: " + result.error);
       }
-      setCustomPrompt(""); // پاک کردن کادر ورودی بعد از موفقیت
-    } else {
-      alert("خطا در هوش مصنوعی: " + result.error);
+    } catch (err: any) {
+      alert("خطا در ارتباط: " + err.message);
+    } finally {
+      setIsLoading(false);
     }
-  } catch (err: any) {
-    alert("خطا در ارتباط: " + err.message);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
   return (
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
       <div className="max-w-7xl mx-auto">
