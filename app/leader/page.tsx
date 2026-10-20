@@ -762,13 +762,14 @@ const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
     if (result.success) {
 const resultData = result.data;
 if (aiTab === 'dayByDay') {
-  setTourPlanData(resultData.dayByDay?.[0] || resultData.promoText || '');
-} else if (aiTab === 'packingList') {
-  setConsultData(resultData.packingList?.[0] || resultData.promoText || '');
-} else if (aiTab === 'promoText') {
-  setPromoData(resultData.promoText || '');
-}
-
+        setTourPlanData(resultData.dayByDay?.[0] || resultData.promoText || '');
+      } else if (aiTab === 'packingList') {
+        // اگر جواب مشاوره در هر کدوم از فیلدها بود، به زور و با موفقیت نمایشش میده
+        const consultAnswer = resultData.consult || resultData.packingList?.[0] || resultData.promoText || resultData.dayByDay?.[0] || "پاسخی دریافت شد.";
+        setConsultData(consultAnswer);
+      } else if (aiTab === 'promoText') {
+        setPromoData(resultData.promoText || '');
+      }
       setCustomPrompt(""); // پاک کردن کادر ورودی بعد از موفقیت
     } else {
       alert("خطا در هوش مصنوعی: " + result.error);
@@ -1591,10 +1592,7 @@ if (aiTab === 'dayByDay') {
         )}
     
       </div>
-{/* --- مدال گزارش‌گیری هوش مصنوعی (با قابلیت ویرایش آنلاین) --- */}
-{/* --- مدال گزارش‌گیری هوش مصنوعی (با قابلیت ویرایش آنلاین) --- */}
-{/* --- مدال گزارش‌گیری هوش مصنوعی (با قابلیت ویرایش آنلاین) --- */}
-{/* مودال هوش مصنوعی */}
+
 {/* مودال هوش مصنوعی */}
 {isAiModalOpen && (
   <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
@@ -1698,21 +1696,19 @@ if (aiTab === 'dayByDay') {
             }
             className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
           />
-          <button
+<button
             type="submit"
             disabled={isLoading}
-            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl text-xs font-medium transition-colors cursor-pointer shrink-0"
+            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-3 sm:px-4 py-2.5 rounded-xl text-xs font-medium transition-colors cursor-pointer shrink-0 whitespace-nowrap"
           >
             {isLoading ? "در حال تفکر..." : (
-              aiTab === 'dayByDay' ? "اصلاح برنامه سفر" :
+              aiTab === 'dayByDay' ? "اصلاح برنامه" :
               aiTab === 'packingList' ? "پرسش از هوش مصنوعی" :
-              "تولید کپشن اینستاگرام"
+              "تولید کپشن"
             )}
           </button>
         </form>
       </div>
-
-
 
       {/* Footer مدال */}
       <div className="p-4 border-t border-zinc-800 bg-zinc-900/50 flex items-center justify-between">
@@ -1773,25 +1769,26 @@ if (aiTab === 'dayByDay') {
           </a>
 
           {/* اینستاگرام (کپی متن) */}
-          <button
-            onClick={() => {
-              const textToCopy = 
-                aiTab === 'dayByDay' ? tourPlanData : 
-                aiTab === 'packingList' ? consultData : 
-                promoData;
+{/* اینستاگرام (کپی متن) */}
+        <button
+          onClick={() => {
+            const textToCopy =
+              aiTab === 'dayByDay' ? tourPlanData :
+              aiTab === 'packingList' ? consultData :
+              promoData;
 
-              if (!textToCopy) {
-                alert("متنی برای کپی در این تب وجود ندارد!");
-                return;
-              }
-              navigator.clipboard.writeText(textToCopy);
-              alert("متن این تب کپی شد! 📸");
-            }}
-            title="کپی متن جهت پیست در اینستاگرام"
-            className="flex items-center gap-1.5 bg-pink-950/40 hover:bg-pink-900/60 text-pink-400 border border-pink-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
-          >
-            <FaInstagram size={16} />
-          </button>
+            if (!textToCopy) {
+              alert("متنی برای کپی در این تب وجود ندارد!");
+              return;
+            }
+            navigator.clipboard.writeText(textToCopy);
+            alert("متن این تب با موفقیت کپی شد! 📸");
+          }}
+          title="کپی متن جهت پیست در اینستاگرام"
+          className="flex items-center gap-1.5 bg-pink-950/40 hover:bg-pink-900/60 text-pink-400 border border-pink-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
+        >
+          <FaInstagram size={16} />
+        </button>
         
         </div>
 {/* دکمه بستن */}
