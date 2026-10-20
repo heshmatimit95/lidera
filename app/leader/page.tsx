@@ -922,7 +922,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                         placeholder="نام بانک (مثلا: پاسارگاد)" 
                         value={card.bankName} 
                         onChange={(e) => handleCardChange(idx, 'bankName', e.target.value)}
-                        className="bg-zinc-800 border [#F9704E] p-2.5 rounded-lg text-xs text-white placeholder-zinc-500"
+                        className="bg-zinc-800 border border-[#F9704E]  p-2.5 rounded-lg text-xs text-white placeholder-zinc-500"
                       />
                     </div>
                     <input 
