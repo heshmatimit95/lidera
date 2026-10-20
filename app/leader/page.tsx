@@ -743,8 +743,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
   }
 };
 
-  // تابع ارسال دستور جدید (بدون بستن مودال و با نمایش انیمیشن تفکر)
-// تابع ارسال دستور جدید (بدون بستن مودال و با نمایش انیمیشن تفکر)
+  /// تابع ارسال دستور جدید بر اساس تب فعال
   const handleCustomPromptSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!customPrompt.trim()) return;
@@ -752,6 +751,14 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     setIsLoading(true);
 
     try {
+      // تفکیک دستور بر اساس تب فعال کاربر تا هوش مصنوعی دقیقا همون رو تولید کنه
+      let promptToSend = customPrompt;
+      if (aiTab === 'promoText') {
+        promptToSend = `لطفاً یک کپشن جذاب و تبلیغاتی اینستاگرام برای این تور بنویس: ${customPrompt}`;
+      } else if (aiTab === 'packingList') {
+        promptToSend = `به عنوان راهنمای تور و مشاور سفر، به این سوال پاسخ بده: ${customPrompt}`;
+      }
+
       const res = await fetch("/api/generate-tour", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -759,7 +766,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
           tourName: selectedTourName,
           days: 3,
           category: "طبیعت‌گردی",
-          customInstruction: customPrompt,
+          customInstruction: promptToSend,
         }),
       });
 
@@ -767,14 +774,16 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       if (result.success) {
         const rd = result.data;
 
-        // هدایت هوشمند پاسخ به تب فعالِ کاربر
+        // ذخیره دقیق پاسخ در استیتِ همان تب فعال
         if (aiTab === 'dayByDay') {
           setTourPlanData(rd.dayByDay?.[0] || rd.tourPlan || rd.promoText || '');
         } else if (aiTab === 'packingList') {
-          const aiAnswer = rd.consult || rd.answer || rd.packingList?.[0] || rd.promoText || rd.dayByDay?.[0] || "پاسخ دریافت شد.";
-          setConsultData(aiAnswer);
+          // تب مشاوره آزاد و چت
+          const chatAnswer = rd.consult || rd.answer || rd.promoText || rd.dayByDay?.[0] || "پاسخی از هوش مصنوعی دریافت شد.";
+          setConsultData(chatAnswer);
         } else if (aiTab === 'promoText') {
-          setPromoData(rd.caption || rd.promoText || '');
+          // تب کپشن اینستاگرام
+          setPromoData(rd.caption || rd.promoText || rd.dayByDay?.[0] || '');
         }
 
         setCustomPrompt(""); 
@@ -787,6 +796,8 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       setIsLoading(false);
     }
   };
+
+  
   return (
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
       <div className="max-w-7xl mx-auto">
@@ -1605,7 +1616,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     <div className="bg-[#18181b] border-2 border-[#E5C060] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
       
       {/* هدر مودال */}
-      <div className="p-4 border-b border-[#F9704E] flex items-center justify-between bg-zinc-900/50">
+      <div className="p-4 border-b border-[#E5C060] flex items-center justify-between bg-zinc-900/50">
         <h3 className="text-white font-bold text-base">گزارش و چت هوشمند تور </h3>
         <button
           onClick={() => setIsAiModalOpen(false)}
@@ -1800,7 +1811,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 {/* دکمه بستن */}
         <button
           onClick={() => setIsAiModalOpen(false)}
-          className="bg-zinc-800/80 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-700/50 px-4 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer"
+          className="bg-[#F9704E] hover:bg-[#F9704E] text-zinc-200 hover:text-zinc-200 border border-zinc-700/50 px-4 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer"
         >
           بستن
         </button>

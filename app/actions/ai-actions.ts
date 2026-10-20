@@ -3,23 +3,21 @@
 import { prisma } from "../lib/db";
 import { revalidatePath } from "next/cache";
 
-export async function generateTourAiItinerary(tourId: string, destination: string, days: number = 3, theme: string = "گردشگری و طبیعت‌گردی") {
+export async function generateTourAiItinerary(tourId: string, destination: string, days: number = 3, theme: string = "گردشگری و طبیعت‌گردی", customPrompt?: string) {
   try {
-    const prompt = `شما یک تورلیدر و برنامه‌ریز حرفه‌ای تورهای گردشگری در ایران هستید.
-لطفاً برای یک تور ${days} روزه به مقصد "${destination}" با سبک "${theme}" موارد زیر را به زبان فارسی و با لحن جذاب تولید کنید:
-
-1. برنامه‌ی کامل روزانه (به تفکیک روزها و بازدیدها)
-2. چک‌لیست کامل وسایل ضروری مسافر
-3. یک متن جذاب تبلیغاتی برای اینستاگرام و واتس‌اپ همراه با ایموجی و هشتگ
+    const prompt = customPrompt || `شما یک تورلیدر و برنامه‌ریز حرفه‌ای تورهای گردشگری در ایران هستید. 
+لطفاً برای یک تور ${destination} با سبک "${theme}" ${days} روزه به زبان فارسی و با لحن جذاب تولید کنید:
+1. برنامه کامل روزانه (به تفکیک روزها و بازدیدها)
+2. پاسخ به سوالات مشاوره سفر یا نکات ایمنی و چکسیست وسایل
+3. یک متن جذاب تبلیغاتی برای اینستاگرام و واتساپ همراه با ایموجی و اشتیاق.
 
 پاسخ را دقیقاً در قالب فرمت زیر ارسال کنید:
 ---PROGRAM---
 (برنامه روزانه)
 ---PACKING---
-(چک‌لیست وسایل)
+(نکات مشاوره یا چکسیست وسایل)
 ---PROMO---
-(متن تبلیغاتی)
-`;
+(متن تبلیغاتی اینستاگرام)`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -40,19 +38,24 @@ export async function generateTourAiItinerary(tourId: string, destination: strin
 
     if (response.ok) {
       const aiData = await response.json();
-      const rawText = aiData.choices[0]?.message?.content || "";
-      
+      const rawText = aiData.choices[0]?.message.content || "";
+
+      // تفکیک هوشمند بخش‌های مختلف پاسخ هوش مصنوعی
       const parts = rawText.split(/---PROGRAM---|---PACKING---|---PROMO---/);
-      dayByDayContent = parts[1]?.trim() || rawText;
-      packingListContent = parts[2]?.trim() || "کفش مناسب، مدارک شناسایی، داروهای شخصی، لباس مناسب فصل";
-      promoTextContent = parts[3]?.trim() || `🌟 تور استثنایی ${destination}!\nثبت‌نام در سامانه لیدرا.`;
+      if (parts.length >= 4) {
+        dayByDayContent = parts[1]?.trim() || "";
+        packingListContent = parts[2]?.trim() || "";
+        promoTextContent = parts[3]?.trim() || "";
+      } else {
+        // اگر فرمت رعایت نشده بود، متن رو هوشمند تقسیم می‌کنیم
+        dayByDayContent = rawText;
+        packingListContent = "می‌توانید سوالات خود را درباره این تور بپرسید تا راهنماییتان کنم.";
+        promoTextContent = `تور جذاب ${destination} (${days} روزه) - هم اکنون ثبت‌نام کنید! 🌟`;
+      }
     } else {
-      dayByDayContent = `📌 برنامه سفر ${days} روزه به ${destination}:\n` +
-        Array.from({ length: days }, (_, i) => `• روز ${i + 1}: بازدید از جاذبه‌های برتر و دیدنی‌های ${destination}، صرف غذاهای محلی و اقامت.`).join('\n');
-      
-      packingListContent = `🎒 چک‌لیست وسایل تور ${destination}:\n- کفش پیاده‌روی راحت\n- مدارک شناسایی و کارت شناسایی\n- داروها و لوازم شخصی\n- لباس مناسب فصل و دوربین عکاسی`;
-      
-      promoTextContent = `✨ تور جذاب ${destination} (${days} روزه)\n\nبا ما در یک سفر بی‌نظیر به ${destination} همراه شوید!\n📍 اطلاعات بیشتر و ثبت‌نام در پنل اختصاصی لیدرا.`;
+      dayByDayContent = `🌟 برنامه سفر ${destination} (${days} روزه)\n- حرکت به سمت مقصد و گشت‌وگذار.`;
+      packingListContent = "کفش مناسب، مدارک شناسایی و لوازم شخصی.";
+      promoTextContent = `🌟 تور فوق‌العاده ${destination} در ${days} روز!`;
     }
 
     const aiRecord = await prisma.aiItinerary.create({
@@ -66,13 +69,13 @@ export async function generateTourAiItinerary(tourId: string, destination: strin
     revalidatePath('/leader');
     return { 
       success: true, 
-      message: 'برنامه سفر هوشمند با موفقیت تولید شد!',
+      message: 'برنامه سفر هوشمند با موفقیت تولید شد!', 
       data: aiRecord 
     };
 
   } catch (error: any) {
     console.error("AI Generation Detailed Error:", error);
-    return { success: false, message: `خطا: ${error.message || 'مشکل در ارتباط با دیتابیس'}` };
+    return { success: false, message: `مشکل در ارتباط با دیتابیس: ${error.message || ''}` };
   }
 }
 
