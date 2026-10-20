@@ -728,7 +728,11 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
     const result = await res.json();
     if (result.success) {
-      setAiData(result.data);
+      const data = result.data;
+      // پر کردن استیت‌های مستقل برای هر تب به محض کلیک روی تور
+      setTourPlanData(data.dayByDay?.[0] || data.promoText || '');
+      setPromoData(data.promoText || '');
+      setConsultData("می‌توانید سوالات آزاد، نکات ایمنی یا راهنمایی‌های مربوط به این تور و هچیز دیگر را از اینجا بپرسید.");
     } else {
       alert("خطا در هوش مصنوعی: " + result.error);
     }
@@ -1596,11 +1600,11 @@ if (aiTab === 'dayByDay') {
 {/* مودال هوش مصنوعی */}
 {isAiModalOpen && (
   <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-    <div className="bg-[#18181b] border border-purple-500/30 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+    <div className="bg-[#18181b] border-2 border-[#E5C060] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
       
       {/* هدر مودال */}
-      <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
-        <h3 className="text-white font-bold text-base">گزارش و چت هوشمند تور )</h3>
+      <div className="p-4 border-b border-[#F9704E] flex items-center justify-between bg-zinc-900/50">
+        <h3 className="text-white font-bold text-base">گزارش و چت هوشمند تور </h3>
         <button
           onClick={() => setIsAiModalOpen(false)}
           className="text-zinc-400 hover:text-white transition-colors cursor-pointer text-lg font-bold"
@@ -1703,7 +1707,7 @@ if (aiTab === 'dayByDay') {
           >
             {isLoading ? "در حال تفکر..." : (
               aiTab === 'dayByDay' ? "اصلاح برنامه" :
-              aiTab === 'packingList' ? "پرسش از هوش مصنوعی" :
+              aiTab === 'packingList' ? "بپرس از AI" :
               "تولید کپشن"
             )}
           </button>
