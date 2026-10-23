@@ -1761,23 +1761,19 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
           {/* تلگرام */}
 {/* تلگرام */}
+{/* تلگرام */}
 <a
-  onClick={(e) => {
-    e.preventDefault();
-    const textToShare =
-      aiTab === 'dayByDay'
-        ? (tourPlanData || '')
-        : aiTab === 'packingList'
-        ? (tourPlanData || '')
-        : (aiTab as string) === 'consultData'
-        ? (consultData || '')
-        : (promoData || '');
-
-    // حتما باید متن داخل encodeURIComponent قرار بگیرد تا خطای 400 ندهد
-    const telegramUrl = `https://t.me/share/url?text=${encodeURIComponent(textToShare)}`;
-    window.open(telegramUrl, '_blank', 'noopener,noreferrer');
-  }}
-  href="#"
+  href={`https://t.me/share/url?text=${encodeURIComponent(
+    aiTab === 'dayByDay'
+      ? (tourPlanData || '')
+      : aiTab === 'packingList'
+      ? (tourPlanData || '')
+      : (aiTab as string) === 'consultData'
+      ? (consultData || '')
+      : (promoData || '')
+  )}`}
+  target="_blank"
+  rel="noopener noreferrer"
   title="ارسال به تلگرام"
   className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
 >
@@ -1787,9 +1783,12 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
           {/* روبیکا */}
    {/* روبیکا */}
+{/* روبیکا */}
 <a
-  onClick={(e) => {
-    e.preventDefault();
+  href="https://m.rubika.ir"
+  target="_blank"
+  rel="noopener noreferrer"
+  onClick={() => {
     const textToCopy =
       aiTab === 'dayByDay'
         ? (tourPlanData || '')
@@ -1803,11 +1802,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       navigator.clipboard.writeText(textToCopy);
       alert('متن برنامه سفر کپی شد! در روبیکا می‌توانید آن را پیست کنید.');
     }
-    
-    // باز کردن وب‌اپلیکیشن روبیکا در تب جدید بدون بسته شدن سایت لیدرا
-    window.open('https://m.rubika.ir', '_blank', 'noopener,noreferrer');
   }}
-  href="#"
   title="ارسال در روبیکا"
   className="flex items-center justify-center bg-purple-950/40 hover:bg-purple-900/60 text-purple-400 border border-purple-800/50 p-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer"
 >
