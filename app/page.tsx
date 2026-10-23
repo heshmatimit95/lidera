@@ -358,7 +358,7 @@ return (
   <div className="flex items-center justify-end shrink-0 ml-0 sm:ml-0 ">
     <a
       href={`/login${window.location.search}`}
-      className="flex items-center justify-center px-1.5 sm:px-3 py-1 sm:py-1.5 bg-[#F9704E] text-white rounded-lg sm:rounded-xl transition-all duration-200 active:scale-95 text-[10px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap ml-2 sm:ml-3"
+      className="flex items-center justify-center px-1.5 sm:px-3 py-1 sm:py-1.5 bg-[#F9704E] text-white rounded-lg sm:rounded-xl transition-all duration-200 active:scale-95 text-[10px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap ml-1 sm:ml-4"
       title="ورود تورلیدر"
     >
       ورود لیدر
