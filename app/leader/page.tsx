@@ -1761,16 +1761,18 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
           {/* تلگرام */}
  <a
-  onClick={() => {
+onClick={(e) => {
+    e.preventDefault();
     const textToShare =
       aiTab === 'dayByDay'
-              aiTab === 'dayByDay' 
-                ? (tourPlanData || '') 
-                : aiTab === 'packingList' 
-                ? (consultData || '') 
-                : (promoData || '')
+        ? (tourPlanData || '')
+        : aiTab === 'packingList'
+        ? (tourPlanData || '') // استفاده از متغیر امن برای جلوگیری از خطا
+        : (aiTab as string) === 'consultData'
+        ? (consultData || '')
+        : (promoData || '');
 
-    const telegramUrl = `https://telegram.me/989194077618"/share/url?text=${encodeURIComponent(textToShare)}`;
+   const telegramUrl = `https://t.me/share/url?text=${encodeURIComponent(textToShare)}`;
     
     // باز کردن در زبانه جدید بدون آسیب به صفحه چت جاری
     window.open(telegramUrl, '_blank', 'noopener,noreferrer');
@@ -1780,6 +1782,8 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 >
   <FaTelegramPlane size={16} />
     </a>
+
+
           {/* روبیکا */}
           <a
             href={`https://m.rubika.ir://post?text=${encodeURIComponent(
@@ -1788,7 +1792,9 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                 : aiTab === 'packingList' 
                 ? (consultData || '') 
                 : (promoData || '')
+               
             )}`}
+            
             target="_blank"
             rel="noopener noreferrer"
             title="ارسال در روبیکا"
@@ -1798,6 +1804,11 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
               <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.8 13.7c-.4.4-1.1.4-1.5 0l-2.3-2.3-2.3 2.3c-.4.4-1.1.4-1.5 0s-.4-1.1 0-1.5l2.3-2.3-2.3-2.3c-.4-.4-.4-1.1 0-1.5s1.1-.4 1.5 0l2.3 2.3 2.3-2.3c.4-.4 1.1-.4 1.5 0s.4 1.1 0 1.5l-2.3 2.3 2.3 2.3c.4.4.4 1.1 0 1.5z" />
             </svg>
           </a>
+
+
+
+
+
 
           {/* اینستاگرام (کپی متن) */}
 {/* اینستاگرام (کپی متن) */}
