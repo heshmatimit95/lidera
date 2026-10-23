@@ -71,7 +71,7 @@ if (res && res.success) {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="نام کاربری"
-              className="w-full bg-[#0a0a0c] border border-neutral-800 focus:border-red-500 p-3.5 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none transition-colors font-mono"
+              className="w-full bg-[#0a0a0c] border border-red-500 focus:border-red-500 p-3.5 rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none transition-colors font-mono"
             />
           </div>
 
@@ -84,7 +84,7 @@ if (res && res.success) {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               dir="rtl"
-              className="w-full bg-zinc-900/90 border border-zinc-800 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white focus:outline-none focus:border-[#F9704E] transition-colors text-right font-mono"
+              className="w-full bg-zinc-900/90 border border-red-500 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white focus:outline-none focus:border-[#F9704E] transition-colors text-right font-mono"
             />
           </div>
 

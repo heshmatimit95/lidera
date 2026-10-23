@@ -1761,7 +1761,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
           {/* تلگرام */}
           <a
-            href={`https://t.me/share/url?url=&text=${encodeURIComponent(
+           href={`https://t.me/share/url?text=${encodeURIComponent(
               aiTab === 'dayByDay' 
                 ? (tourPlanData || '') 
                 : aiTab === 'packingList' 
@@ -1778,7 +1778,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
           {/* روبیکا */}
           <a
-            href={`rubika://post?text=${encodeURIComponent(
+            href={`https://m.rubika.ir://post?text=${encodeURIComponent(
               aiTab === 'dayByDay' 
                 ? (tourPlanData || '') 
                 : aiTab === 'packingList' 
