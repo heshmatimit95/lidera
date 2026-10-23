@@ -349,7 +349,7 @@ return (
     <h1 className="text-xs sm:text-base md:text-lg font-bold text-white tracking-tight ">
       {currentLider.fullName || currentLider.name}
     </h1>
-    <p className="text-[8px] sm:text-xs font-base text-neutral-400 mt-0.5 truncate ">
+    <p className="text-[8px] sm:text-xs font-xs text-neutral-400 mt-0.5 truncate ">
       {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
     </p>
   </div>
@@ -358,7 +358,7 @@ return (
   <div className="flex items-center justify-end shrink-0 ml-0 sm:ml-0 ">
     <a
       href={`/login${window.location.search}`}
-      className="flex items-center justify-center px-1.5 sm:px-3 py-1 sm:py-1.5 bg-[#F9704E] text-white rounded-lg sm:rounded-xl transition-all duration-200 active:scale-95 text-[10px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap ml-1 sm:ml-4"
+      className="flex items-center justify-center px-1.5 sm:px-3 py-1 sm:py-1.5 bg-[#F9704E] text-white rounded-lg sm:rounded-xl transition-all duration-200 active:scale-95 text-[10px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap ml-0.5 sm:ml-4"
       title="ورود تورلیدر"
     >
       ورود لیدر
