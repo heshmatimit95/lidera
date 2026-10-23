@@ -1761,7 +1761,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
           {/* تلگرام */}
           <a
-           href={`https://t.me/share/url?text=${encodeURIComponent(
+           href={`https://telegram.me/url?text=${encodeURIComponent(
               aiTab === 'dayByDay' 
                 ? (tourPlanData || '') 
                 : aiTab === 'packingList' 
