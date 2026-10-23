@@ -1760,52 +1760,61 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
           </a>
 
           {/* تلگرام */}
- <a
-onClick={(e) => {
+{/* تلگرام */}
+<a
+  onClick={(e) => {
     e.preventDefault();
     const textToShare =
       aiTab === 'dayByDay'
         ? (tourPlanData || '')
         : aiTab === 'packingList'
-        ? (tourPlanData || '') // استفاده از متغیر امن برای جلوگیری از خطا
+        ? (tourPlanData || '')
         : (aiTab as string) === 'consultData'
         ? (consultData || '')
         : (promoData || '');
 
-   const telegramUrl = `https://t.me/share/url?text=${encodeURIComponent(textToShare)}`;
-    
-    // باز کردن در زبانه جدید بدون آسیب به صفحه چت جاری
+    // حتما باید متن داخل encodeURIComponent قرار بگیرد تا خطای 400 ندهد
+    const telegramUrl = `https://t.me/share/url?text=${encodeURIComponent(textToShare)}`;
     window.open(telegramUrl, '_blank', 'noopener,noreferrer');
   }}
+  href="#"
   title="ارسال به تلگرام"
-  className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
+  className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
 >
   <FaTelegramPlane size={16} />
-    </a>
+</a>
 
 
           {/* روبیکا */}
-          <a
-            href={`https://m.rubika.ir://post?text=${encodeURIComponent(
-              aiTab === 'dayByDay' 
-                ? (tourPlanData || '') 
-                : aiTab === 'packingList' 
-                ? (consultData || '') 
-                : (promoData || '')
-               
-            )}`}
-            
-            target="_blank"
-            rel="noopener noreferrer"
-            title="ارسال در روبیکا"
-            className="flex items-center justify-center bg-purple-950/40 hover:bg-purple-900/60 text-purple-400 border border-purple-800/50 p-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer"
-          >
-            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-              <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.8 13.7c-.4.4-1.1.4-1.5 0l-2.3-2.3-2.3 2.3c-.4.4-1.1.4-1.5 0s-.4-1.1 0-1.5l2.3-2.3-2.3-2.3c-.4-.4-.4-1.1 0-1.5s1.1-.4 1.5 0l2.3 2.3 2.3-2.3c.4-.4 1.1-.4 1.5 0s.4 1.1 0 1.5l-2.3 2.3 2.3 2.3c.4.4.4 1.1 0 1.5z" />
-            </svg>
-          </a>
+   {/* روبیکا */}
+<a
+  onClick={(e) => {
+    e.preventDefault();
+    const textToCopy =
+      aiTab === 'dayByDay'
+        ? (tourPlanData || '')
+        : aiTab === 'packingList'
+        ? (tourPlanData || '')
+        : (aiTab as string) === 'consultData'
+        ? (consultData || '')
+        : (promoData || '');
 
-
+    if (textToCopy) {
+      navigator.clipboard.writeText(textToCopy);
+      alert('متن برنامه سفر کپی شد! در روبیکا می‌توانید آن را پیست کنید.');
+    }
+    
+    // باز کردن وب‌اپلیکیشن روبیکا در تب جدید بدون بسته شدن سایت لیدرا
+    window.open('https://m.rubika.ir', '_blank', 'noopener,noreferrer');
+  }}
+  href="#"
+  title="ارسال در روبیکا"
+  className="flex items-center justify-center bg-purple-950/40 hover:bg-purple-900/60 text-purple-400 border border-purple-800/50 p-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer"
+>
+  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+    <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.8 13.7c-.4.4-1.1.4-1.5 0l-2.3-2.3 2.3-2.3c.4-.4 1.1-.4 1.5 0s.4 1.1 0 1.5l-1.5 1.5 1.5 1.5c.4.4.4 1.1 0 1.5z" />
+  </svg>
+</a>
 
 
 
