@@ -322,8 +322,8 @@ const handleRemoveReceipt = () => {
     return (
       <div className="min-h-screen bg-[#121214] text-white flex flex-col items-center justify-center p-4" dir="rtl">
         <div className="text-center p-6 bg-neutral-900 border border-neutral-800 rounded-2xl max-w-sm">
-          <h2 className="text-base font-bold text-[#F9704E] mb-2">لینک معتبر نیست</h2>
-          <p className="text-xs text-neutral-400">تورلیدر مورد نظر یافت نشد یا لینک منقضی شده است.</p>
+          <h2 className="text-base font-bold text-[#F9704E] mb-2">در حال بارگذاری دیتا..</h2>
+        
         </div>
       </div>
     );
@@ -378,7 +378,7 @@ return (
     </div>
 
     {/* خط رابط ۱ */}
-    <div className="h-[2px] flex-1 mx-2 bg-neutral-800 rounded-full overflow-hidden">
+    <div className="h-2px] flex-1 mx-2 bg-neutral-800 rounded-full overflow-hidden">
       <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 1 ? '100%' : '0%' }}></div>
     </div>
 
@@ -389,7 +389,7 @@ return (
     </div>
 
     {/* خط رابط ۲ */}
-    <div className="h-[2px] flex-1 mx-2 bg-neutral-800 rounded-full overflow-hidden">
+    <div className="h-2px] flex-1 mx-2 bg-neutral-800 rounded-full overflow-hidden">
       <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 2 ? '100%' : '0%' }}></div>
     </div>
 
