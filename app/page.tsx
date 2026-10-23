@@ -554,7 +554,7 @@ return (
     placeholder="1370/01/01"
     value={birthDate}
     onChange={(e) => setBirthDate(e.target.value)}
-    className="w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-300"
+    className={`w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono tracking-wider font-medium ${birthDate.length > 0 && !isIdValid ? ' border border-[#F9704E] focus:border-red-500' : ' border border-[#F9704E] focus:border-[#F9704E]'}`} 
     style={{ direction: 'ltr' }}
   />
 </div>

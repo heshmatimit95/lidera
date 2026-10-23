@@ -8,7 +8,7 @@ import * as XLSX from 'xlsx';
 import { 
   FaFileExcel, FaTrash, FaUserPlus, FaEdit, FaCheck, FaTimes, 
   FaMapMarkedAlt, FaPlus, FaKey, FaSignOutAlt, FaSearch, FaFilter,
-  FaImage, FaCreditCard,FaUpload,FaMagic
+  FaImage, FaCreditCard,FaUpload,FaMagic,FaShieldAlt
 } from 'react-icons/fa';
 
 interface Passenger {
@@ -911,18 +911,15 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
               <FaKey size={14} />
             </button>
 
-<button
-  onClick={exportToExcel}
-  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-2"
->
-  📊 دانلود اکسل مسافران
-</button>
-<button
-  onClick={exportInsuranceToExcel}
-  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-2"
->
-  🛡️ دانلود لیست بیمه (Excel)
-</button>
+{/* خروجی اکسل مسافران (تبدیل به آیکون یکدست) */}
+  <button onClick={exportToExcel} title="دانلود اکسل مسافران" className="flex items-center justify-center bg-emerald-950/40 hover:bg-emerald-900 text-emerald-400 p-2.5 rounded-xl transition-all border border-emerald-900/50 active:scale-95 cursor-pointer flex-1 sm:flex-none">
+    <FaFileExcel size={16} />
+  </button>
+
+  {/* خروجی اکسل بیمه (تبدیل به آیکون یکدست) */}
+  <button onClick={exportInsuranceToExcel} title="دانلود لیست بیمه (Excel)" className="flex items-center justify-center bg-blue-950/40 hover:bg-blue-900 text-blue-400 p-2.5 rounded-xl transition-all border border-blue-900/50 active:scale-95 cursor-pointer flex-1 sm:flex-none">
+    <FaShieldAlt size={16} />
+  </button>
 
             <button onClick={handleLogout} title="خروج از پنل" className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-rose-900/30 cursor-pointer flex-1 sm:flex-none">
               <FaSignOutAlt size={14} />
@@ -1081,10 +1078,11 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                 <tr className="bg-[#2a2a2a] text-white text-xs sm:text-sm">
                   <th className="p-3 sm:p-4 font-bold">نام مسافر و کد ملی</th>
                   <th className="p-3 sm:p-4 font-bold">تلفن تماس</th>
-                  <th className="p-3 sm:p-4 font-bold text-center">تعهدنامه</th>
+                  
                   <th className="p-3 sm:p-4 font-bold text-center">عنوان تور</th>
                   <th className="p-3 sm:p-4 font-bold text-center">تاریخ، مبلغ و تصویر فیش</th>
                   <th className="p-3 sm:p-4 font-bold text-center">بیمه</th>
+                  <th className="p-3 sm:p-4 font-bold text-center">تعهدنامه</th>
                   <th className="p-3 sm:p-4 font-bold text-center">وضعیت مالی</th>
                   <th className="p-3 sm:p-4 font-bold text-center">عملیات</th>
                 </tr>
@@ -1226,14 +1224,14 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                   <div>
 
 <div>
-    <label className="block text-xs sm:text-sm text-zinc-300 mb-1.5 font-medium">تاریخ تولد (مثلا 1375/05/12):</label>
+    <label className="block text-xs sm:text-sm text-zinc-300 mb-1.5  font-bold">تاریخ تولد (مثلا 1375/05/12):</label>
     <input
       type="text"
       dir="ltr"
       placeholder="1370/01/01"
       value={addFormData.birthDate || ''}
       onChange={(e) => setAddFormData({ ...addFormData, birthDate: e.target.value })}
-      className="w-full bg-zinc-900 border border-orange-600 p-2.5 rounded-xl text-xs sm:text-sm font-mono text-white text-right focus:outline-none"
+      className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
     />
   </div>
 
@@ -1251,7 +1249,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     required
     value={addFormData.phone}
     onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })}
-    className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
+   
   />
 </div>
 
@@ -1425,7 +1423,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     placeholder="1370/01/01"
     value={editFormData.birthDate || ''}
     onChange={(e) => setEditFormData({ ...editFormData, birthDate: e.target.value })}
-    className="w-full bg-zinc-900 border border-orange-600 p-2.5 rounded-xl text-xs sm:text-sm font-mono text-white text-right focus:outline-none"
+    className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
   />
 </div>
 
