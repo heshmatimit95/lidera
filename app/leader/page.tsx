@@ -940,7 +940,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
         </div>
 
          {/* نوار جستجو و فیلتر */}
-        <div className="mb-6 bg-[#1e1e1e] p-4 rounded-2xl  border-2 border-[#E5C060] shadow-xl  flex-col md:flex-row items-center justify-between gap-1" dir="rtl">
+        <div className="mb-6 bg-[#1e1e1e] p-4 rounded-2xl  border-2 border-[#E5C060] shadow-xl  flex-col md:flex-row items-center justify-between gap-1" dir="left">
           <div className="flex flex-wrap items-center justify-start gap-3 w-full md:w-auto">
             <div className="flex items-center gap-2">
               <FaFilter className="text-zinc-500 text-xs" />
@@ -1760,22 +1760,26 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
           </a>
 
           {/* تلگرام */}
-          <a
-           href={`https://telegram.me/url?text=${encodeURIComponent(
+ <a
+  onClick={() => {
+    const textToShare =
+      aiTab === 'dayByDay'
               aiTab === 'dayByDay' 
                 ? (tourPlanData || '') 
                 : aiTab === 'packingList' 
                 ? (consultData || '') 
                 : (promoData || '')
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="تلگرام"
-            className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
-          >
-            <FaTelegramPlane size={16} />
-          </a>
 
+    const telegramUrl = `https://t.me/share/url?text=${encodeURIComponent(textToShare)}`;
+    
+    // باز کردن در زبانه جدید بدون آسیب به صفحه چت جاری
+    window.open(telegramUrl, '_blank', 'noopener,noreferrer');
+  }}
+  title="ارسال به تلگرام"
+  className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95"
+>
+  <FaTelegramPlane size={16} />
+    </a>
           {/* روبیکا */}
           <a
             href={`https://m.rubika.ir://post?text=${encodeURIComponent(

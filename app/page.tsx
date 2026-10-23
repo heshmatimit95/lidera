@@ -322,7 +322,7 @@ const handleRemoveReceipt = () => {
     return (
       <div className="min-h-screen bg-[#121214] text-white flex flex-col items-center justify-center p-4" dir="rtl">
         <div className="text-center p-6 bg-neutral-900 border border-neutral-800 rounded-2xl max-w-sm">
-          <h2 className="text-base font-bold text-[#F9704E] mb-2">در حال بارگذاری دیتا..</h2>
+          <h2 className="text-base font-bold text-[#F9704E] mb-2">در حال بارگذاری دیتابیس...</h2>
         
         </div>
       </div>
@@ -358,7 +358,7 @@ return (
   <div className="flex items-center justify-end shrink-0 ml-0 sm:ml-0 ">
     <a
       href={`/login${window.location.search}`}
-      className="flex items-center justify-center px-1.5 sm:px-3 py-1 sm:py-1.5 bg-[#F9704E] text-white rounded-lg sm:rounded-xl transition-all duration-200 active:scale-95 text-[10px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap"
+      className="flex items-center justify-center px-1.5 sm:px-3 py-1 sm:py-1.5 bg-[#F9704E] text-white rounded-lg sm:rounded-xl transition-all duration-200 active:scale-95 text-[10px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap ml-2 sm:ml-3"
       title="ورود تورلیدر"
     >
       ورود لیدر
