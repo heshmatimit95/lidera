@@ -1770,7 +1770,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                 ? (consultData || '') 
                 : (promoData || '')
 
-    const telegramUrl = `https://t.me/share/url?text=${encodeURIComponent(textToShare)}`;
+    const telegramUrl = `https://telegram.me/989194077618"/share/url?text=${encodeURIComponent(textToShare)}`;
     
     // باز کردن در زبانه جدید بدون آسیب به صفحه چت جاری
     window.open(telegramUrl, '_blank', 'noopener,noreferrer');
