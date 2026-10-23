@@ -1761,9 +1761,8 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
           {/* تلگرام */}
 {/* تلگرام */}
-{/* تلگرام */}
 <a
-  href={`https://t.me/share/url?text=${encodeURIComponent(
+  href={`https://t.me/share/url?url=${encodeURIComponent('https://lidra.ir')}&text=${encodeURIComponent(
     aiTab === 'dayByDay'
       ? (tourPlanData || '')
       : aiTab === 'packingList'
@@ -1779,7 +1778,6 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 >
   <FaTelegramPlane size={16} />
 </a>
-
 
           {/* روبیکا */}
    {/* روبیکا */}
