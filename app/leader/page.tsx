@@ -31,6 +31,7 @@ interface Passenger {
   createdAt?: string;
 }
 
+
 interface TourItem {
   id?: string;
   name: string;
@@ -56,13 +57,16 @@ const [selectedTourName, setSelectedTourName] = useState("");
 const [aiData, setAiData] = useState<{ dayByDay: string; packingList: string; promoText: string } | null>(null);
 const [activeTab, setActiveTab] = useState<'program' | 'packing' | 'promo'>('program');
 const [copied, setCopied] = useState(false);
-
+const [waiverFilter, setWaiverFilter] = useState('all');
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentTenantSlug, setCurrentTenantSlug] = useState<string>('');
   const [leaderId, setLeaderId] = useState<string>('');
-
+const [selectedReceiptPassenger, setSelectedReceiptPassenger] = useState<any>(null);
+const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+const [rejectReason, setRejectReason] = useState('');
+const [showRejectInput, setShowRejectInput] = useState(false);
   // --- استیت‌های تنظیمات مالی و بانکی لیدر ---
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'gateway' | 'both'>('card');
   const [leaderCards, setLeaderCards] = useState<BankCard[]>([
@@ -93,56 +97,33 @@ const [copied, setCopied] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [editId, setEditId] = useState<string | null>(null);
 
-  const [addFormData, setAddFormData] = useState<{
-    fullName: string;
-    phone: string;
-    nationalId: string;
-    tourName: string;
-    paymentStatus: string;
-    insurance: boolean;
-    receiptDate: string;
-    amount: string;
-    receiptImage: string;
-    seats: number;
-  }>({
-    fullName: '',
-    phone: '',
-    nationalId: '',
-    tourName: '',
-    paymentStatus: 'در انتظار پرداخت',
-    insurance: false,
-    receiptDate: '',
-    amount: '',
-    receiptImage: '',
-    seats: 1,
+const [addFormData, setAddFormData] = useState<any>({
+  fullName: '',
+  phone: '',
+  nationalId: '',
+  birthDate: '',
+  tourName: '',
+  paymentStatus: 'در انتظار پرداخت',
+  insurance: false,
+  receiptDate: '',
+  amount: '',
+  receiptImage: '',
+  seats: 1,
+});
 
-  });
-
-
-  const [editFormData, setEditFormData] = useState<{
-    fullName: string;
-    phone: string;
-    nationalId: string;
-    tourName: string;
-    paymentStatus: string;
-    insurance: boolean;
-    receiptDate: string;
-    amount: string;
-    receiptImage: string;
-    seats: number;
-  }>({
-    fullName: '',
-    phone: '',
-    nationalId: '',
-    tourName: '',
-    paymentStatus: 'در انتظار پرداخت',
-    insurance: false,
-    receiptDate: '',
-    amount: '',
-    receiptImage: '',
-    seats: 1,
-  });
-
+const [editFormData, setEditFormData] = useState<any>({
+  fullName: '',
+  phone: '',
+  nationalId: '',
+  birthDate: '',
+  tourName: '',
+  paymentStatus: 'در انتظار پرداخت',
+  insurance: false,
+  receiptDate: '',
+  amount: '',
+  receiptImage: '',
+  seats: 1,
+});
   // --- استیت‌های مودال تورها ---
   const [isTourModalOpen, setIsTourModalOpen] = useState<boolean>(false);
 const [tourPlanData, setTourPlanData] = useState<string>(''); // مخصوص تب اول (برنامه سفر)
@@ -357,9 +338,9 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolea
       const result = reader.result;
       if (typeof result === 'string') {
         if (isEdit) {
-          setEditFormData(prev => ({ ...prev, receiptImage: result }));
+          setEditFormData((prev: any) => ({ ...prev, receiptImage: result }));
         } else {
-          setAddFormData(prev => ({ ...prev, receiptImage: result }));
+          setAddFormData((prev: any) => ({ ...prev, receiptImage: result }));
         }
       }
     };
@@ -673,6 +654,44 @@ const handleAddTour = async (e: React.FormEvent) => {
     }
   };
 
+
+// تابع تایید فیش
+const handleApproveReceipt = async (passengerId: string) => {
+  try {
+    // فراخوانی اکشن سرور یا API آپدیت وضعیت
+    const res = await handleSaveSingleStatus(passengerId, 'پرداخت شده');
+    // فراخوانی ارسال پیامک تایید فیش
+sendSmsNotification(
+  selectedReceiptPassenger.mobile,
+  'APPROVED',
+  selectedReceiptPassenger.name,
+  selectedReceiptPassenger.tourName
+);
+    setIsReceiptModalOpen(false);
+    setSelectedReceiptPassenger(null);
+  } catch (error) {
+    alert('خطا در تایید فیش واریزی');
+  }
+};
+
+// تابع رد فیش
+const handleRejectReceipt = async (passengerId: string) => {
+  if (!rejectReason.trim()) {
+    alert('لطفاً علت رد فیش را وارد کنید');
+    return;
+  }
+  try {
+    const statusWithReason = `رد شده (${rejectReason.trim()})`;
+    await handleSaveSingleStatus(passengerId, statusWithReason);
+    setIsReceiptModalOpen(false);
+    setSelectedReceiptPassenger(null);
+    setShowRejectInput(false);
+    setRejectReason('');
+  } catch (error) {
+    alert('خطا در ثبت رد فیش');
+  }
+};
+
 const exportToExcel = () => {
     const dataToExport = filteredPassengers.map((p, index) => ({
       'ردیف': index + 1,
@@ -714,6 +733,48 @@ const handleCopyText = (text: string) => {
   setTimeout(() => setCopied(false), 2000);
 };
   
+const exportInsuranceToExcel = () => {
+  const insurancePassengers = filteredPassengers.filter(p => p.insurance === true);
+
+  const dataToExport = insurancePassengers.map((p, index) => ({
+    'ردیف': index + 1,
+    'نام و نام خانوادگی': p.fullName,
+    'کد ملی': p.nationalId,
+   'تاریخ تولد': (p as any).birthDate, 
+    'شماره تماس': p.mobile,
+    'عنوان تور': p.tourName,
+    'تعداد نفرات': p.seatsCount || p.seats || 1
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'لیست بیمه');
+  if (!worksheet['!views']) worksheet['!views'] = [];
+  worksheet['!views'].push({ RTL: true });
+  XLSX.writeFile(workbook, `Insurance_List.xlsx`);
+};
+
+
+
+// تابع کمکی برای فراخوانی API پیامک
+const sendSmsNotification = async (
+  mobile: string, 
+  type: 'APPROVED' | 'REJECTED', 
+  passengerName: string, 
+  tourName: string, 
+  reason?: string
+) => {
+  try {
+    await fetch('/api/sms/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile, type, passengerName, tourName, reason }),
+    });
+  } catch (err) {
+    console.error('خطا در ارسال پیامک:', err);
+  }
+};
+
 const handleGenerateAi = async (tourId: string, tourName: string, days: number = 3, category: string = "طبیعت‌گردی") => {
   setSelectedTourName(tourName);
   setIsAiModalOpen(true);
@@ -849,6 +910,20 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
             <button onClick={() => setIsChangePassModalOpen(true)} title="تغییر رمز" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-zinc-800 cursor-pointer flex-1 sm:flex-none">
               <FaKey size={14} />
             </button>
+
+<button
+  onClick={exportToExcel}
+  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-2"
+>
+  📊 دانلود اکسل مسافران
+</button>
+<button
+  onClick={exportInsuranceToExcel}
+  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-2"
+>
+  🛡️ دانلود لیست بیمه (Excel)
+</button>
+
             <button onClick={handleLogout} title="خروج از پنل" className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-rose-900/30 cursor-pointer flex-1 sm:flex-none">
               <FaSignOutAlt size={14} />
             </button>
@@ -939,33 +1014,66 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
           )}
         </div>
 
-         {/* نوار جستجو و فیلتر */}
-        <div className="mb-6 bg-[#1e1e1e] p-4 rounded-2xl  border-2 border-[#E5C060] shadow-xl  flex-col md:flex-row items-center justify-between gap-1" dir="left">
+{/* نوار جستجو و فیلتر */}
+{/* نوار جستجو و فیلتر */}
+        <div className="mb-6 bg-[#1e1e1e] p-4 rounded-2xl border-2 border-[#E5C060] shadow-xl flex flex-col md:flex-row items-center justify-between gap-4" dir="left">
           <div className="flex flex-wrap items-center justify-start gap-3 w-full md:w-auto">
+            {/* فیلتر وضعیت پرداخت */}
             <div className="flex items-center gap-2">
               <FaFilter className="text-zinc-500 text-xs" />
-              <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }} className="bg-zinc-900 border border-[#F9704E] rounded-xl px-3 py-2 text-xs text-zinc-300 focus:outline-none cursor-pointer">
+              <select 
+                value={statusFilter} 
+                onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }} 
+                className="bg-zinc-900 border border-[#F9704E] rounded-xl px-3 py-2 text-xs text-zinc-300 focus:outline-none cursor-pointer"
+              >
                 <option value="all">همه وضعیت‌ها</option>
                 <option value="پرداخت شده">پرداخت شده</option>
                 <option value="بیعانه">بیعانه</option>
                 <option value="در انتظار پرداخت">در انتظار پرداخت</option>
               </select>
             </div>
-            <button onClick={handleDeleteAllRecords} title="حذف کلی رکوردها" className="p-2.5 bg-rose-950/40 hover:bg-rose-900 text-rose-400 hover:text-white border border-rose-900/50 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center">
+
+            {/* فیلتر وضعیت تعهدنامه */}
+            <div className="flex items-center gap-2">
+              <select 
+                value={waiverFilter || "all"} 
+                onChange={(e) => { setWaiverFilter(e.target.value); setCurrentPage(1); }} 
+                className="bg-zinc-900 border border-[#E5C060] rounded-xl px-3 py-2 text-xs text-zinc-300 focus:outline-none cursor-pointer"
+              >
+                <option value="all">همه تعهدنامه‌ها</option>
+                <option value="signed">امضا شده</option>
+                <option value="unsigned">امضا نشده</option>
+              </select>
+            </div>
+            
+            {/* دکمه حذف کلی */}
+            <button 
+              onClick={handleDeleteAllRecords} 
+              title="حذف کلی رکوردها" 
+              className="p-2.5 bg-rose-950/40 hover:bg-rose-900 text-rose-400 hover:text-white border border-rose-900/50 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center"
+            >
               <FaTrash size={15} />
             </button>
+            
+            {/* تعداد کل */}
             <div className="text-xs text-white font-medium">
               تعداد: <span className="text-[#F9704E] font-bold font-mono">{filteredPassengers.length}</span> نفر
             </div>
           </div>
 
+          {/* باکس جستجو */}
           <div className="relative w-full sm:w-64 max-w-xs">
             <FaSearch className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-xs" />
-            <input type="text" value={searchTerm} onChange={handleSearchChange} placeholder="جستجو نام، کدملی، تور..." className="w-full bg-zinc-900 border-2 border-[#F9704E] rounded-xl pr-9 pl-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#F9704E] transition-all" />
+            <input 
+              type="text" 
+              value={searchTerm} 
+              onChange={handleSearchChange} 
+              placeholder="جستجو نام، کدملی، تور..." 
+              className="w-full bg-zinc-900 border-2 border-[#F9704E] rounded-xl pr-9 pl-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#F9704E] transition-all" 
+            />
           </div>
         </div>
-
-        {/* جدول مسافران */}
+{/* جدول مسافران */}
         <div className="bg-[#1e1e1e] rounded-2xl border-2 border-[#E5C060] shadow-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-right border-collapse">
@@ -973,6 +1081,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                 <tr className="bg-[#2a2a2a] text-white text-xs sm:text-sm">
                   <th className="p-3 sm:p-4 font-bold">نام مسافر و کد ملی</th>
                   <th className="p-3 sm:p-4 font-bold">تلفن تماس</th>
+                  <th className="p-3 sm:p-4 font-bold text-center">تعهدنامه</th>
                   <th className="p-3 sm:p-4 font-bold text-center">عنوان تور</th>
                   <th className="p-3 sm:p-4 font-bold text-center">تاریخ، مبلغ و تصویر فیش</th>
                   <th className="p-3 sm:p-4 font-bold text-center">بیمه</th>
@@ -982,9 +1091,9 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
               </thead>
               <tbody className="divide-y divide-zinc-800 text-white text-xs">
                 {paginatedPassengers.length === 0 ? (
-                  <tr><td colSpan={7} className="p-8 text-center text-zinc-500">هیچ مسافری یافت نشد!</td></tr>
+                  <tr><td colSpan={8} className="p-8 text-center text-zinc-500">هیچ مسافری یافت نشد!</td></tr>
                 ) : (
-                  paginatedPassengers.map((p) => {
+                  paginatedPassengers.map((p: any) => {
                     const isChanged = p.paymentStatus !== p.originalPaymentStatus;
                     const displaySeats = p.seatsCount || p.seats || 1;
                     return (
@@ -1004,19 +1113,50 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                             </div>
                           )}
                         </td>
+
+                        {/* تلفن تماس + دکمه کپی */}
                         <td className="p-3 sm:p-4 font-mono text-zinc-300 text-[11px] sm:text-xs" style={{ direction: 'ltr', textAlign: 'right' }}>
-                          {p.mobile || (p as any).mobile || 'ثبت نشده'}
+                          <div className="flex items-center gap-1.5 justify-end">
+                            <span>{p.mobile || 'ثبت نشده'}</span>
+                            {p.mobile && (
+                              <button
+                                onClick={() => handleCopyText(p.mobile)}
+                                className="text-zinc-400 hover:text-white transition-colors text-[10px] p-1 rounded bg-zinc-800 hover:bg-zinc-700 cursor-pointer"
+                                title="کپی شماره تماس"
+                              >
+                                📋
+                              </button>
+                            )}
+                          </div>
                         </td>
+
+                        {/* وضعیت تعهدنامه */}
+                        <td className="p-3 sm:p-4 text-center">
+                          {p.hasAcceptedWaiver ? (
+                            <span className="bg-emerald-950/50 text-emerald-400 border border-emerald-900/40 px-2 py-0.5 rounded-md text-[10px]">امضا شده</span>
+                          ) : (
+                            <span className="bg-rose-950/50 text-rose-400 border border-rose-900/40 px-2 py-0.5 rounded-md text-[10px]">امضا نشده</span>
+                          )}
+                        </td>
+
                         <td className="p-3 sm:p-4 text-center font-medium">{p.tourName}</td>
+                        
                         <td className="p-3 sm:p-4 text-center">
                           <div className="text-zinc-300 font-mono text-[11px]">{p.receiptDate || '-'}</div>
                           <div className="text-emerald-400 font-mono font-bold mt-0.5">{p.amount ? `${p.amount} تومان` : '-'}</div>
                           {p.receiptImage && (
-                            <button onClick={() => setPreviewImage(p.receiptImage || null)} className="mt-1 text-[10px] text-[#F9704E] hover:underline flex items-center justify-center gap-1 mx-auto cursor-pointer">
+                            <button
+                              onClick={() => {
+                                setSelectedReceiptPassenger(p);
+                                setIsReceiptModalOpen(true);
+                              }}
+                              className="mt-1 text-[10px] text-[#F9704E] hover:underline flex items-center justify-center gap-1 mx-auto cursor-pointer"
+                            >
                               <FaImage size={11} /> مشاهده فیش
                             </button>
                           )}
                         </td>
+
                         <td className="p-3 sm:p-4 text-center">
                           {p.insurance ? (
                             <span className="bg-emerald-950/50 text-emerald-400 border border-emerald-900/40 px-2 py-0.5 rounded-md text-[10px]">دارد</span>
@@ -1024,6 +1164,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                             <span className="bg-zinc-950/50 text-zinc-500 border border-[#F9704E] px-2 py-0.5 rounded-md text-[10px]">ندارد</span>
                           )}
                         </td>
+
                         <td className="p-3 sm:p-4 text-center">
                           <div className="flex flex-col items-center gap-1.5">
                             <select 
@@ -1042,6 +1183,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                             )}
                           </div>
                         </td>
+
                         <td className="p-3 sm:p-4 text-center">
                           <div className="flex items-center justify-center gap-1.5">
                             <button onClick={() => openEditModal(p)} title="ویرایش" className="p-2 bg-zinc-900 hover:bg-zinc-800 text-blue-400 rounded-xl transition-all border border-zinc-800 cursor-pointer">
@@ -1082,6 +1224,23 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
+
+<div>
+    <label className="block text-xs sm:text-sm text-zinc-300 mb-1.5 font-medium">تاریخ تولد (مثلا 1375/05/12):</label>
+    <input
+      type="text"
+      dir="ltr"
+      placeholder="1370/01/01"
+      value={addFormData.birthDate || ''}
+      onChange={(e) => setAddFormData({ ...addFormData, birthDate: e.target.value })}
+      className="w-full bg-zinc-900 border border-orange-600 p-2.5 rounded-xl text-xs sm:text-sm font-mono text-white text-right focus:outline-none"
+    />
+  </div>
+
+
+
+
+
                 <div>
 
   <label className="block text-xs text-zinc-300 mb-1.5 font-medium">شماره موبایل:</label>
@@ -1116,7 +1275,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                       value={addFormData.tourName} 
                       onChange={(e) => {
                         const selectedTour = e.target.value;
-                        setAddFormData(prev => ({ ...prev, tourName: selectedTour }));
+                        setAddFormData((prev: any) => ({ ...prev, tourName: selectedTour }));
                         calculateAddAmount(selectedTour, Number(addFormData.seats));
                       }} 
                       className="w-full bg-zinc-300  border border-orange-600 p-2.5 rounded-xl text-xs text-black"
@@ -1135,7 +1294,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       type="button"
       onClick={() => {
         const newVal = Math.max(1, Number(addFormData.seats) - 1);
-        setAddFormData(prev => ({ ...prev, seats: newVal }));
+        setAddFormData((prev: any) => ({ ...prev, seats: newVal }));
         calculateAddAmount(addFormData.tourName, newVal);
       }}
       className="bg-zinc-800  hover:bg-zinc-300 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
@@ -1150,7 +1309,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       value={addFormData.seats} 
       onChange={(e) => {
         const val = Math.max(1, Number(e.target.value));
-        setAddFormData(prev => ({ ...prev, seats: val }));
+        setAddFormData((prev: any) => ({ ...prev, seats: val }));
         calculateAddAmount(addFormData.tourName, val);
       }} 
       className="w-full bg-zinc-300  border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-center focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" 
@@ -1161,7 +1320,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       type="button"
       onClick={() => {
         const newVal = Number(addFormData.seats) + 1;
-        setAddFormData(prev => ({ ...prev, seats: newVal }));
+        setAddFormData((prev: any) => ({ ...prev, seats: newVal }));
         calculateAddAmount(addFormData.tourName, newVal);
       }}
       className="bg-zinc-800 hover:bg-zinc-700 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
@@ -1207,7 +1366,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                       <span className="text-black truncate max-w-200px]">فیش ثبت شده/انتخاب شده</span>
                       <button
                         type="button"
-                        onClick={() => setAddFormData(prev => ({ ...prev, receiptImage: '' }))}
+                        onClick={() => setAddFormData((prev: any)=> ({ ...prev, receiptImage: '' }))}
                         className="bg-zinc-900 text-rose-400 border border-zinc-800 px-2 py-1 rounded-lg text-[10px]"
                       >
                         حذف فیش
@@ -1257,6 +1416,21 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                   <label className="block text-xs sm:text-sm text-zinc-300 mb-1.5 font-bold">نام و نام خانوادگی:</label>
                   <input type="text" required value={editFormData.fullName} onChange={(e) => setEditFormData({ ...editFormData, fullName: e.target.value })} className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black placeholder-white/70" />
                 </div>
+
+<div>
+  <label className="block text-xs sm:text-sm text-zinc-300 mb-1.5 font-medium">تاریخ تولد (مثلا 1370/01/01):</label>
+  <input
+    type="text"
+    dir="ltr"
+    placeholder="1370/01/01"
+    value={editFormData.birthDate || ''}
+    onChange={(e) => setEditFormData({ ...editFormData, birthDate: e.target.value })}
+    className="w-full bg-zinc-900 border border-orange-600 p-2.5 rounded-xl text-xs sm:text-sm font-mono text-white text-right focus:outline-none"
+  />
+</div>
+
+
+
 <div>
   <label className="block text-xs text-zinc-300 mb-1.5 font-medium">شماره موبایل:</label>
   <input 
@@ -1290,7 +1464,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                       value={editFormData.tourName} 
                       onChange={(e) => {
                         const selectedTour = e.target.value;
-                        setEditFormData(prev => ({ ...prev, tourName: selectedTour }));
+                        setEditFormData((prev: any) => ({ ...prev, tourName: selectedTour }));
                         calculateEditAmount(selectedTour, Number(editFormData.seats));
                       }} 
                       className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black"
@@ -1308,7 +1482,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       type="button"
       onClick={() => {
         const newVal = Math.max(1, Number(addFormData.seats) - 1);
-        setAddFormData(prev => ({ ...prev, seats: newVal }));
+        setAddFormData((prev: any) => ({ ...prev, seats: newVal }));
         calculateAddAmount(addFormData.tourName, newVal);
       }}
       className="bg-zinc-800 hover:bg-zinc-300 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
@@ -1323,7 +1497,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       value={addFormData.seats} 
       onChange={(e) => {
         const val = Math.max(1, Number(e.target.value));
-        setAddFormData(prev => ({ ...prev, seats: val }));
+        setAddFormData((prev: any) => ({ ...prev, seats: val }));
         calculateAddAmount(addFormData.tourName, val);
       }} 
       className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-center focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" 
@@ -1334,7 +1508,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       type="button"
       onClick={() => {
         const newVal = Number(addFormData.seats) + 1;
-        setAddFormData(prev => ({ ...prev, seats: newVal }));
+        setAddFormData((prev: any)=> ({ ...prev, seats: newVal }));
         calculateAddAmount(addFormData.tourName, newVal);
       }}
       className="bg-zinc-800 hover:bg-zinc-300 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
@@ -1382,7 +1556,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                       <span className="text-black truncate max-w-200px]">فیش ثبت شده/انتخاب شده</span>
                       <button 
                         type="button" 
-                        onClick={() => setEditFormData(prev => ({ ...prev, receiptImage: '' }))}
+                        onClick={() => setEditFormData((prev: any)=> ({ ...prev, receiptImage: '' }))}
                         className="bg-zinc-900 text-rose-400 border border-zinc-800 px-2 py-1 rounded-lg text-[10px]"
                       >
                         حذف فیش
@@ -1620,6 +1794,109 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     
       </div>
 
+
+
+
+{/* مودال مشاهده و تایید فیش واریزی */}
+{isReceiptModalOpen && selectedReceiptPassenger && (
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 dir-rtl">
+    <div className="w-full max-w-lg bg-[#121214] border border-[#E5C060] rounded-2xl p-6 shadow-2xl relative overflow-hidden text-white space-y-4">
+      
+      {/* هدر مودال */}
+      <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+        <h3 className="text-base font-bold flex items-center gap-2 text-[#E5C060]">
+          بررسی فیش واریزی: {selectedReceiptPassenger.fullName}
+        </h3>
+        <button 
+          onClick={() => {
+            setIsReceiptModalOpen(false);
+            setShowRejectInput(false);
+          }} 
+          className="text-zinc-400 hover:text-white text-lg"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* جزئیات مسافر و تصویر فیش */}
+      <div className="space-y-3 text-xs sm:text-sm text-zinc-300">
+        <div className="grid grid-cols-2 gap-2 bg-zinc-900/60 p-3 rounded-xl border border-zinc-800">
+          <p><span className="text-zinc-500">شماره تماس:</span> {selectedReceiptPassenger.mobile}</p>
+          <p><span className="text-zinc-500">مبلغ:</span> {selectedReceiptPassenger.amount || 'ثبت نشده'}</p>
+          <p><span className="text-zinc-500">تاریخ فیش:</span> {selectedReceiptPassenger.receiptDate || 'ثبت نشده'}</p>
+          <p><span className="text-zinc-500">وضعیت فعلی:</span> <span className="text-amber-400">{selectedReceiptPassenger.paymentStatus}</span></p>
+        </div>
+
+        {/* نمایش تصویر فیش */}
+        <div className="w-full bg-black/50 border border-zinc-800 rounded-xl overflow-hidden flex items-center justify-center min-h-220px] max-h-350px]">
+          {selectedReceiptPassenger.receiptImage ? (
+            <img 
+              src={selectedReceiptPassenger.receiptImage} 
+              alt="فیش واریزی" 
+              className="w-full h-full object-contain"
+            />
+          ) : (
+            <p className="text-zinc-500 text-xs">تصویر فیش آپلود نشده است.</p>
+          )}
+        </div>
+      </div>
+
+      {/* فیلد علت رد (در صورت کلیک روی رد فیش) */}
+      {showRejectInput && (
+        <div className="space-y-2 animate-fadeIn">
+          <label className="block text-xs text-rose-400 font-medium">علت رد فیش را بنویسید:</label>
+          <input
+            type="text"
+            placeholder="مثال: تصویر ناخوانا است یا مبلغ مغایرت دارد"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            className="w-full bg-zinc-900 border border-rose-600/60 p-2.5 rounded-xl text-xs text-white focus:outline-none"
+          />
+        </div>
+      )}
+
+      {/* دکمه‌های عملیات */}
+      <div className="flex items-center gap-3 pt-2">
+        {!showRejectInput ? (
+          <>
+            <button
+              onClick={() => handleApproveReceipt(selectedReceiptPassenger.id)}
+              className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all"
+            >
+              ✓ تایید و ثبت نهایی (پرداخت شده)
+            </button>
+
+            <button
+              onClick={() => setShowRejectInput(true)}
+              className="bg-rose-600/20 hover:bg-rose-600 border border-rose-600 text-rose-300 hover:text-white font-medium py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all"
+            >
+              ✕ رد فیش
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => handleRejectReceipt(selectedReceiptPassenger.id)}
+              className="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all"
+            >
+              ثبت رد فیش
+            </button>
+            <button
+              onClick={() => setShowRejectInput(false)}
+              className="bg-zinc-800 text-zinc-300 py-2.5 px-4 rounded-xl text-xs"
+            >
+              انصراف
+            </button>
+          </>
+        )}
+      </div>
+
+    </div>
+  </div>
+)}
+
+
+
 {/* مودال هوش مصنوعی */}
 {isAiModalOpen && (
   <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
@@ -1848,7 +2125,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 {/* دکمه بستن */}
         <button
           onClick={() => setIsAiModalOpen(false)}
-          className="bg-[#F9704E] hover:bg-[#F9704E] text-zinc-900 hover:text-zinc-900 border border-zinc-700/50 px-4 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer"
+          className="bg-[#F9704E] hover:bg-[#F9704E] text-white hover:text-white  border border-zinc-700/50 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
         >
           بستن
         </button>

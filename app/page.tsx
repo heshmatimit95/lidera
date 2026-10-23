@@ -37,6 +37,7 @@ function TourForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [phone, setPhone] = useState('');
   const [nationalId, setNationalId] = useState('');
   const [selectedTour, setSelectedTour] = useState('');
@@ -208,6 +209,7 @@ const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         fullName: fullName.trim(),
         mobile: phone.trim(),
         nationalId: nationalId.trim(),
+        birthDate:  birthDate,
         tourName: tourTitle,
         seatsCount: seatsCount,
         leaderSlug: tenantSlug || currentLider?.slug || 'default',
@@ -543,7 +545,19 @@ return (
                     <label className="block text-sm  text-white mb-2 font-medium">نام و نام خانوادگی نماینده مسافران</label>
                     <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="مثال: رضا کیهانی" className="w-full bg-[#1c1c21]  border border-[#F9704E] focus:border-[#F9704E] p-4 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-medium" />
                   </div>
-
+<div>
+  <label className="block text-sm text-white mb-2 font-medium">تاریخ تولد (مثلا 1370/01/01):</label>
+  <input
+    type="text"
+    dir="ltr"
+    required
+    placeholder="1370/01/01"
+    value={birthDate}
+    onChange={(e) => setBirthDate(e.target.value)}
+    className="w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-300"
+    style={{ direction: 'ltr' }}
+  />
+</div>
                   <div>
                     <label className="block text-sm text-white mb-2 font-medium">شماره موبایل</label>
                     <input type="tel" required maxLength={11} value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="09191294068" className={`w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono tracking-wider font-medium ${phone.length > 0 && !isPhoneValid ? ' border border-[#F9704E] focus:border-red-500' : ' border border-[#F9704E] focus:border-[#F9704E]'}`} style={{ direction: 'ltr' }} />
@@ -683,7 +697,32 @@ return (
                     {getValidationHint()}
                   </div>
                 )}
+{/* تعهدنامه دیجیتال و قوانین سفر (مرحله آخر) */}
+<div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-2xl space-y-3 mb-4">
+  <div className="flex items-center justify-between">
+    <label className="text-xs font-bold text-[#E5C060] flex items-center gap-1.5">
+      📜 تعهدنامه سلامت و قوانین سفر
+    </label>
+    <button 
+      type="button"
+      onClick={() => alert('متن کامل قوانین: مسافر متعهد می‌شود تمامی اصول ایمنی، سلامت و زمان‌بندی تور را رعایت کند و مسئولیت عدم رعایت آن بر عهده خودش می‌باشد.')}
+      className="text-[11px] text-amber-400 hover:underline cursor-pointer"
+    >
+      مشاهده متن کامل
+    </button>
+  </div>
 
+  <label className="flex items-start gap-2.5 cursor-pointer pt-1">
+    <input 
+      type="checkbox" 
+      required
+      className="mt-0.5 accent-[#E5C060] w-4 h-4 rounded cursor-pointer"
+    />
+    <span className="text-xs text-zinc-300 leading-relaxed">
+      اینجانب تمامی قوانین سفر، شرایط کنسلی و تعهدنامه سلامت و ایمنی را مطالعه نموده و با آگاهی کامل پذیرفتم.
+    </span>
+  </label>
+</div>
                 <div className="flex gap-3">
                   {step > 1 && (
                     <button type="button" onClick={prevStep} className="w-1/3 bg-amber-500/10 hover:bg-amber-500/10 text-white font-bold py-4 rounded-xl text-xs transition-all border border-[#F9704E] active:scale-95">
@@ -705,7 +744,9 @@ return (
                     >
                       مرحله بعدی 
                     </button>
+                    
                   ) : (
+                   
                     <button 
                       type="submit" 
                       disabled={isSubmitting || !isStepValid()} 

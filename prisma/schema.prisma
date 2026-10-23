@@ -97,6 +97,7 @@ model Passenger {
   fullName       String
   mobile         String
   nationalId     String?
+  birthDate       String?   // <--- اضافه کردن فیلد تاریخ تولد
   tourName       String
   paymentStatus  String   @default("در انتظار پرداخت")
   insurance      Boolean  @default(false)
@@ -105,10 +106,10 @@ model Passenger {
  receiptImage String?
   idCardImage    String?  // این فیلد اضافه شد تا خطای تایپ اسکریپت برطرف شود
   seatsCount     Int      @default(1)
-
   tourId         String?
   tour           Tour?    @relation(fields: [tourId], references: [id], onDelete: SetNull)
-
+hasAcceptedWaiver Boolean   @default(false) // وضعیت پذیرش تعهدنامه
+  waiverSignedAt    DateTime?                  // تاریخ و ساعت امضا
   leaderId       String
   leader         Leader   @relation(fields: [leaderId], references: [id], onDelete: Cascade)
   createdAt      DateTime @default(now())
