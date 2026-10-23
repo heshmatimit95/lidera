@@ -94,7 +94,7 @@ return (
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="نام کاربری خود را وارد کنید"
-              className="w-full bg-zinc-900/90 border border-zinc-800 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white focus:outline-none focus:border-[#F9704E] transition-colors"
+              className="w-full bg-zinc-900/90 border border-[#F9704E] rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white focus:outline-none focus:border-[#F9704E] transition-colors"
             />
           </div>
 
@@ -107,10 +107,9 @@ return (
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               dir="rtl"
-              className="w-full bg-zinc-900/90 border border-zinc-800 rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white focus:outline-none focus:border-[#F9704E] transition-colors text-right font-mono"
+              className="w-full bg-zinc-900/90 border border-[#F9704E] rounded-xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white focus:outline-none focus:border-[#F9704E] transition-colors text-right font-mono"
             />
           </div>
-
           {error && (
             <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[11px] sm:text-xs py-2 px-3 rounded-xl text-center font-medium">
               {error}
