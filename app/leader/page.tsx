@@ -1802,8 +1802,17 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       alert('متن برنامه سفر کپی شد! در روبیکا می‌توانید آن را پیست کنید.');
     }
 
-    // باز کردن امن روبیکا با جاوااسکریپت بدون بسته شدن سایت لیدرا
-    window.open('https://m.rubika.ir', '_blank', 'noopener,noreferrer');
+    // باز کردن مستقیم اپلیکیشن روبیکا روی موبایل با دیپ‌لینک
+    const rubikaAppUrl = 'rubika://';
+    const rubikaWebFallback = 'https://m.rubika.ir';
+
+    // تلاش برای باز کردن اپلیکیشن
+    window.location.href = rubikaAppUrl;
+
+    // اگر اپلیکیشن نصب نبود یا باز نشد، نسخه وب در تب جدید به عنوان پشتیبان باز شود
+    setTimeout(() => {
+      window.open(rubikaWebFallback, '_blank', 'noopener,noreferrer');
+    }, 500);
   }}
   title="ارسال در روبیکا"
   className="flex items-center justify-center bg-purple-950/40 hover:bg-purple-900/60 text-purple-400 border border-purple-800/50 p-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer"
@@ -1812,9 +1821,6 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.8 13.7c-.4.4-1.1.4-1.5 0l-2.3-2.3 2.3-2.3c.4-.4 1.1-.4 1.5 0s.4 1.1 0 1.5l-1.5 1.5 1.5 1.5c.4.4.4 1.1 0 1.5z" />
   </svg>
 </a>
-
-
-
 
           {/* اینستاگرام (کپی متن) */}
 {/* اینستاگرام (کپی متن) */}
