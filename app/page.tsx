@@ -208,25 +208,11 @@ const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isStepValid()) return;
 
     setIsSubmitting(true);
-
-const resetFormState = () => {
-    setFullName("");
-    setPhone("");
-    setBirthDate("");
-    setNationalId("");
-    setSeatsCount("1");
-    setIsTermsAccepted(false);
-    setStep(1); // بازگشت به مرحله اول
-    setIdCardImage(null);
-    setIdCardPreview(null);
-  };
-
-
 
     const tourObj = currentLider?.tours?.find((t: any) => (t.id || t._id) === selectedTour);
     const tourTitle = tourObj ? `${tourObj.title || tourObj.name} (${tourObj.date || ''})` : 'تور عمومی';
@@ -236,22 +222,26 @@ const resetFormState = () => {
         fullName: fullName.trim(),
         mobile: phone.trim(),
         nationalId: nationalId.trim(),
-        birthDate:  birthDate,
+        birthDate: birthDate,
         tourName: tourTitle,
         seatsCount: seatsCount,
-        leaderSlug: tenantSlug || currentLider?.slug || 'default',
-        tenantId: tenantSlug || currentLider?.slug || 'default',
+        leaderSlug: currentLider?.slug || 'default',
+        tenantId: currentLider?.slug || 'default',
         idCardImage: idCardPreview || null,
         receiptImage: receiptPreview || null
       });
 
       if (res && res.success) {
         setIsSuccess(true);
+        alert("ثبت‌نام با موفقیت انجام شد!");
+        
+        // **اینجا دقیقاً جایی است که باید تابع ریست صدا زده شود تا صفحه برگردد به مرحله اول و کشوها بسته شوند**
+        handleReset();
       } else {
         alert(res?.message || 'خطا در ثبت اطلاعات.');
       }
     } catch (error) {
-      console.error('خطا در ثبت اطلاعات مسافر:', error);
+      console.error('خطا در ثبت اطلاعات مسافر', error);
       alert('خطای سرور در ثبت نام.');
     } finally {
       setIsSubmitting(false);
@@ -650,26 +640,61 @@ return (
           </label>
         </div>
       )}
-                      <div>
-                        <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
-                        <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
-                        {idCardPreview ? (
-                    <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
-     
-                            <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
-                              <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-neutral-200 transition-all cursor-pointer">تغییر عکس</button>
-                              <button type="button" onClick={handleRemoveIdCard} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-bold transition-all cursor-pointer">حذف عکس</button>
-                            </div>
-                          </div>
-                        ) : (
-                          <button type="button" onClick={() => idCardInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${idCardError ? 'border-red-500/50 text-red-400' : 'border-[#F9704E] hover:border-[#F9704E]/50 text-neutral-400'}`}>
-                            <span className="text-lg">🪪</span>
-                            <span>برای آپلود عکس کارت ملی کلیک کنید</span>
-                          </button>
-                        )}
-                        {idCardError && <p className="text-xs text-red-400 mt-2 font-medium">{idCardError}</p>}
-                      </div>
+<div>
+  <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری):</label>
+  
+  {/* اینپوت فایل مخفی */}
+  <input 
+    type="file" 
+    ref={idCardInputRef} 
+    accept="image/*" 
+    onChange={(e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const previewUrl = URL.createObjectURL(file);
+        setIdCardPreview(previewUrl);
+        setIdCardImage(file);
+      }
+    }} 
+    className="hidden" 
+  />
 
+  {idCardPreview ? (
+    <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] bg-black/40 flex items-center justify-center">
+      <img src={idCardPreview} alt="پیش‌نمایش کارت ملی" className="w-full h-full object-contain" />
+      <div className="absolute inset-x-0 bottom-0 bg-black/70 p-2 flex items-center justify-center gap-3">
+        <button 
+          type="button" 
+          onClick={() => idCardInputRef.current?.click()} 
+          className="text-xs bg-white text-black px-3 py-1.5 rounded-lg font-bold hover:bg-zinc-200 transition-all cursor-pointer"
+        >
+          تغییر عکس
+        </button>
+        <button 
+          type="button" 
+          onClick={() => {
+            setIdCardPreview(null);
+            setIdCardImage(null);
+          }} 
+          className="text-xs bg-rose-600 text-white px-3 py-1.5 rounded-lg font-bold hover:bg-rose-500 transition-all cursor-pointer"
+        >
+          حذف عکس
+        </button>
+      </div>
+    </div>
+  ) : (
+    <button 
+      type="button" 
+      onClick={() => idCardInputRef.current?.click()} 
+      className="w-full border-2 border-dashed border-[#F9704E] bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 hover:border-orange-400 flex flex-col items-center justify-center gap-2 cursor-pointer"
+    >
+      <span className="text-lg">🪪</span>
+      <span className="text-zinc-300 font-medium">برای آپلود عکس کارت ملی کلیک کنید</span>
+    </button>
+  )}
+
+  {idCardError && <p className="text-xs text-red-400 mt-2">{idCardError}</p>}
+</div>
 
 
                     </div>
