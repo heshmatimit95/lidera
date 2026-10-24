@@ -567,7 +567,7 @@ return (
 {/* ۳. تاریخ تولد (آکاردئونی - پس از تکمیل ۱۱ رقم موبایل) */}
   {isPhoneValid && (
     <div className="animate-fadeIn transition-all duration-300">
-      <label className="block text-sm text-white mb-2 font-medium">تاریخ تولد (مثلا 1370/01/01):</label>
+      <label className="block text-sm text-white mb-2 font-medium">تاریخ تولد :</label>
       <input
         type="text"
         required
@@ -602,6 +602,32 @@ return (
                           style={{ direction: 'ltr' }} 
                         />
                       </div>
+
+                    {/* اینپوت کد ملی */}
+<div>
+  <label className="text-xs text-zinc-300 block mb-1">کد ملی مسافر:</label>
+  <input
+    type="text"
+    value={nationalId}
+    maxLength={10}
+    onChange={(e) => {
+      const val = e.target.value;
+      setNationalId(val);
+      // وقتی کاربر شروع به وارد کردن کد ملی کرد یا کد ملی ۱۰ رقمی شد تعهدنامه باز شود
+      if (val.trim().length > 0) {
+        setShowTermsAccordion(true);
+      } else {
+        setShowTermsAccordion(false);
+        setIsTermsAccepted(false);
+      }
+    }}
+    placeholder="مثلاً: 0012345678"
+    className="w-full bg-zinc-900/80 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors"
+  />
+</div>
+
+
+
 {/* ۵. بخش تعهدنامه کشویی و اجباری (ظهور پس از ۱۰ رقمی شدن کد ملی) */}
       {isNationalIdValid && (
         <div className="bg-[#1c1c21] border border-[#F9704E] rounded-2xl p-4 space-y-3 animate-fadeIn transition-all duration-300">
@@ -759,7 +785,7 @@ return (
                   {step < 3 ? (
                     <button 
                       type="button" 
-                     disabled={!isTermsAccepted || !isNationalIdValid}
+                    disabled={isSubmitting || !isStepValid()} 
                       onClick={nextStep} 
                       className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-95 flex items-center justify-center disabled:cursor-not-allowed border" 
                       style={
