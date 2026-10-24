@@ -1069,8 +1069,8 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                  <th className="p-3 sm:p-4 font-bold text-center">عنوان تور</th>
                   <th className="p-3 sm:p-4 font-bold text-center">تاریخ، مبلغ و تصویر فیش</th>
                    <th className="p-3 sm:p-4 font-bold text-center">عملیات</th>
-                  <th className="p-3 sm:p-4 font-bold text-center">بیمه</th>
-                    <th className="p-3 sm:p-4 font-bold text-center">وضعیت مالی</th>
+                <th className="p-3 sm:p-4 font-bold text-center">وضعیت مالی</th>
+                     <th className="p-3 sm:p-4 font-bold text-center">بیمه</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800 text-white text-xs">
@@ -1139,13 +1139,6 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                             <button onClick={() => handleDeletePassenger(p.id)} title="حذف" className="p-2 bg-zinc-900 hover:bg-zinc-800 text-rose-500 rounded-xl transition-all border border-zinc-800 cursor-pointer">
                               <FaTrash size={13} />
                             </button>
-                        <td className="p-3 sm:p-4 text-center">
-                          {p.insurance ? (
-                            <span className="bg-emerald-950/50 text-emerald-400 border border-emerald-900/40 px-2 py-0.5 rounded-md text-[10px]">دارد</span>
-                          ) : (
-                            <span className="bg-zinc-950/50 text-zinc-500 border border-[#F9704E] px-2 py-0.5 rounded-md text-[10px]">ندارد</span>
-                          )}
-                        </td>
 
                         <td className="p-3 sm:p-4 text-center">
                           <div className="flex flex-col items-center gap-1.5">
@@ -1165,7 +1158,13 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                             )}
                           </div>
                         </td>
-
+                        <td className="p-3 sm:p-4 text-center">
+                          {p.insurance ? (
+                            <span className="bg-emerald-950/50 text-emerald-400 border border-emerald-900/40 px-2 py-0.5 rounded-md text-[10px]">دارد</span>
+                          ) : (
+                            <span className="bg-zinc-950/50 text-zinc-500 border border-[#F9704E] px-2 py-0.5 rounded-md text-[10px]">ندارد</span>
+                          )}
+                        </td>
                           </div>
                         </td>
                       </tr>
