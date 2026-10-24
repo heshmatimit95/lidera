@@ -777,22 +777,26 @@ return (
                     </button>
                   )}
 
-                  {step < 3 ? (
-                    <button 
-                      type="button" 
-                     disabled={!isTermsAccepted || !isNationalIdValid}
-                      onClick={nextStep} 
-                      className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-95 flex items-center justify-center disabled:cursor-not-allowed border" 
-                      style={
-                        isStepValid() 
-                          ? { backgroundColor: activeColor, borderColor: activeColor } 
-                          : { backgroundColor: 'rgba(249, 112, 78, 0.15)', borderColor: 'rgba(249, 112, 78, 0.3)', color: 'rgba(255, 255, 255, 0.4)' }
-                      }
-                    >
-                      مرحله بعدی 
-                    </button>
-                    
-                  ) : (
+{/* دکمه مرحله بعدی */}
+{step < 3 && (
+  <button
+    type="button"
+    disabled={!isStepValid()}
+    onClick={nextStep}
+    className={`flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs flex items-center justify-center cursor-pointer ${
+      isStepValid()
+        ? 'opacity-100 hover:scale-[1.02]'
+        : 'opacity-40 cursor-not-allowed'
+    }`}
+    style={{
+      backgroundColor: isStepValid() ? activeColor : 'rgba(249, 112, 78, 0.2)',
+      borderColor: activeColor,
+      borderWidth: '1px'
+    }}
+  >
+    مرحله بعدی
+  </button>
+           )}
                    
                     <button 
                       type="submit" 
@@ -806,7 +810,7 @@ return (
                     >
                       {isSubmitting ? "در حال ارسال..." : "ثبت نهایی و ارسال مدارک"}
                     </button>
-                  )}
+                 
                 </div>
               </div>
 
