@@ -651,28 +651,7 @@ return (
                         )}
                         {idCardError && <p className="text-xs text-red-400 mt-2 font-medium">{idCardError}</p>}
                       </div>
-                    {/* اینپوت کد ملی */}
-<div>
-  <label className="text-xs text-zinc-300 block mb-1">کد ملی مسافر:</label>
-  <input
-    type="text"
-    value={nationalId}
-    maxLength={10}
-    onChange={(e) => {
-      const val = e.target.value;
-      setNationalId(val);
-      // وقتی کاربر شروع به وارد کردن کد ملی کرد یا کد ملی ۱۰ رقمی شد تعهدنامه باز شود
-      if (val.trim().length > 0) {
-        setShowTermsAccordion(true);
-      } else {
-        setShowTermsAccordion(false);
-        setIsTermsAccepted(false);
-      }
-    }}
-    placeholder="مثلاً: 0012345678"
-    className="w-full bg-zinc-900/80 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors"
-  />
-</div>
+
 
 
                     </div>
@@ -777,26 +756,22 @@ return (
                     </button>
                   )}
 
-{/* دکمه مرحله بعدی */}
-{step < 3 && (
-  <button
-    type="button"
-    disabled={!isStepValid()}
-    onClick={nextStep}
-    className={`flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs flex items-center justify-center cursor-pointer ${
-      isStepValid()
-        ? 'opacity-100 hover:scale-[1.02]'
-        : 'opacity-40 cursor-not-allowed'
-    }`}
-    style={{
-      backgroundColor: isStepValid() ? activeColor : 'rgba(249, 112, 78, 0.2)',
-      borderColor: activeColor,
-      borderWidth: '1px'
-    }}
-  >
-    مرحله بعدی
-  </button>
-           )}
+                  {step < 3 ? (
+                    <button 
+                      type="button" 
+                     disabled={!isTermsAccepted || !isNationalIdValid}
+                      onClick={nextStep} 
+                      className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-95 flex items-center justify-center disabled:cursor-not-allowed border" 
+                      style={
+                        isStepValid() 
+                          ? { backgroundColor: activeColor, borderColor: activeColor } 
+                          : { backgroundColor: 'rgba(249, 112, 78, 0.15)', borderColor: 'rgba(249, 112, 78, 0.3)', color: 'rgba(255, 255, 255, 0.4)' }
+                      }
+                    >
+                      مرحله بعدی 
+                    </button>
+                    
+                  ) : (
                    
                     <button 
                       type="submit" 
@@ -810,7 +785,7 @@ return (
                     >
                       {isSubmitting ? "در حال ارسال..." : "ثبت نهایی و ارسال مدارک"}
                     </button>
-                 
+                  )}
                 </div>
               </div>
 
