@@ -612,7 +612,7 @@ return (
                             setNationalId(val.replace(/[^0-9]/g, ''));
                           }} 
                           placeholder="0012345678" 
-                          className={`w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono tracking-wider font-medium ${nationalId.length > 0 && !isIdValid ? ' border border-[#F9704E] focus:border-red-500' : ' border border-[#F9704E] focus:border-[#F9704E]'}`} 
+                          className={`w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono tracking-wider font-medium ${nationalId.length > 0 && !isIdValid ? ' border border-[#F9704E] focus:border-[#F9704E]' : ' border border-[#F9704E] focus:border-[#F9704E]'}`} 
                           style={{ direction: 'ltr' }} 
                         />
                       </div>
