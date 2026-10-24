@@ -1030,18 +1030,6 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
               </select>
             </div>
 
-            {/* فیلتر وضعیت تعهدنامه */}
-            <div className="flex items-center gap-2">
-              <select 
-                value={waiverFilter || "all"} 
-                onChange={(e) => { setWaiverFilter(e.target.value); setCurrentPage(1); }} 
-                className="bg-zinc-900 border border-[#E5C060] rounded-xl px-3 py-2 text-xs text-zinc-300 focus:outline-none cursor-pointer"
-              >
-                <option value="all">همه تعهدنامه‌ها</option>
-                <option value="signed">امضا شده</option>
-                <option value="unsigned">امضا نشده</option>
-              </select>
-            </div>
             
             {/* دکمه حذف کلی */}
             <button 
@@ -1078,13 +1066,11 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                 <tr className="bg-[#2a2a2a] text-white text-xs sm:text-sm">
                   <th className="p-3 sm:p-4 font-bold">نام مسافر و کد ملی</th>
                   <th className="p-3 sm:p-4 font-bold">تلفن تماس</th>
-                  
-                  <th className="p-3 sm:p-4 font-bold text-center">عنوان تور</th>
+                 <th className="p-3 sm:p-4 font-bold text-center">عنوان تور</th>
                   <th className="p-3 sm:p-4 font-bold text-center">تاریخ، مبلغ و تصویر فیش</th>
                   <th className="p-3 sm:p-4 font-bold text-center">بیمه</th>
-                  <th className="p-3 sm:p-4 font-bold text-center">تعهدنامه</th>
-                  <th className="p-3 sm:p-4 font-bold text-center">وضعیت مالی</th>
-                  <th className="p-3 sm:p-4 font-bold text-center">عملیات</th>
+                    <th className="p-3 sm:p-4 font-bold text-center">عملیات</th>
+                   <th className="p-3 sm:p-4 font-bold text-center">وضعیت مالی</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800 text-white text-xs">
@@ -1127,16 +1113,6 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                             )}
                           </div>
                         </td>
-
-                        {/* وضعیت تعهدنامه */}
-                        <td className="p-3 sm:p-4 text-center">
-                          {p.hasAcceptedWaiver ? (
-                            <span className="bg-emerald-950/50 text-emerald-400 border border-emerald-900/40 px-2 py-0.5 rounded-md text-[10px]">امضا شده</span>
-                          ) : (
-                            <span className="bg-rose-950/50 text-rose-400 border border-rose-900/40 px-2 py-0.5 rounded-md text-[10px]">امضا نشده</span>
-                          )}
-                        </td>
-
                         <td className="p-3 sm:p-4 text-center font-medium">{p.tourName}</td>
                         
                         <td className="p-3 sm:p-4 text-center">
@@ -1155,6 +1131,14 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                           )}
                         </td>
 
+                        <td className="p-3 sm:p-4 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button onClick={() => openEditModal(p)} title="ویرایش" className="p-2 bg-zinc-900 hover:bg-zinc-800 text-blue-400 rounded-xl transition-all border border-zinc-800 cursor-pointer">
+                              <FaEdit size={13} />
+                            </button>
+                            <button onClick={() => handleDeletePassenger(p.id)} title="حذف" className="p-2 bg-zinc-900 hover:bg-zinc-800 text-rose-500 rounded-xl transition-all border border-zinc-800 cursor-pointer">
+                              <FaTrash size={13} />
+                            </button>
                         <td className="p-3 sm:p-4 text-center">
                           {p.insurance ? (
                             <span className="bg-emerald-950/50 text-emerald-400 border border-emerald-900/40 px-2 py-0.5 rounded-md text-[10px]">دارد</span>
@@ -1182,14 +1166,6 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                           </div>
                         </td>
 
-                        <td className="p-3 sm:p-4 text-center">
-                          <div className="flex items-center justify-center gap-1.5">
-                            <button onClick={() => openEditModal(p)} title="ویرایش" className="p-2 bg-zinc-900 hover:bg-zinc-800 text-blue-400 rounded-xl transition-all border border-zinc-800 cursor-pointer">
-                              <FaEdit size={13} />
-                            </button>
-                            <button onClick={() => handleDeletePassenger(p.id)} title="حذف" className="p-2 bg-zinc-900 hover:bg-zinc-800 text-rose-500 rounded-xl transition-all border border-zinc-800 cursor-pointer">
-                              <FaTrash size={13} />
-                            </button>
                           </div>
                         </td>
                       </tr>
@@ -1415,18 +1391,18 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                   <input type="text" required value={editFormData.fullName} onChange={(e) => setEditFormData({ ...editFormData, fullName: e.target.value })} className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black placeholder-white/70" />
                 </div>
 
-<div>
-  <label className="block text-xs sm:text-sm text-zinc-300 mb-1.5 font-medium">تاریخ تولد (مثلا 1370/01/01):</label>
-  <input
-    type="text"
-    dir="ltr"
-    placeholder="1370/01/01"
-    value={editFormData.birthDate || ''}
-    onChange={(e) => setEditFormData({ ...editFormData, birthDate: e.target.value })}
-    className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
-  />
-</div>
-
+{/* تاریخ تولد (نمایش و ویرایش) */}
+  <div>
+    <label className="block text-xs sm:text-sm text-zinc-300 mb-1.5 font-medium">تاریخ تولد (مثلا 1370/01/01):</label>
+    <input 
+      type="text" 
+      dir="ltr"
+      placeholder="1370/01/01"
+      value={editFormData.birthDate || ''} 
+      onChange={(e) => setEditFormData({ ...editFormData, birthDate: e.target.value })} 
+      className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black font-bold text-left font-mono focus:outline-none"
+    />
+  </div>
 
 
 <div>
@@ -1516,22 +1492,32 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
   </div>
 </div>
 </div>
+{/* وضعیت مالی و مبلغ (مبلغ به صورت خودکار و غیرقابل ویرایش دستی مستقیم جهت جلوگیری از خطا) */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div>
+      <label className="block text-xs text-zinc-300 mb-1.5 font-medium">وضعیت مالی:</label>
+      <select 
+        value={editFormData.paymentStatus || 'در انتظار پرداخت'} 
+        onChange={(e) => setEditFormData({ ...editFormData, paymentStatus: e.target.value })} 
+        className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black font-bold"
+      >
+        <option value="پرداخت شده">پرداخت شده ✓</option>
+        <option value="در انتظار پرداخت">در انتظار پرداخت ⏳</option>
+        <option value="رد شده">رد شده ✕</option>
+      </select>
+    </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-zinc-300 mb-1.5 font-medium">وضعیت مالی:</label>
-                    <select value={editFormData.paymentStatus} onChange={(e) => setEditFormData({ ...editFormData, paymentStatus: e.target.value })} className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black">
-                      <option value="پرداخت شده" className="bg-zinc-300 text-black">پرداخت شده</option>
-                      <option value="بیعانه" className="bg-zinc-300 text-black">بیعانه</option>
-                      <option value="در انتظار پرداخت" className="bg-zinc-300 text-black">در انتظار پرداخت</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-zinc-300 mb-1.5 font-medium">مبلغ واریزی (تومان):</label>
-                    <input type="text" value={editFormData.amount} onChange={(e) => setEditFormData({ ...editFormData, amount: e.target.value })} className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black" />
-                  </div>
-                </div>
-
+    <div>
+      <label className="block text-xs text-zinc-300 mb-1.5 font-medium">مبلغ واریزی (محاسبه خودکار بر اساس صندلی):</label>
+      <input 
+        type="text" 
+        readOnly
+        value={editFormData.amount ? `${Number(editFormData.amount).toLocaleString('fa-IR')} تومان` : '۰ تومان'} 
+        className="w-full bg-zinc-800 border border-zinc-700 p-2.5 rounded-xl text-xs text-emerald-400 font-bold font-mono text-left"
+        style={{ direction: 'ltr' }}
+      />
+    </div>
+  </div>
 <div>
   <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تاریخ پرداخت:</label>
   <input 
@@ -1793,106 +1779,128 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       </div>
 
 
-
-
 {/* مودال مشاهده و تایید فیش واریزی */}
-{isReceiptModalOpen && selectedReceiptPassenger && (
-  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 dir-rtl">
-    <div className="w-full max-w-lg bg-[#121214] border border-[#E5C060] rounded-2xl p-6 shadow-2xl relative overflow-hidden text-white space-y-4">
-      
-      {/* هدر مودال */}
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-        <h3 className="text-base font-bold flex items-center gap-2 text-[#E5C060]">
-          بررسی فیش واریزی: {selectedReceiptPassenger.fullName}
-        </h3>
-        <button 
-          onClick={() => {
-            setIsReceiptModalOpen(false);
-            setShowRejectInput(false);
-          }} 
-          className="text-zinc-400 hover:text-white text-lg"
-        >
-          ✕
-        </button>
-      </div>
+      {isReceiptModalOpen && selectedReceiptPassenger && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 dir-rtl">
+          <div className="w-full max-w-lg bg-[#121214] border border-[#E5C060] rounded-2xl p-4 sm:p-5 shadow-2xl relative max-h-[90vh] flex flex-col justify-between overflow-y-auto space-y-4">
+            
+            {/* هدر مودال */}
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3 shrink-0">
+              <h3 className="text-base font-bold flex items-center gap-2 text-[#E5C060]">
+                بررسی فیش واریزی: {selectedReceiptPassenger.fullName}
+              </h3>
+              <button
+                onClick={() => {
+                  setIsReceiptModalOpen(false);
+                  setShowRejectInput(false);
+                }}
+                className="text-zinc-400 hover:text-white text-lg p-1"
+              >
+                ✕
+              </button>
+            </div>
 
-      {/* جزئیات مسافر و تصویر فیش */}
-      <div className="space-y-3 text-xs sm:text-sm text-zinc-300">
-        <div className="grid grid-cols-2 gap-2 bg-zinc-900/60 p-3 rounded-xl border border-zinc-800">
-          <p><span className="text-zinc-500">شماره تماس:</span> {selectedReceiptPassenger.mobile}</p>
-          <p><span className="text-zinc-500">مبلغ:</span> {selectedReceiptPassenger.amount || 'ثبت نشده'}</p>
-          <p><span className="text-zinc-500">تاریخ فیش:</span> {selectedReceiptPassenger.receiptDate || 'ثبت نشده'}</p>
-          <p><span className="text-zinc-500">وضعیت فعلی:</span> <span className="text-amber-400">{selectedReceiptPassenger.paymentStatus}</span></p>
-        </div>
+            {/* جزئیات مسافر و محاسبه خودکار مبلغ برمبنای تعداد صندلی */}
+            <div className="space-y-3 text-xs sm:text-sm text-zinc-300 shrink-0">
+              <div className="grid grid-cols-2 gap-2 bg-zinc-900/60 p-3 rounded-xl border border-zinc-800">
+                <p><span className="text-zinc-500">شماره تماس: </span>{selectedReceiptPassenger.mobile}</p>
+                <p>
+                  <span className="text-zinc-500">مبلغ تور (محاسبه خودکار): </span>
+                  <span className="text-emerald-400 font-bold font-mono">
+                    {selectedReceiptPassenger.seatsCount && selectedReceiptPassenger.tourPrice
+                      ? `${(Number(selectedReceiptPassenger.seatsCount) * Number(selectedReceiptPassenger.tourPrice)).toLocaleString('fa-IR')} تومان`
+                      : (selectedReceiptPassenger.amount ? `${Number(selectedReceiptPassenger.amount).toLocaleString('fa-IR')} تومان` : 'ثبت نشده')}
+                  </span>
+                </p>
+                <p><span className="text-zinc-500">وضعیت فعلی: </span><span className="text-amber-400">{selectedReceiptPassenger.paymentStatus}</span></p>
+                <p><span className="text-zinc-500">تعداد صندلی: </span><span className="text-white font-bold">{selectedReceiptPassenger.seatsCount || 1} صندلی</span></p>
+              </div>
 
-        {/* نمایش تصویر فیش */}
-        <div className="w-full bg-black/50 border border-zinc-800 rounded-xl overflow-hidden flex items-center justify-center min-h-220px] max-h-350px]">
-          {selectedReceiptPassenger.receiptImage ? (
-            <img 
-              src={selectedReceiptPassenger.receiptImage} 
-              alt="فیش واریزی" 
-              className="w-full h-full object-contain"
-            />
-          ) : (
-            <p className="text-zinc-500 text-xs">تصویر فیش آپلود نشده است.</p>
-          )}
-        </div>
-      </div>
+              {/* اینپوت ثبت/ویرایش دستی تاریخ واریز توسط تور لیدر */}
+              <div className="bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-800/80">
+                <label className="block text-zinc-400 text-xs mb-1 font-medium">تاریخ واریز فیش (توسط لیدر):</label>
+                <input
+                  type="text"
+                  placeholder="مثلا: 1405/07/09"
+                  value={selectedReceiptPassenger.receiptDate || ''}
+                  onChange={(e) => {
+                    const updatedDate = e.target.value;
+                    setSelectedReceiptPassenger((prev: any) => ({
+                      ...prev,
+                      receiptDate: updatedDate
+                    }));
+                  }}
+                  className="w-full bg-[#1c1c21] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#E5C060] font-mono text-left"
+                  style={{ direction: 'ltr' }}
+                />
+              </div>
+            </div>
 
-      {/* فیلد علت رد (در صورت کلیک روی رد فیش) */}
-      {showRejectInput && (
-        <div className="space-y-2 animate-fadeIn">
-          <label className="block text-xs text-rose-400 font-medium">علت رد فیش را بنویسید:</label>
-          <input
-            type="text"
-            placeholder="مثال: تصویر ناخوانا است یا مبلغ مغایرت دارد"
-            value={rejectReason}
-            onChange={(e) => setRejectReason(e.target.value)}
-            className="w-full bg-zinc-900 border border-rose-600/60 p-2.5 rounded-xl text-xs text-white focus:outline-none"
-          />
+            {/* نمایش تصویر فیش (با ارتفاع کنترل شده جهت جلوگیری از اورفلو) */}
+            <div className="bg-black/50 border border-zinc-800 rounded-xl overflow-hidden flex items-center justify-center min-h-160px] max-h-240px] shrink-0">
+              {selectedReceiptPassenger.receiptImage ? (
+                <img
+                  src={selectedReceiptPassenger.receiptImage}
+                  alt="فیش واریزی"
+                  className="w-full h-full object-contain max-h-240px]"
+                />
+              ) : (
+                <p className="text-zinc-500 text-xs">تصویر فیش آپلود نشده است</p>
+              )}
+            </div>
+
+            {/* فیلد علت رد فیش */}
+            {showRejectInput && (
+              <div className="space-y-2 animate-fadeIn shrink-0">
+                <label className="block text-xs text-rose-400 font-medium">علت رد فیش را بنویسید:</label>
+                <input
+                  type="text"
+                  placeholder="مثال: تصویر ناخوانا است یا مبلغ مغایرت دارد"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  className="w-full bg-zinc-900 border border-rose-600/60 p-2.5 rounded-xl text-xs text-white focus:outline-none"
+                />
+              </div>
+            )}
+
+            {/* دکمه‌های عملیات (ثابت در انتهای مودال و همیشه قابل دیدن) */}
+            <div className="flex items-center gap-3 pt-2 shrink-0 border-t border-zinc-800">
+              {!showRejectInput ? (
+                <>
+                  <button
+                    onClick={() => handleApproveReceipt(selectedReceiptPassenger.id)}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all shadow-lg cursor-pointer"
+                  >
+                    (پرداخت شده) تایید و ثبت نهایی ✓
+                  </button>
+                  <button
+                    onClick={() => setShowRejectInput(true)}
+                    className="bg-rose-600/20 hover:bg-rose-600 border border-rose-600 text-rose-300 hover:text-white font-medium py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all cursor-pointer"
+                  >
+                    رد فیش ✕
+                  </button>
+                </>
+              ) : (
+                <div className="flex gap-2 w-full">
+                  <button
+                    onClick={() => handleRejectReceipt(selectedReceiptPassenger.id)}
+                    className="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 px-3 rounded-xl text-xs transition-all cursor-pointer"
+                  >
+                    ارسال علت و رد فیش
+                  </button>
+                  <button
+                    onClick={() => setShowRejectInput(false)}
+                    className="bg-zinc-800 text-zinc-300 py-2 px-3 rounded-xl text-xs transition-all cursor-pointer"
+                  >
+                    انصراف
+                  </button>
+                </div>
+              )}
+            </div>
+
+          </div>
         </div>
       )}
-
-      {/* دکمه‌های عملیات */}
-      <div className="flex items-center gap-3 pt-2">
-        {!showRejectInput ? (
-          <>
-            <button
-              onClick={() => handleApproveReceipt(selectedReceiptPassenger.id)}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all"
-            >
-              ✓ تایید و ثبت نهایی (پرداخت شده)
-            </button>
-
-            <button
-              onClick={() => setShowRejectInput(true)}
-              className="bg-rose-600/20 hover:bg-rose-600 border border-rose-600 text-rose-300 hover:text-white font-medium py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all"
-            >
-              ✕ رد فیش
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => handleRejectReceipt(selectedReceiptPassenger.id)}
-              className="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all"
-            >
-              ثبت رد فیش
-            </button>
-            <button
-              onClick={() => setShowRejectInput(false)}
-              className="bg-zinc-800 text-zinc-300 py-2.5 px-4 rounded-xl text-xs"
-            >
-              انصراف
-            </button>
-          </>
-        )}
-      </div>
-
-    </div>
-  </div>
-)}
-
 
 
 {/* مودال هوش مصنوعی */}

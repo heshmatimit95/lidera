@@ -50,6 +50,19 @@ function TourForm() {
   const [isCopied, setIsCopied] = useState(false);
   const idCardInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
+const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+const [showTermsAccordion, setShowTermsAccordion] = useState(false);
+
+const isBirthDateValid = birthDate.trim().length >= 8; // مثلاً 1370/01/01
+const isNationalIdValid = nationalId.trim().length === 10;
+
+// تابع تبدیل اعداد فارسی/عربی به انگلیسی
+  const toEnglishDigits = (str: string) => {
+    if (!str) return "";
+    return str
+      .replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d).toString())
+      .replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d).toString());
+  };
   const handleRemoveIdCard = () => {
     setIdCardImage(null);
     if (idCardPreview) {
@@ -545,25 +558,32 @@ return (
                     <label className="block text-sm  text-white mb-2 font-medium">نام و نام خانوادگی نماینده مسافران</label>
                     <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="مثال: رضا کیهانی" className="w-full bg-[#1c1c21]  border border-[#F9704E] focus:border-[#F9704E] p-4 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-medium" />
                   </div>
-<div>
-  <label className="block text-sm text-white mb-2 font-medium">تاریخ تولد (مثلا 1370/01/01):</label>
-  <input
-    type="text"
-    dir="ltr"
-    required
-    placeholder="1370/01/01"
-    value={birthDate}
-    onChange={(e) => setBirthDate(e.target.value)}
-    className={`w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono tracking-wider font-medium ${birthDate.length > 0 && !isIdValid ? ' border border-[#F9704E] focus:border-red-500' : ' border border-[#F9704E] focus:border-[#F9704E]'}`} 
-    style={{ direction: 'ltr' }}
-  />
-</div>
+
                   <div>
                     <label className="block text-sm text-white mb-2 font-medium">شماره موبایل</label>
                     <input type="tel" required maxLength={11} value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="09191294068" className={`w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono tracking-wider font-medium ${phone.length > 0 && !isPhoneValid ? ' border border-[#F9704E] focus:border-red-500' : ' border border-[#F9704E] focus:border-[#F9704E]'}`} style={{ direction: 'ltr' }} />
                   </div>
 
-                  {isPhoneValid && (
+{/* ۳. تاریخ تولد (آکاردئونی - پس از تکمیل ۱۱ رقم موبایل) */}
+  {isPhoneValid && (
+    <div className="animate-fadeIn transition-all duration-300">
+      <label className="block text-sm text-white mb-2 font-medium">تاریخ تولد (مثلا 1370/01/01):</label>
+      <input
+        type="text"
+        required
+        placeholder="1370/01/01"
+        value={birthDate}
+        onChange={(e) => {
+          const enVal = toEnglishDigits(e.target.value);
+          setBirthDate(enVal);
+        }}
+        className="w-full bg-[#1c1c21] border border-[#F9704E] p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono"
+        style={{ direction: 'ltr' }}
+      />
+    </div>
+  )}
+
+                  {isBirthDateValid&& (
                     <div className="space-y-5 animate-fadeIn">
                       <div>
                         <label className="block text-sm text-white mb-2 font-medium">کد ملی</label>
@@ -582,7 +602,36 @@ return (
                           style={{ direction: 'ltr' }} 
                         />
                       </div>
+{/* ۵. بخش تعهدنامه کشویی و اجباری (ظهور پس از ۱۰ رقمی شدن کد ملی) */}
+      {isNationalIdValid && (
+        <div className="bg-[#1c1c21] border border-[#F9704E] rounded-2xl p-4 space-y-3 animate-fadeIn transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-[#E5C060] flex items-center gap-1.5">
+              📜 تعهدنامه سلامت و قوانین سفر
+            </label>
+            <button
+              type="button"
+              onClick={() => alert("متن کامل قوانین: مسافر متعهد می‌شود تمامی اصول ایمنی، سلامت و زمان‌بندی تور را رعایت کند.")}
+              className="text-[11px] text-amber-400 hover:underline cursor-pointer"
+            >
+              مشاهده متن کامل
+            </button>
+          </div>
 
+          <label className="flex items-start gap-2.5 cursor-pointer pt-1">
+            <input
+              type="checkbox"
+              checked={isTermsAccepted}
+              onChange={(e) => setIsTermsAccepted(e.target.checked)}
+              required
+              className="mt-0.5 accent-[#E5C060] w-4 h-4 rounded cursor-pointer"
+            />
+            <span className="text-xs text-zinc-300 leading-relaxed">
+              اینجانب تمامی قوانین سفر، شرایط کنسل‌شدن و تعهدنامه سلامت و ایمنی را مطالعه نموده و با آگاهی کامل پذیرفتم.
+            </span>
+          </label>
+        </div>
+      )}
                       <div>
                         <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
                         <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
@@ -602,6 +651,30 @@ return (
                         )}
                         {idCardError && <p className="text-xs text-red-400 mt-2 font-medium">{idCardError}</p>}
                       </div>
+                    {/* اینپوت کد ملی */}
+<div>
+  <label className="text-xs text-zinc-300 block mb-1">کد ملی مسافر:</label>
+  <input
+    type="text"
+    value={nationalId}
+    maxLength={10}
+    onChange={(e) => {
+      const val = e.target.value;
+      setNationalId(val);
+      // وقتی کاربر شروع به وارد کردن کد ملی کرد یا کد ملی ۱۰ رقمی شد تعهدنامه باز شود
+      if (val.trim().length > 0) {
+        setShowTermsAccordion(true);
+      } else {
+        setShowTermsAccordion(false);
+        setIsTermsAccepted(false);
+      }
+    }}
+    placeholder="مثلاً: 0012345678"
+    className="w-full bg-zinc-900/80 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors"
+  />
+</div>
+
+
                     </div>
                   )}
                 </div>
@@ -697,32 +770,6 @@ return (
                     {getValidationHint()}
                   </div>
                 )}
-{/* تعهدنامه دیجیتال و قوانین سفر (مرحله آخر) */}
-<div className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-2xl space-y-3 mb-4">
-  <div className="flex items-center justify-between">
-    <label className="text-xs font-bold text-[#E5C060] flex items-center gap-1.5">
-      📜 تعهدنامه سلامت و قوانین سفر
-    </label>
-    <button 
-      type="button"
-      onClick={() => alert('متن کامل قوانین: مسافر متعهد می‌شود تمامی اصول ایمنی، سلامت و زمان‌بندی تور را رعایت کند و مسئولیت عدم رعایت آن بر عهده خودش می‌باشد.')}
-      className="text-[11px] text-amber-400 hover:underline cursor-pointer"
-    >
-      مشاهده متن کامل
-    </button>
-  </div>
-
-  <label className="flex items-start gap-2.5 cursor-pointer pt-1">
-    <input 
-      type="checkbox" 
-      required
-      className="mt-0.5 accent-[#E5C060] w-4 h-4 rounded cursor-pointer"
-    />
-    <span className="text-xs text-zinc-300 leading-relaxed">
-      اینجانب تمامی قوانین سفر، شرایط کنسلی و تعهدنامه سلامت و ایمنی را مطالعه نموده و با آگاهی کامل پذیرفتم.
-    </span>
-  </label>
-</div>
                 <div className="flex gap-3">
                   {step > 1 && (
                     <button type="button" onClick={prevStep} className="w-1/3 bg-amber-500/10 hover:bg-amber-500/10 text-white font-bold py-4 rounded-xl text-xs transition-all border border-[#F9704E] active:scale-95">
@@ -733,7 +780,7 @@ return (
                   {step < 3 ? (
                     <button 
                       type="button" 
-                      disabled={!isStepValid()} 
+                     disabled={!isTermsAccepted || !isNationalIdValid}
                       onClick={nextStep} 
                       className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-95 flex items-center justify-center disabled:cursor-not-allowed border" 
                       style={
