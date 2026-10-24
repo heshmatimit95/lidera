@@ -1062,15 +1062,15 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
         <div className="bg-[#1e1e1e] rounded-2xl border-2 border-[#E5C060] shadow-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-right border-collapse">
-              <thead className="bg-[#2a2a2a] text-white text-xs text-sm">
+<thead className="bg-[#2a2a2a] text-white text-xs sm:text-sm">
   <tr>
-    <th className="p-3 sm:p-4 font-bold text-right">نام مسافر و کد ملی</th>
-    <th className="p-3 sm:p-4 font-bold text-center">تلفن تماس</th>
-    <th className="p-3 sm:p-4 font-bold text-center">عنوان تور</th>
-    <th className="p-3 sm:p-4 font-bold text-center">تاریخ، مبلغ و تصویر فیش</th>
-    <th className="p-3 sm:p-4 font-bold text-center">عملیات</th>
-    <th className="p-3 sm:p-4 font-bold text-center">وضعیت مالی</th>
-    <th className="p-3 sm:p-4 font-bold text-center">بیمه</th>
+    <th className="p-3 sm:p-4 font-bold text-right w-[22%]">نام مسافر و کد ملی</th>
+    <th className="p-3 sm:p-4 font-bold text-center w-[12%]">تلفن تماس</th>
+    <th className="p-3 sm:p-4 font-bold text-center w-[15%]">عنوان تور</th>
+    <th className="p-3 sm:p-4 font-bold text-center w-[18%]">تاریخ، مبلغ و تصویر فیش</th>
+    <th className="p-3 sm:p-4 font-bold text-center w-[12%]">عملیات</th>
+    <th className="p-3 sm:p-4 font-bold text-center w-[13%]">وضعیت مالی</th>
+    <th className="p-3 sm:p-4 font-bold text-center w-[8%]">بیمه</th>
   </tr>
 </thead>
               <tbody className="divide-y divide-zinc-800 text-white text-xs">
