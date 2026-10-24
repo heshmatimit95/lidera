@@ -1068,9 +1068,9 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                   <th className="p-3 sm:p-4 font-bold">تلفن تماس</th>
                  <th className="p-3 sm:p-4 font-bold text-center">عنوان تور</th>
                   <th className="p-3 sm:p-4 font-bold text-center">تاریخ، مبلغ و تصویر فیش</th>
+                   <th className="p-3 sm:p-4 font-bold text-center">عملیات</th>
                   <th className="p-3 sm:p-4 font-bold text-center">بیمه</th>
-                    <th className="p-3 sm:p-4 font-bold text-center">عملیات</th>
-                   <th className="p-3 sm:p-4 font-bold text-center">وضعیت مالی</th>
+                    <th className="p-3 sm:p-4 font-bold text-center">وضعیت مالی</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800 text-white text-xs">
