@@ -1062,17 +1062,17 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
         <div className="bg-[#1e1e1e] rounded-2xl border-2 border-[#E5C060] shadow-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-right border-collapse">
-              <thead>
-                <tr className="bg-[#2a2a2a] text-white text-xs sm:text-sm">
-                  <th className="p-3 sm:p-4 font-bold">نام مسافر و کد ملی</th>
-                  <th className="p-3 sm:p-4 font-bold">تلفن تماس</th>
-                 <th className="p-3 sm:p-4 font-bold text-center">عنوان تور</th>
-                  <th className="p-3 sm:p-4 font-bold text-center">تاریخ، مبلغ و تصویر فیش</th>
-                   <th className="p-3 sm:p-4 font-bold text-center">عملیات</th>
-                <th className="p-3 sm:p-4 font-bold text-center">وضعیت مالی</th>
-                     <th className="p-3 sm:p-4 font-bold text-center">بیمه</th>
-                </tr>
-              </thead>
+              <thead className="bg-[#2a2a2a] text-white text-xs text-sm">
+  <tr>
+    <th className="p-3 sm:p-4 font-bold text-right">نام مسافر و کد ملی</th>
+    <th className="p-3 sm:p-4 font-bold text-center">تلفن تماس</th>
+    <th className="p-3 sm:p-4 font-bold text-center">عنوان تور</th>
+    <th className="p-3 sm:p-4 font-bold text-center">تاریخ، مبلغ و تصویر فیش</th>
+    <th className="p-3 sm:p-4 font-bold text-center">عملیات</th>
+    <th className="p-3 sm:p-4 font-bold text-center">وضعیت مالی</th>
+    <th className="p-3 sm:p-4 font-bold text-center">بیمه</th>
+  </tr>
+</thead>
               <tbody className="divide-y divide-zinc-800 text-white text-xs">
                 {paginatedPassengers.length === 0 ? (
                   <tr><td colSpan={8} className="p-8 text-center text-zinc-500">هیچ مسافری یافت نشد!</td></tr>
