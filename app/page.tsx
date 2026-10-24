@@ -637,24 +637,31 @@ return (
           </label>
         </div>
       )}
-                      <div>
-                        <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
-                        <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
-                        {idCardPreview ? (
-                    <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
-     
-                            <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
-                              <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-neutral-200 transition-all cursor-pointer">تغییر عکس</button>
-                              <button type="button" onClick={handleRemoveIdCard} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-bold transition-all cursor-pointer">حذف عکس</button>
-                            </div>
-                          </div>
-                        ) : (
-                          <button type="button" onClick={() => idCardInputRef.current?.click()}  className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${receiptError ? 'border-red-500/50 text-red-400' : ' border-[#F9704E] hover:border-[#F9704E]/50 text-neutral-400'}`}>
-                          </button>
-                        )}
-                        {idCardError && <p className="text-xs text-red-400 mt-2 font-medium">{idCardError}</p>}
-                      </div>
-
+<div>
+  <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری):</label>
+  <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
+  
+  {/* اصلاح شرط برای نمایش پیش‌نمایش در صورت وجود فایل یا پیش‌نمایش */}
+  {idCardPreview || idCardImage ? (
+    <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] bg-black/40 flex items-center justify-center">
+      <img 
+        src={idCardPreview || (idCardImage instanceof File ? URL.createObjectURL(idCardImage) : '')} 
+        alt="پیش‌نمایش کارت ملی" 
+        className="w-full h-full object-contain" 
+      />
+      <div className="absolute inset-x-0 bottom-0 bg-black/70 p-2 flex items-center justify-center gap-3">
+        <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-xs bg-white text-black px-3 py-1.5 rounded-lg font-bold hover:bg-zinc-200 transition-all cursor-pointer">تغییر عکس</button>
+        <button type="button" onClick={handleRemoveIdCard} className="text-xs bg-rose-600 text-white px-3 py-1.5 rounded-lg font-bold hover:bg-rose-500 transition-all cursor-pointer">حذف عکس</button>
+      </div>
+    </div>
+  ) : (
+    <button type="button" onClick={() => idCardInputRef.current?.click()} className="w-full border-2 border-dashed border-[#F9704E] bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 hover:border-orange-400 flex flex-col items-center justify-center gap-2 cursor-pointer">
+      <span className="text-lg">🪪</span>
+      <span className="text-zinc-300 font-medium">برای آپلود عکس کارت ملی کلیک کنید</span>
+    </button>
+  )}
+  {idCardError && <p className="text-xs text-red-400 mt-2">{idCardError}</p>}
+</div>
                     </div>
                   )}
                 </div>
