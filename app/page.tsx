@@ -174,14 +174,6 @@ const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const isPhoneValid = /^09\d{9}$/.test(phone);
   const isIdValid = /^\d{10}$/.test(nationalId);
 
-  const isStepValid = () => {
-    if (step === 1) return selectedTour !== '';
-    if (step === 2) {
-      return fullName.trim() !== '' && isPhoneValid && isIdValid && !idCardError;
-    }
-    if (step === 3) return receiptImage !== null && !receiptError;
-    return false;
-  };
 
   const getValidationHint = () => {
     if (step === 1 && !selectedTour) return "لطفاً ابتدا یک تور انتخاب کنید.";
@@ -330,6 +322,32 @@ const handleRemoveReceipt = () => {
     receiptInputRef.current.value = "";
   }
 };
+
+
+
+const isStepValid = () => {
+    if (step === 1) {
+      return selectedTour && Number(seatsCount) > 0;
+    } 
+    else if (step === 2) {
+      const isPhoneValid = phone.trim().length === 11;
+      const isBirthDateValid = birthDate.trim().length >= 8;
+      const isNationalIdValid = nationalId.trim().length === 10;
+      
+      // حتما باید تمام فیلدها پر باشند و تیک تعهدنامه (isTermsAccepted) هم خورده باشد
+      return fullName.trim().length > 0 && isPhoneValid && isBirthDateValid && isNationalIdValid && isTermsAccepted;
+    }
+    return true;
+  };
+
+
+
+
+
+
+
+
+
 
 
   // ۲. بعد از اتمام لودینگ، اگر واقعاً تورلیدری پیدا نشد خطای معتبر نبودن لینک را بده
@@ -561,7 +579,7 @@ return (
 
                   <div>
                     <label className="block text-sm text-white mb-2 font-medium">شماره موبایل</label>
-                    <input type="tel" required maxLength={11} value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="09191294068" className={`w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono tracking-wider font-medium ${phone.length > 0 && !isPhoneValid ? ' border border-[#F9704E] focus:border-red-500' : ' border border-[#F9704E] focus:border-[#F9704E]'}`} style={{ direction: 'ltr' }} />
+                    <input type="tel" required maxLength={11} value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="09191294068" className={`w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono tracking-wider font-medium ${phone.length > 0 && !isPhoneValid ? ' border border-[#F9704E] focus:border-[#F9704E]' : ' border border-[#F9704E] focus:border-[#F9704E]'}`} style={{ direction: 'ltr' }} />
                   </div>
 
 {/* ۳. تاریخ تولد (آکاردئونی - پس از تکمیل ۱۱ رقم موبایل) */}
