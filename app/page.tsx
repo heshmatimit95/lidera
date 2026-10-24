@@ -174,6 +174,14 @@ const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const isPhoneValid = /^09\d{9}$/.test(phone);
   const isIdValid = /^\d{10}$/.test(nationalId);
 
+  const isStepValid = () => {
+    if (step === 1) return selectedTour !== '';
+    if (step === 2) {
+      return fullName.trim() !== '' && isPhoneValid && isIdValid && !idCardError && isBirthDateValid && isNationalIdValid && isTermsAccepted;
+    }
+    if (step === 3) return receiptImage !== null && !receiptError;
+    return false;
+  };
 
   const getValidationHint = () => {
     if (step === 1 && !selectedTour) return "لطفاً ابتدا یک تور انتخاب کنید.";
@@ -322,23 +330,6 @@ const handleRemoveReceipt = () => {
     receiptInputRef.current.value = "";
   }
 };
-
-
-
-const isStepValid = () => {
-    if (step === 1) {
-      return selectedTour && Number(seatsCount) > 0;
-    } 
-    else if (step === 2) {
-      const isPhoneValid = phone.trim().length === 11;
-      const isBirthDateValid = birthDate.trim().length >= 8;
-      const isNationalIdValid = nationalId.trim().length === 10;
-      
-      // حتما باید تمام فیلدها پر باشند و تیک تعهدنامه (isTermsAccepted) هم خورده باشد
-      return fullName.trim().length > 0 && isPhoneValid && isBirthDateValid && isNationalIdValid && isTermsAccepted;
-    }
-    return true;
-  };
 
 
   // ۲. بعد از اتمام لودینگ، اگر واقعاً تورلیدری پیدا نشد خطای معتبر نبودن لینک را بده
@@ -611,6 +602,29 @@ return (
                           style={{ direction: 'ltr' }} 
                         />
                       </div>
+
+                    {/* اینپوت کد ملی */}
+<div>
+  <label className="text-xs text-zinc-300 block mb-1">کد ملی مسافر:</label>
+  <input
+    type="text"
+    value={nationalId}
+    maxLength={10}
+    onChange={(e) => {
+      const val = e.target.value;
+      setNationalId(val);
+      // وقتی کاربر شروع به وارد کردن کد ملی کرد یا کد ملی ۱۰ رقمی شد تعهدنامه باز شود
+      if (val.trim().length > 0) {
+        setShowTermsAccordion(true);
+      } else {
+        setShowTermsAccordion(false);
+        setIsTermsAccepted(false);
+      }
+    }}
+    placeholder="مثلاً: 0012345678"
+    className="w-full bg-zinc-900/80 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors"
+  />
+</div>
 
 
 
