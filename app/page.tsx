@@ -649,10 +649,10 @@ return (
                             </div>
                           </div>
                         ) : (
-                      <button type="button" onClick={() => receiptInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${receiptError ? 'border-red-500/50 text-red-400' : 'border-neutral-800 hover:border-[#F9704E]/50 text-neutral-400'}`}>
-                        <span className="text-lg">📸</span>
-                        <span>برای آپلود عکس فیش کلیک کنید</span>
-                      </button>
+                          <button type="button" onClick={() => idCardInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${idCardError ? 'border-red-500/50 text-red-400' : 'border-neutral-800 hover:border-[#F9704E]/50 text-neutral-400'}`}>
+                            <span className="text-lg">🪪</span>
+                            <span>برای آپلود عکس کارت ملی کلیک کنید</span>
+                          </button>
                         )}
                         {idCardError && <p className="text-xs text-red-400 mt-2 font-medium">{idCardError}</p>}
                       </div>
