@@ -532,30 +532,34 @@ const openEditModal = (passenger: Passenger) => {
     if (!editId) return;
 
     try {
-      const payload = { 
-        id: editId, 
-        ...editFormData, 
-        seatsCount: editFormData.seats 
+      // استخراج قیمت بر اساس فیلد قیمت موجود در اطلاعات فرم ویرایش یا مقدار پیش‌فرض
+      const rawPrice = editFormData?.tourPrice ? parseInt(String(editFormData.tourPrice).replace(/[^0-9]/g, ''), 10) : 0;
+      const calculatedAmount = (rawPrice * parseInt(String(editFormData.seats || 1), 10)).toString();
+
+      const payload = {
+        id: editId,
+        ...editFormData,
+        seatsCount: editFormData.seats,
+        amount: calculatedAmount,
       };
 
       const res = await fetch('/api/passengers', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       const responseData = await res.json();
 
       if (res.ok) {
-        setPassengers(prev => prev.map(p => p.id === editId ? { ...responseData, originalPaymentStatus: responseData.paymentStatus } : p));
-        alert('✅ اطلاعات مسافر ویرایش شد.');
-        
+        setPassengers((prev: any[]) => prev.map((p: any) => p.id === editId ? { ...responseData, originalPaymentStatus: responseData.paymentStatus } : p));
+        alert('اطلاعات مسافر ویرایش شد ✅');
       } else {
-        alert('❌ خطا در ویرایش اطلاعات: ' + (responseData.error || 'خطای سرور'));
+        alert('خطا در ویرایش اطلاعات: ' + (responseData.error || 'خطای سرور'));
       }
     } catch (e: any) {
       console.error(e);
-      alert('❌ خطای ارتباط با سرور.');
+      alert('خطای ارتباط با سرور ❌');
     }
   };
 

@@ -218,20 +218,23 @@ const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const tourObj = currentLider?.tours?.find((t: any) => (t.id || t._id) === selectedTour);
     const tourTitle = tourObj ? `${tourObj.title || tourObj.name} (${tourObj.date || ''})` : 'تور عمومی';
 
+    // محاسبه دقیق مبلغ کل بر اساس قیمت تور و تعداد صندلی‌های انتخابی
+    const rawPrice = tourObj?.price ? parseInt(tourObj.price.replace(/[^0-9]/g, ''), 10) || 0 : 0;
+    const calculatedAmount = (rawPrice * parseInt(String(seatsCount || 1), 10)).toString();
     try {
       const res = await submitPassengerAction({
         fullName: fullName.trim(),
         mobile: phone.trim(),
         nationalId: nationalId.trim(),
-        birthDate:  birthDate,
+        birthDate: birthDate,
         tourName: tourTitle,
         seatsCount: seatsCount,
-        leaderSlug: tenantSlug || currentLider?.slug || 'default',
-        tenantId: tenantSlug || currentLider?.slug || 'default',
+        amount: calculatedAmount, // <--- اضافه کردن مبلغ محاسبه شده اینجا
+        leaderSlug: currentLider?.slug || 'default',
+        tenantId: currentLider?.slug || 'default',
         idCardImage: idCardPreview || null,
-        receiptImage: receiptPreview || null
+        receiptImage: receiptPreview || null,
       });
-
       if (res && res.success) {
         setIsSuccess(true);
       } else {
