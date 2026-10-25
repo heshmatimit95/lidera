@@ -456,11 +456,11 @@ const calculateEditAmount = (selectedTourName: string, seatCount: number) => {
     const unitPrice = foundTour ? Number(String(foundTour.price).replace(/[^0-9]/g, '')) || 0 : 0;
     const total = unitPrice * seatCount;
 
-    setEditFormData((prev: any) => ({
+setEditFormData((prev: any) => ({
       ...prev,
       tourName: selectedTourName,
       seats: seatCount,
-      amount: total > 0 ? total.toString() : prev.amount,
+      amount: total.toString(), // <--- همیشه مبلغ جدید را به صورت مستقیم ست کن
     }));
   };;
   const openAddModal = () => {
