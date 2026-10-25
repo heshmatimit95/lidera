@@ -559,15 +559,20 @@ const handleUpdatePassenger = async (e: React.FormEvent) => {
       const seatCount = Number(editFormData.seats || 1);
       const finalAmount = (unitPrice * seatCount).toString();
 
-      const response = await fetch(`/api/passengers/${editId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...editFormData,
-          amount: finalAmount, // ارسال مبلغ دقیق محاسبه شده
-          seats: seatCount,
-        }),
-      });
+const response = await fetch(`/api/passengers`, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    id: editId, // <--- ارسال شناسه درون بدنه درخواست
+    tourName: editFormData.tourName,
+    seats: seatCount,
+    amount: finalAmount,
+    paymentStatus: editFormData.paymentStatus,
+    receiptDate: editFormData.receiptDate,
+    insurance: editFormData.insurance,
+    // و سایر فیلدهای فرم...
+  }),
+});
 
       const responseData = await response.json();
 
