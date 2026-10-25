@@ -124,18 +124,18 @@ export async function PUT(request: Request) {
 
 const updated = await prisma.passenger.update({
       where: { id },
-      data: {
-        ...(fullName !== undefined && { fullName }),
-        ...(mobileValue !== undefined && { mobile: mobileValue }),
-        ...(nationalId !== undefined && { nationalId }),
-        ...(tourName !== undefined && { tourName }),
-        ...(seatsValue !== undefined && { seatsCount: seatsValue }),
-        ...(paymentStatus !== undefined && { paymentStatus }),
-        ...(insurance !== undefined && { insurance: Boolean(insurance) }),
-        ...(receiptDate !== undefined && { receiptDate }),
-        amount: amount || null, // <--- این خط را جایگزین خط ۱۳۶ کن تا همیشه مقدار مبلغ ذخیره شود
-        ...(receiptImage !== undefined && { receiptImage })
-      }
+ data: {
+    ...(fullName !== undefined && { fullName }),
+    ...(mobileValue !== undefined && { mobile: mobileValue }),
+    ...(nationalId !== undefined && { nationalId }),
+    ...(tourName !== undefined && { tourName }),
+    ...(seatsValue !== undefined && { seatsCount: seatsValue }),
+    ...(paymentStatus !== undefined && { paymentStatus }),
+    ...(insurance !== undefined && { insurance: Boolean(insurance) }),
+    ...(receiptDate !== undefined && { receiptDate }),
+    amount: amount !== undefined && amount !== null ? String(amount) : '0',
+    ...(receiptImage !== undefined && { receiptImage })
+  },
     });
     
     const responseData = {
