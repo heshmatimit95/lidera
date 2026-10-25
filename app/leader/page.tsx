@@ -495,16 +495,16 @@ const openEditModal = (passenger: Passenger) => {
     
     const initialSeats = Number(p.seatsCount || p.seats) || 1;
     
-    setEditId(p.id);
+setEditId(p.id);
     setEditFormData({
-      fullName: p.fullName || p.name || '',
-      phone: p.phone || p.mobile || '',
+      fullName: p.fullName || '',
+      mobile: p.mobile || p.phone || '',
       nationalId: p.nationalId || p.national_id || p.nationalCode || p.national_code || '',
       tourName: initialTour,
       paymentStatus: p.paymentStatus || 'در انتظار پرداخت',
       insurance: Boolean(p.insurance),
       receiptDate: p.receiptDate || '',
-      amount: p.amount || '',
+      amount: p.amount ? String(p.amount) : '0',
       receiptImage: p.receiptImage || '',
       seats: initialSeats,
     });

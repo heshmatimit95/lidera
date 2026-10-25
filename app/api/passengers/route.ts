@@ -121,13 +121,14 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Passenger ID required' }, { status: 400 });
     }
 
- const updated = await prisma.passenger.update({
-      where: { id: String(id) }, // یا همینطور id مستقیماً
+const updated = await prisma.passenger.update({
+      where: { id: String(id) },
       data: {
         ...(fullName !== undefined && { fullName }),
         ...(mobileValue !== undefined && { mobile: mobileValue }),
         ...(nationalId !== undefined && { nationalId }),
         ...(tourName !== undefined && { tourName }),
+        // ذخیره دقیق تعداد صندلی با نام صریح ستون دیتابیس
         ...(seatsValue !== undefined && { seatsCount: seatsValue }),
         ...(paymentStatus !== undefined && { paymentStatus }),
         ...(insurance !== undefined && { insurance: Boolean(insurance) }),
@@ -136,7 +137,6 @@ export async function PUT(request: Request) {
         ...(receiptImage !== undefined && { receiptImage })
       },
     });
-
     return NextResponse.json(updated);
   } catch (error: any) {
     console.error('Detailed Passenger Update Error:', error);
