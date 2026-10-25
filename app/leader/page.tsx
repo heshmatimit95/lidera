@@ -1059,121 +1059,132 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
           </div>
         </div>
 {/* جدول مسافران */}
-        <div className="bg-[#1e1e1e] rounded-2xl border-2 border-[#E5C060] shadow-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-right border-collapse">
-<thead className="bg-[#2a2a2a] text-white text-xs sm:text-sm">
-  <tr>
-    <th className="p-3 sm:p-4 font-bold text-right">نام مسافر و کد ملی</th>
-    <th className="p-3 sm:p-4 font-bold text-center">تلفن تماس</th>
-    <th className="p-3 sm:p-4 font-bold text-center">عنوان تور</th>
-    <th className="p-3 sm:p-4 font-bold text-center">تاریخ، مبلغ و تصویر فیش</th>
-    <th className="p-3 sm:p-4 font-bold text-center">عملیات</th>
-    <th className="p-3 sm:p-4 font-bold text-center">وضعیت مالی</th>
-    <th className="p-3 sm:p-4 font-bold text-center">بیمه</th>
-  </tr>
-</thead>      <tbody className="divide-y divide-zinc-800 text-white text-xs">
-                {paginatedPassengers.length === 0 ? (
-                  <tr><td colSpan={8} className="p-8 text-center text-zinc-500">هیچ مسافری یافت نشد!</td></tr>
-                ) : (
-                  paginatedPassengers.map((p: any) => {
-                    const isChanged = p.paymentStatus !== p.originalPaymentStatus;
-                    const displaySeats = p.seatsCount || p.seats || 1;
-                    return (
-                      <tr key={p.id} className="hover:bg-zinc-900/50 transition-colors">
-                        <td className="p-3 sm:p-4">
-                          <div className="font-bold text-white text-xs sm:text-sm flex items-center justify-between">
-                            <span>{p.fullName}</span>
-                            <span className="text-[10px] bg-[#F9704E]/20 text-[#F9704E] border border-[#F9704E]/30 px-1.5 py-0.5 rounded-md font-mono mr-1">
-                              {displaySeats} نفره
-                            </span>
-                          </div>
-                          <div className="text-zinc-400 mt-0.5 text-[11px]">کد ملی: {p.nationalId}</div>
-                          {p.createdAt && (
-                            <div className="text-[10px] text-[#E5C060] font-mono mt-1 flex items-center gap-1">
-                              <span>⏰ ثبت:</span> 
-                              {new Date(p.createdAt).toLocaleDateString('fa-IR')} - {new Date(p.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                          )}
-                        </td>
+<div className="bg-[#1e1e1e] rounded-2xl border-2 border-[#E5C060] shadow-xl overflow-hidden">
+  <div className="overflow-x-auto">
+    <table className="w-full text-right border-collapse">
+      <thead className="bg-[#2a2a2a] text-white text-xs sm:text-sm">
+        <tr>
+          <th className="p-3 sm:p-4 font-bold text-right">نام مسافر و کد ملی</th>
+          <th className="p-3 sm:p-4 font-bold text-center">تلفن تماس</th>
+          <th className="p-3 sm:p-4 font-bold text-center">عنوان تور</th>
+          <th className="p-3 sm:p-4 font-bold text-center">تاریخ، مبلغ و تصویر فیش</th>
+          <th className="p-3 sm:p-4 font-bold text-center">عملیات</th>
+          <th className="p-3 sm:p-4 font-bold text-center">وضعیت مالی</th>
+          <th className="p-3 sm:p-4 font-bold text-center">بیمه</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-zinc-800 text-white text-xs">
+        {paginatedPassengers.length === 0 ? (
+          <tr>
+            <td colSpan={7} className="p-8 text-center text-zinc-500">هیچ مسافری یافت نشد!</td>
+          </tr>
+        ) : (
+          paginatedPassengers.map((p: any) => {
+            const isChanged = p.paymentStatus !== p.originalPaymentStatus;
+            const displaySeats = p.seatsCount || p.seats || 1;
+            return (
+              <tr key={p.id} className="hover:bg-zinc-900/50 transition-colors">
+                {/* ستون ۱: نام مسافر و کد ملی */}
+                <td className="p-3 sm:p-4">
+                  <div className="font-bold text-white text-xs sm:text-sm flex items-center justify-between">
+                    <span>{p.fullName}</span>
+                    <span className="text-[10px] bg-[#F9704E]/20 text-[#F9704E] border border-[#F9704E]/30 px-1.5 py-0.5 rounded-md font-mono mr-1">
+                      {displaySeats} نفره
+                    </span>
+                  </div>
+                  <div className="text-zinc-400 mt-0.5 text-[11px]">کد ملی: {p.nationalId}</div>
+                  {p.createdAt && (
+                    <div className="text-[10px] text-[#E5C060] font-mono mt-1 flex items-center gap-1">
+                      <span>⏰ ثبت:</span>
+                      {new Date(p.createdAt).toLocaleDateString('fa-IR')} - {new Date(p.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  )}
+                </td>
 
-                        {/* تلفن تماس + دکمه کپی */}
-                        <td className="p-3 sm:p-4 font-mono text-zinc-300 text-[11px] sm:text-xs" style={{ direction: 'ltr', textAlign: 'right' }}>
-                          <div className="flex items-center gap-1.5 justify-end">
-                            <span>{p.mobile || 'ثبت نشده'}</span>
-                            {p.mobile && (
-                              <button
-                                onClick={() => handleCopyText(p.mobile)}
-                                className="text-zinc-400 hover:text-white transition-colors text-[10px] p-1 rounded bg-zinc-800 hover:bg-zinc-700 cursor-pointer"
-                                title="کپی شماره تماس"
-                              >
-                                📋
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                        <td className="p-3 sm:p-4 text-center font-medium">{p.tourName}</td>
-                        
-                        <td className="p-3 sm:p-4 text-center">
-                          <div className="text-zinc-300 font-mono text-[11px]">{p.receiptDate || '-'}</div>
-                          <div className="text-emerald-400 font-mono font-bold mt-0.5">{p.amount ? `${p.amount} تومان` : '-'}</div>
-                          {p.receiptImage && (
-                            <button
-                              onClick={() => {
-                                setSelectedReceiptPassenger(p);
-                                setIsReceiptModalOpen(true);
-                              }}
-                              className="mt-1 text-[10px] text-[#F9704E] hover:underline flex items-center justify-center gap-1 mx-auto cursor-pointer"
-                            >
-                              <FaImage size={11} /> مشاهده فیش
-                            </button>
-                          )}
-                        </td>
+                {/* ستون ۲: تلفن تماس + دکمه کپی */}
+                <td className="p-3 sm:p-4 font-mono text-zinc-300 text-[11px] sm:text-xs" style={{ direction: 'ltr', textAlign: 'right' }}>
+                  <div className="flex items-center gap-1.5 justify-end">
+                    <span>{p.mobile || 'ثبت نشده'}</span>
+                    {p.mobile && (
+                      <button
+                        onClick={() => handleCopyText(p.mobile)}
+                        className="text-zinc-400 hover:text-white transition-colors text-[10px] p-1 rounded bg-zinc-800 hover:bg-zinc-700 cursor-pointer"
+                        title="کپی شماره تماس"
+                      >
+                        📋
+                      </button>
+                    )}
+                  </div>
+                </td>
 
-                        <td className="p-3 sm:p-4 text-center">
-                          <div className="flex items-center justify-center gap-1.5">
-                            <button onClick={() => openEditModal(p)} title="ویرایش" className="p-2 bg-zinc-900 hover:bg-zinc-800 text-blue-400 rounded-xl transition-all border border-zinc-800 cursor-pointer">
-                              <FaEdit size={13} />
-                            </button>
-                            <button onClick={() => handleDeletePassenger(p.id)} title="حذف" className="p-2 bg-zinc-900 hover:bg-zinc-800 text-rose-500 rounded-xl transition-all border border-zinc-800 cursor-pointer">
-                              <FaTrash size={13} />
-                            </button>
+                {/* ستون ۳: عنوان تور */}
+                <td className="p-3 sm:p-4 text-center font-medium">{p.tourName}</td>
+                
+                {/* ستون ۴: تاریخ، مبلغ و تصویر فیش */}
+                <td className="p-3 sm:p-4 text-center">
+                  <div className="text-zinc-300 font-mono text-[11px]">{p.receiptDate || '-'}</div>
+                  <div className="text-emerald-400 font-mono font-bold mt-0.5">{p.amount ? `${p.amount} تومان` : '-'}</div>
+                  {p.receiptImage && (
+                    <button
+                      onClick={() => {
+                        setSelectedReceiptPassenger(p);
+                        setIsReceiptModalOpen(true);
+                      }}
+                      className="mt-1 text-[10px] text-[#F9704E] hover:underline flex items-center justify-center gap-1 mx-auto cursor-pointer"
+                    >
+                      <FaImage size={11} /> مشاهده فیش
+                    </button>
+                  )}
+                </td>
 
-                        <td className="p-3 sm:p-4 text-center">
-                          <div className="flex flex-col items-center gap-1.5">
-                            <select 
-                              value={p.paymentStatus} 
-                              onChange={(e) => handleInlineStatusChange(p.id, e.target.value)}
-                              className="bg-zinc-900 border border-[#F9704E] rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer"
-                            >
-                              <option value="پرداخت شده">پرداخت شده</option>
-                              <option value="بیعانه">بیعانه</option>
-                              <option value="در انتظار پرداخت">در انتظار پرداخت</option>
-                            </select>
-                            {isChanged && (
-                              <button onClick={() => handleSaveSingleStatus(p.id, p.paymentStatus)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded text-[10px] flex items-center gap-1 shadow transition-all cursor-pointer">
-                                <FaCheck size={9} /> ثبت
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                        <td className="p-3 sm:p-4 text-center">
-                          {p.insurance ? (
-                            <span className="bg-emerald-950/50 text-emerald-400 border border-emerald-900/40 px-2 py-0.5 rounded-md text-[10px]">دارد</span>
-                          ) : (
-                            <span className="bg-zinc-950/50 text-zinc-500 border border-[#F9704E] px-2 py-0.5 rounded-md text-[10px]">ندارد</span>
-                          )}
-                        </td>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                {/* ستون ۵: عملیات (ویرایش و حذف) */}
+                <td className="p-3 sm:p-4 text-center">
+                  <div className="flex items-center justify-center gap-1.5">
+                    <button onClick={() => openEditModal(p)} title="ویرایش" className="p-2 bg-zinc-900 hover:bg-zinc-800 text-blue-400 rounded-xl transition-all border border-zinc-800 cursor-pointer">
+                      <FaEdit size={13} />
+                    </button>
+                    <button onClick={() => handleDeletePassenger(p.id)} title="حذف" className="p-2 bg-zinc-900 hover:bg-zinc-800 text-rose-500 rounded-xl transition-all border border-zinc-800 cursor-pointer">
+                      <FaTrash size={13} />
+                    </button>
+                  </div>
+                </td>
+
+                {/* ستون ۶: وضعیت مالی */}
+                <td className="p-3 sm:p-4 text-center">
+                  <div className="flex flex-col items-center gap-1.5">
+                    <select 
+                      value={p.paymentStatus} 
+                      onChange={(e) => handleInlineStatusChange(p.id, e.target.value)}
+                      className="bg-zinc-900 border border-[#F9704E] rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer"
+                    >
+                      <option value="پرداخت شده">پرداخت شده</option>
+                      <option value="بیعانه">بیعانه</option>
+                      <option value="در انتظار پرداخت">در انتظار پرداخت</option>
+                    </select>
+                    {isChanged && (
+                      <button onClick={() => handleSaveSingleStatus(p.id, p.paymentStatus)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded text-[10px] flex items-center gap-1 shadow transition-all cursor-pointer">
+                        <FaCheck size={9} /> ثبت
+                      </button>
+                    )}
+                  </div>
+                </td>
+
+                {/* ستون ۷: بیمه */}
+                <td className="p-3 sm:p-4 text-center">
+                  {p.insurance ? (
+                    <span className="bg-emerald-950/50 text-emerald-400 border border-emerald-900/40 px-2 py-0.5 rounded-md text-[10px]">دارد</span>
+                  ) : (
+                    <span className="bg-zinc-950/50 text-zinc-500 border border-[#F9704E] px-2 py-0.5 rounded-md text-[10px]">ندارد</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
 {/* --- مودال افزودن مسافر (با فیش واریزی کامل) --- */}
         {/* --- مودال افزودن مسافر (با فیش واریزی کامل) --- */}
 {isAddModalOpen && (
@@ -1208,10 +1219,6 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
     />
   </div>
-
-
-
-
 
                 <div>
 
