@@ -445,8 +445,15 @@ const handleTourImageUpload = (tourIndex: number, e: React.ChangeEvent<HTMLInput
   };
   // تابع محاسبه و بروزرسانی مبلغ برای فرم "ویرایش" (دیتای ثبت‌نامی قبلی را اصلاح می‌کند)
 const calculateEditAmount = (selectedTourName: string, seatCount: number) => {
-    const foundTour = activeTours.find((t: any) => t.name === selectedTourName);
-    const unitPrice = foundTour ? Number(foundTour.price) || 0 : 0;
+    // جستجوی تور در لیست تورهای لیدر
+    const foundTour = activeTours.find((t: any) => 
+      t.name === selectedTourName || 
+      selectedTourName?.includes(t.name) || 
+      t.name?.includes(selectedTourName)
+    );
+    
+    // اگر قیمت پیدا شد، ضربدر تعداد صندلی کن
+    const unitPrice = foundTour ? Number(String(foundTour.price).replace(/[^0-9]/g, '')) || 0 : 0;
     const total = unitPrice * seatCount;
 
     setEditFormData((prev: any) => ({
@@ -455,7 +462,7 @@ const calculateEditAmount = (selectedTourName: string, seatCount: number) => {
       seats: seatCount,
       amount: total > 0 ? total.toString() : prev.amount,
     }));
-  };
+  };;
   const openAddModal = () => {
     const defaultTourName = activeTours[0]?.name || '';
     const defaultTourPrice = activeTours[0]?.price ? Number(activeTours[0].price) : 0;
@@ -491,6 +498,7 @@ const openEditModal = (passenger: Passenger) => {
       receiptImage: p.receiptImage || '',
       seats: initialSeats,
     });
+    calculateEditAmount(initialTour, initialSeats);
     setIsEditModalOpen(true);
   };
  
