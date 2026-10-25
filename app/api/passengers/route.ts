@@ -110,44 +110,37 @@ export async function PUT(request: Request) {
     const body = await request.json();
     console.log("Received PUT body:", body);
 
-   const { id, fullName, mobile, phone, nationalId, tourName, paymentStatus, insurance, receiptDate, amount, receiptImage } = body;
+    const { id, fullName, mobile, phone, nationalId, tourName, paymentStatus, insurance, receiptDate, amount, receiptImage } = body;
     const mobileValue = mobile || phone;
-    
-    // در بخش ویرایش (PUT)، تعداد صندلی تنها در صورتی به‌روز می‌شود که کاربر مقدار آن را در فرم ویرایش تغییر داده باشد
+
     const seatsValue = body.seatsCount !== undefined || body.seats !== undefined 
       ? Number(body.seatsCount || body.seats) 
       : undefined;
-    
+
     if (!id) {
       return NextResponse.json({ error: 'Passenger ID required' }, { status: 400 });
     }
 
-const updated = await prisma.passenger.update({
-      where: { id },
- data: {
-    ...(fullName !== undefined && { fullName }),
-    ...(mobileValue !== undefined && { mobile: mobileValue }),
-    ...(nationalId !== undefined && { nationalId }),
-    ...(tourName !== undefined && { tourName }),
-    ...(seatsValue !== undefined && { seatsCount: seatsValue }),
-    ...(paymentStatus !== undefined && { paymentStatus }),
-    ...(insurance !== undefined && { insurance: Boolean(insurance) }),
-    ...(receiptDate !== undefined && { receiptDate }),
-    amount: amount !== undefined && amount !== null ? String(amount) : '0',
-    ...(receiptImage !== undefined && { receiptImage })
-  },
+ const updated = await prisma.passenger.update({
+      where: { id: String(id) }, // یا همینطور id مستقیماً
+      data: {
+        ...(fullName !== undefined && { fullName }),
+        ...(mobileValue !== undefined && { mobile: mobileValue }),
+        ...(nationalId !== undefined && { nationalId }),
+        ...(tourName !== undefined && { tourName }),
+        ...(seatsValue !== undefined && { seatsCount: seatsValue }),
+        ...(paymentStatus !== undefined && { paymentStatus }),
+        ...(insurance !== undefined && { insurance: Boolean(insurance) }),
+        ...(receiptDate !== undefined && { receiptDate }),
+        amount: amount !== undefined && amount !== null ? String(amount) : '0',
+        ...(receiptImage !== undefined && { receiptImage })
+      },
     });
-    
-    const responseData = {
-      ...(updated as any),
-      phone: (updated as any).phone || (updated as any).mobile,
-      mobile: (updated as any).mobile || (updated as any).phone
-    };
 
-    return NextResponse.json(responseData);
+    return NextResponse.json(updated);
   } catch (error: any) {
-    console.error('Passenger update error details:', error);
-    return NextResponse.json({ error: error.message || 'Failed to update passenger' }, { status: 500 });
+    console.error('Detailed Passenger Update Error:', error);
+    return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
   }
 }
 
