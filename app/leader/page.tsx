@@ -566,7 +566,8 @@ const response = await fetch(`/api/passengers`, {
         id: editId,
         tourName: editFormData.tourName,
         seats: seatCount,
-        amount: String(finalAmount || editFormData.amount || '0'),
+        // گرفتن مستقیم مبلغ از فرم یا متغیر محاسبه‌شده با پشتیبانی کامل از مقدار عددی
+        amount: String(editFormData.amount || finalAmount || '0'),
         paymentStatus: editFormData.paymentStatus,
         receiptDate: editFormData.receiptDate,
         insurance: editFormData.insurance,
