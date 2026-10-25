@@ -498,7 +498,7 @@ const openEditModal = (passenger: Passenger) => {
 setEditId(p.id);
     setEditFormData({
       fullName: p.fullName || '',
-      mobile: p.mobile || p.phone || '',
+       phone: p.phone || p.mobile || '',
       nationalId: p.nationalId || p.national_id || p.nationalCode || p.national_code || '',
       tourName: initialTour,
       paymentStatus: p.paymentStatus || 'در انتظار پرداخت',
@@ -575,14 +575,15 @@ const response = await fetch(`/api/passengers`, {
 });
 
       const responseData = await response.json();
-
-      if (response.ok) {
+if (response.ok) {
+        // استفاده از داده‌های واقعی و جدیدی که سرور برگردانده است
         setPassengers((prev: any[]) =>
-          prev.map((p: any) => (p.id === editId ? { ...p, ...editFormData, amount: finalAmount, seats: seatCount } : p))
+          prev.map((p: any) => (p.id === editId ? responseData : p))
         );
         setIsEditModalOpen(false);
         alert('ویرایش مسافر با موفقیت انجام شد ✅');
-      } else {
+      }
+       else {
         alert('خطا در بروزرسانی ❌: ' + (responseData.error || 'خطای سرور'));
       }
     } catch (error) {
