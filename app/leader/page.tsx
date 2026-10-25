@@ -444,7 +444,7 @@ const handleTourImageUpload = (tourIndex: number, e: React.ChangeEvent<HTMLInput
     }));
   };
   // تابع محاسبه و بروزرسانی مبلغ برای فرم "ویرایش" (دیتای ثبت‌نامی قبلی را اصلاح می‌کند)
-  const calculateEditAmount = (selectedTourName: string, seatCount: number) => {
+const calculateEditAmount = (selectedTourName: string, seatCount: number) => {
     const foundTour = activeTours.find((t: any) => t.name === selectedTourName);
     const unitPrice = foundTour ? Number(foundTour.price) || 0 : 0;
     const total = unitPrice * seatCount;
@@ -1280,20 +1280,20 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs text-zinc-300 mb-1.5 font-medium">انتخاب تور:</label>
-                    <select 
-                      value={addFormData.tourName} 
-                      onChange={(e) => {
-                        const selectedTour = e.target.value;
-                        setAddFormData((prev: any) => ({ ...prev, tourName: selectedTour }));
-                        calculateAddAmount(selectedTour, Number(addFormData.seats));
-                      }} 
-                      className="w-full bg-zinc-300  border border-orange-600 p-2.5 rounded-xl text-xs text-black"
-                    >
-                      <option value="" className="bg-zinc-300 text-black">انتخاب کنید...</option>
-                      {activeTours.map((t, idx) => (
-                        <option key={t.id || idx} value={t.name} className="bg-zinc-900 text-black">{t.name}</option>
-                      ))}
-                    </select>
+<select
+  value={editFormData.tourName || ''}
+  onChange={(e) => {
+    const selectedTour = e.target.value;
+    calculateEditAmount(selectedTour, Number(editFormData.seats || 1));
+  }}
+  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-xs text-white"
+>
+  {activeTours.map((tour: any, idx: number) => (
+    <option key={idx} value={tour.name}>
+      {tour.name} - ({tour.price} تومان)
+    </option>
+  ))}
+</select>
                   </div>
 <div>
   <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تعداد صندلی/نفرات:</label>
@@ -1485,42 +1485,37 @@ onChange={(e) => {
                  <div>
   <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تعداد صندلی/نفرات:</label>
   <div className="flex items-center gap-1.5">
-    {/* دکمه منفی */}
-    <button
-      type="button"
-onClick={() => {
-  const newSeats = Math.max(1, Number(editFormData.seats || 1) - 1);
-  calculateEditAmount(editFormData.tourName, newSeats);
-}}
-      className="bg-zinc-800 hover:bg-zinc-300 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
-    >
-      -
-    </button>
+   {/* دکمه منفی */}
+<button
+  type="button"
+  onClick={() => {
+    const newSeats = Math.max(1, Number(editFormData.seats || 1) - 1);
+    calculateEditAmount(editFormData.tourName, newSeats);
+  }}
+  className="px-3 py-1 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700"
+>
+  -
+</button>
 
-    {/* اینپوت تعداد بدون فلش‌های مزاحم مرورگر */}
-    <input 
-      type="number" 
-      min={1} 
-      value={addFormData.seats} 
-      onChange={(e) => {
-        const val = Math.max(1, Number(e.target.value));
-        setAddFormData((prev: any) => ({ ...prev, seats: val }));
-        calculateAddAmount(addFormData.tourName, val);
-      }} 
-      className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-center focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" 
-    />
+{/* نمایش تعداد صندلی */}
+<input
+  type="text"
+  value={editFormData.seats || 1}
+  readOnly
+  className="w-12 text-center bg-transparent text-white font-bold"
+/>
 
-    {/* دکمه مثبت */}
-    <button
-      type="button"
-onClick={() => {
-  const newSeats = Number(editFormData.seats || 1) + 1;
-  calculateEditAmount(editFormData.tourName, newSeats);
-}}
-      className="bg-zinc-800 hover:bg-zinc-300 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
-    >
-      +
-    </button>
+{/* دکمه مثبت */}
+<button
+  type="button"
+  onClick={() => {
+    const newSeats = Number(editFormData.seats || 1) + 1;
+    calculateEditAmount(editFormData.tourName, newSeats);
+  }}
+  className="px-3 py-1 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700"
+>
+  +
+</button>
   </div>
 </div>
 </div>
