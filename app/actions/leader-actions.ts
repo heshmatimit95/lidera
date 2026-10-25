@@ -16,7 +16,7 @@ export async function savePassengerPayment(formData: FormData, pathName: string)
 
     let imagePath = "";
 
-    // اگر مسافر فیش واریزی آپلود کرده باشد، آن را روی سرور ذخیره می‌کنیم
+    // اگر مسافر فیش واریزی آپلود کرده باشد، آن را روی سرور ذخیره می‌کنیم10
     if (file && file.size > 0) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);

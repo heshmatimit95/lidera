@@ -548,38 +548,40 @@ const openEditModal = (passenger: Passenger) => {
     }
   };
 
-  const handleUpdatePassenger = async (e: React.FormEvent) => {
+const handleUpdatePassenger = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editId) return;
 
     try {
-      // استخراج قیمت بر اساس فیلد قیمت موجود در اطلاعات فرم ویرایش یا مقدار پیش‌فرض
-      const rawPrice = editFormData?.tourPrice ? parseInt(String(editFormData.tourPrice).replace(/[^0-9]/g, ''), 10) : 0;
-      const calculatedAmount = (rawPrice * parseInt(String(editFormData.seats || 1), 10)).toString();
+      // پیدا کردن قیمت تور انتخاب شده از لیست تورهای فعال
+      const foundTour = activeTours.find((t: any) => t.name === editFormData.tourName);
+      const unitPrice = foundTour ? Number(String(foundTour.price).replace(/[^0-9]/g, '')) || 0 : 0;
+      const seatCount = Number(editFormData.seats || 1);
+      const finalAmount = (unitPrice * seatCount).toString();
 
-      const payload = {
-        id: editId,
-        ...editFormData,
-        seatsCount: editFormData.seats,
-        amount: calculatedAmount,
-      };
-
-      const res = await fetch('/api/passengers', {
+      const response = await fetch(`/api/passengers/${editId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...editFormData,
+          amount: finalAmount, // ارسال مبلغ دقیق محاسبه شده
+          seats: seatCount,
+        }),
       });
 
-      const responseData = await res.json();
+      const responseData = await response.json();
 
-      if (res.ok) {
-        setPassengers((prev: any[]) => prev.map((p: any) => p.id === editId ? { ...responseData, originalPaymentStatus: responseData.paymentStatus } : p));
-        alert('اطلاعات مسافر ویرایش شد ✅');
+      if (response.ok) {
+        setPassengers((prev: any[]) =>
+          prev.map((p: any) => (p.id === editId ? { ...p, ...editFormData, amount: finalAmount, seats: seatCount } : p))
+        );
+        setIsEditModalOpen(false);
+        alert('ویرایش مسافر با موفقیت انجام شد ✅');
       } else {
-        alert('خطا در ویرایش اطلاعات: ' + (responseData.error || 'خطای سرور'));
+        alert('خطا در بروزرسانی ❌: ' + (responseData.error || 'خطای سرور'));
       }
-    } catch (e: any) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
       alert('خطای ارتباط با سرور ❌');
     }
   };
@@ -1174,7 +1176,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                 {/* ستون ۴: تاریخ، مبلغ و تصویر فیش */}
                 <td className="p-3 sm:p-4 text-center">
                   <div className="text-zinc-300 font-mono text-[11px]">{p.receiptDate || '-'}</div>
-                  <div className="text-emerald-400 font-mono font-bold mt-0.5">{p.amount ? `${p.amount} تومان` : '-'}</div>
+                {p.amount ? Number(String(p.amount).replace(/[^0-9]/g, '')).toLocaleString() : '0'} تومان
                   {p.receiptImage && (
                     <button
                       onClick={() => {
