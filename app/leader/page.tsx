@@ -1,4 +1,5 @@
 "use client";
+import { savePassengerPayment } from "@/app/actions/leader-actions"; // یا مسیری که فایل اکشن‌های لیدر قرار دارد
 import { generateTourAiItinerary } from "../actions/ai-actions";
 import { FaWhatsapp, FaTelegramPlane, FaInstagram, FaCopy, } from 'react-icons/fa';
 import React, { useState, useEffect, useMemo } from 'react';
@@ -660,41 +661,67 @@ const handleAddTour = async (e: React.FormEvent) => {
 
 
 // تابع تایید فیش
-const handleApproveReceipt = async (passengerId: string) => {
-  try {
-    // فراخوانی اکشن سرور یا API آپدیت وضعیت
-    const res = await handleSaveSingleStatus(passengerId, 'پرداخت شده');
-    // فراخوانی ارسال پیامک تایید فیش
-sendSmsNotification(
-  selectedReceiptPassenger.mobile,
-  'APPROVED',
-  selectedReceiptPassenger.name,
-  selectedReceiptPassenger.tourName
-);
-    setIsReceiptModalOpen(false);
-    setSelectedReceiptPassenger(null);
-  } catch (error) {
-    alert('خطا در تایید فیش واریزی');
-  }
-};
+  const handleApproveReceipt = async (passengerId: string) => {
+    try {
+      const formData = new FormData();
+      formData.append("passengerId", passengerId);
+      formData.append("paymentStatus", "پرداخت شده");
+      
+      // ارسال تاریخ دستی وارد شده توسط لیدر
+      formData.append("receiptDate", selectedReceiptPassenger?.receiptDate || "");
+      
+      // محاسبه و ارسال مبلغ تور
+      const tourPriceRaw = selectedReceiptPassenger?.tourPrice || selectedReceiptPassenger?.price || 500000;
+      const rawPrice = parseInt(String(tourPriceRaw).replace(/[^0-9]/g, ''), 10) || 500000;
+      const seats = parseInt(String(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1), 10);
+      const calculated = rawPrice * seats;
+      formData.append("amount", calculated.toString());
 
-// تابع رد فیش
-const handleRejectReceipt = async (passengerId: string) => {
-  if (!rejectReason.trim()) {
-    alert('لطفاً علت رد فیش را وارد کنید');
-    return;
-  }
-  try {
-    const statusWithReason = `رد شده (${rejectReason.trim()})`;
-    await handleSaveSingleStatus(passengerId, statusWithReason);
-    setIsReceiptModalOpen(false);
-    setSelectedReceiptPassenger(null);
-    setShowRejectInput(false);
-    setRejectReason('');
-  } catch (error) {
-    alert('خطا در ثبت رد فیش');
-  }
-};
+      // فراخوانی اکشن سرور برای ذخیره اطلاعات
+      const res = await savePassengerPayment(formData, window.location.pathname);
+
+      if (res.success) {
+        // فراخوانی ارسال پیامک تایید
+        sendSmsNotification(
+          selectedReceiptPassenger.mobile,
+          'APPROVED',
+          selectedReceiptPassenger.name,
+          selectedReceiptPassenger.tourName
+        );
+
+        setIsReceiptModalOpen(false);
+        setSelectedReceiptPassenger(null);
+        alert('فیش مسافر با موفقیت تایید و ثبت شد ✅');
+        window.location.reload(); // رفرش برای بروزرسانی لیست
+      } else {
+        alert('خطا در ثبت اطلاعات: ' + res.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('خطا در تایید فیش و واریزی ❌');
+    }
+  };
+
+  // تابع رد فیش
+  const handleRejectReceipt = async (passengerId: string) => {
+    if (!rejectReason.trim()) {
+      alert('لطفاً علت رد فیش را وارد کنید');
+      return;
+    }
+    try {
+      const statusWithReason = `رد شده (${rejectReason.trim()})`;
+      await handleSaveSingleStatus(passengerId, statusWithReason);
+      setIsReceiptModalOpen(false);
+      setSelectedReceiptPassenger(null);
+      setShowRejectInput(false);
+      setRejectReason('');
+      alert('فیش با موفقیت رد شد ❌');
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      alert('خطا در ثبت رد فیش');
+    }
+  };
 
 const exportToExcel = () => {
     const dataToExport = filteredPassengers.map((p, index) => ({
@@ -1810,49 +1837,50 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
             </div>
 
             {/* جزئیات مسافر و محاسبه خودکار مبلغ برمبنای تعداد صندلی */}
-            <div className="space-y-3 text-xs sm:text-sm text-zinc-300 shrink-0">
-              <div className="grid grid-cols-2 gap-2 bg-zinc-900/60 p-3 rounded-xl border border-zinc-800">
-                <p><span className="text-zinc-500">شماره تماس: </span>{selectedReceiptPassenger.mobile}</p>
-                <p>
-                  <span className="text-zinc-500">مبلغ تور (محاسبه خودکار): </span>
-                  {(() => {
-  const dbAmount = selectedReceiptPassenger?.amount;
-  if (dbAmount && dbAmount !== 'null' && dbAmount !== 'undefined' && dbAmount !== '') {
-    return `${dbAmount} تومان`;
-  }
-  
-  // استخراج قیمت از فیلدهای احتمالی موجود در شیء مسافر
-  const tourPriceRaw = selectedReceiptPassenger?.tourPrice || selectedReceiptPassenger?.price || 0;
-  const rawPrice = parseInt(String(tourPriceRaw).replace(/[^0-9]/g, ''), 10) || 0;
-  const seats = parseInt(String(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1), 10);
-  const calculated = rawPrice * seats;
+{/* نمایش هوشمند مبلغ تور */}
+<div className="space-y-3 text-xs sm:text-sm">
+  <div className="grid grid-cols-2 gap-2 bg-zinc-900/60 p-3 rounded-xl border border-zinc-800">
+    <p><span className="text-zinc-500">شماره تماس:</span> {selectedReceiptPassenger?.mobile || selectedReceiptPassenger?.phone || 'ـ'}</p>
+    <p>
+      <span className="text-zinc-500">مبلغ تور (محاسبه خودکار): </span>
+      <span className="text-emerald-400 font-bold">
+        {(() => {
+          const dbAmount = selectedReceiptPassenger?.amount;
+          if (dbAmount && dbAmount !== 'null' && dbAmount !== 'undefined' && dbAmount !== '') {
+            return `${dbAmount} تومان`;
+          }
+          // محاسبه خودکار بر اساس قیمت تور یا قیمت پیش‌فرض
+          const tourPriceRaw = selectedReceiptPassenger?.tourPrice || selectedReceiptPassenger?.price || 500000; 
+          const rawPrice = parseInt(String(tourPriceRaw).replace(/[^0-9]/g, ''), 10) || 500000;
+          const seats = parseInt(String(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1), 10);
+          const calculated = rawPrice * seats;
+          return `${calculated.toLocaleString('fa-IR')} تومان`;
+        })()}
+      </span>
+    </p>
+    <p><span className="text-zinc-500">وضعیت فعلی:</span> <span className="text-amber-400">{selectedReceiptPassenger?.paymentStatus || 'در انتظار پرداخت'}</span></p>
+    <p><span className="text-zinc-500">تعداد صندلی:</span> <span className="text-white font-bold">{selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1} صندلی</span></p>
+  </div>
 
-  return calculated > 0 ? `${calculated.toLocaleString('fa-IR')} تومان` : 'ثبت نشده';
-})()}
-                </p>
-                <p><span className="text-zinc-500">وضعیت فعلی: </span><span className="text-amber-400">{selectedReceiptPassenger.paymentStatus}</span></p>
-                <p><span className="text-zinc-500">تعداد صندلی: </span><span className="text-white font-bold">{selectedReceiptPassenger.seatsCount || 1} صندلی</span></p>
-              </div>
-
-              {/* اینپوت ثبت/ویرایش دستی تاریخ واریز توسط تور لیدر */}
-              <div className="bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-800/80">
-                <label className="block text-zinc-400 text-xs mb-1 font-medium">تاریخ واریز فیش (توسط لیدر):</label>
-                <input
-                  type="text"
-                  placeholder="مثلا: 1405/07/09"
-                  value={selectedReceiptPassenger.receiptDate || ''}
-                  onChange={(e) => {
-                    const updatedDate = e.target.value;
-                    setSelectedReceiptPassenger((prev: any) => ({
-                      ...prev,
-                      receiptDate: updatedDate
-                    }));
-                  }}
-                  className="w-full bg-[#1c1c21] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#E5C060] font-mono text-left"
-                  style={{ direction: 'ltr' }}
-                />
-              </div>
-            </div>
+{/* Input برای تاریخ واریز دستی */}
+  <div className="bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-800">
+    <label className="block text-zinc-400 text-xs mb-1 font-medium">تاریخ واریز فیش (توسط لیدر):</label>
+    <input
+      type="text"
+      placeholder="مثلاً: 1405/07/09"
+      value={selectedReceiptPassenger?.receiptDate || ''}
+      onChange={(e) => {
+        const updatedDate = e.target.value;
+        setSelectedReceiptPassenger((prev: any) => ({
+          ...prev,
+          receiptDate: updatedDate
+        }));
+      }}
+      className="w-full bg-[#1c1c21] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#E5C060] font-mono text-left"
+      style={{ direction: 'ltr' }}
+    />
+  </div>
+</div>
 
             {/* نمایش تصویر فیش (با ارتفاع کنترل شده جهت جلوگیری از اورفلو) */}
             <div className="bg-black/50 border border-zinc-800 rounded-xl overflow-hidden flex items-center justify-center min-h-160px] max-h-240px] shrink-0">
@@ -1889,7 +1917,7 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                     onClick={() => handleApproveReceipt(selectedReceiptPassenger.id)}
                     className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all shadow-lg cursor-pointer"
                   >
-                    (پرداخت شده) تایید و ثبت نهایی ✓
+                     تایید و ثبت نهایی ✓
                   </button>
                   <button
                     onClick={() => setShowRejectInput(true)}
