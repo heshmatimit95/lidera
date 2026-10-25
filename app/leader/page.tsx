@@ -1815,21 +1815,20 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                 <p><span className="text-zinc-500">شماره تماس: </span>{selectedReceiptPassenger.mobile}</p>
                 <p>
                   <span className="text-zinc-500">مبلغ تور (محاسبه خودکار): </span>
-                  <span className="text-emerald-400 font-bold">
-  {(() => {
-    const dbAmount = selectedReceiptPassenger?.amount;
-    if (dbAmount && dbAmount !== 'null' && dbAmount !== 'undefined' && dbAmount !== '') {
-      return `${dbAmount} تومان`;
-    }
-    // محاسبه پشتیبان بر اساس قیمت تور و تعداد صندلی
-    const tourObj = currentLider?.tours?.find((t: any) => t.title === selectedReceiptPassenger?.tourName || t.name === selectedReceiptPassenger?.tourName);
-    const rawPrice = tourObj?.price ? parseInt(String(tourObj.price).replace(/[^0-9]/g, ''), 10) || 0 : 0;
-    const seats = parseInt(String(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1), 10);
-    const calculated = rawPrice * seats;
+                  {(() => {
+  const dbAmount = selectedReceiptPassenger?.amount;
+  if (dbAmount && dbAmount !== 'null' && dbAmount !== 'undefined' && dbAmount !== '') {
+    return `${dbAmount} تومان`;
+  }
+  
+  // استخراج قیمت از فیلدهای احتمالی موجود در شیء مسافر
+  const tourPriceRaw = selectedReceiptPassenger?.tourPrice || selectedReceiptPassenger?.price || 0;
+  const rawPrice = parseInt(String(tourPriceRaw).replace(/[^0-9]/g, ''), 10) || 0;
+  const seats = parseInt(String(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1), 10);
+  const calculated = rawPrice * seats;
 
-    return calculated > 0 ? `${calculated.toLocaleString('fa-IR')} تومان` : 'ثبت نشده';
-  })()}
-</span>
+  return calculated > 0 ? `${calculated.toLocaleString('fa-IR')} تومان` : 'ثبت نشده';
+})()}
                 </p>
                 <p><span className="text-zinc-500">وضعیت فعلی: </span><span className="text-amber-400">{selectedReceiptPassenger.paymentStatus}</span></p>
                 <p><span className="text-zinc-500">تعداد صندلی: </span><span className="text-white font-bold">{selectedReceiptPassenger.seatsCount || 1} صندلی</span></p>
