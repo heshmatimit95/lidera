@@ -1473,8 +1473,8 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                       value={editFormData.tourName} 
 onChange={(e) => {
   const selectedTour = e.target.value;
-  calculateEditAmount(selectedTour, editFormData.seats); // <--- این خط باید اضافه شود
-}} 
+  calculateEditAmount(selectedTour, Number(editFormData.seats || 1));
+}}
                       className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black"
                     >
                       {activeTours.map((t, idx) => (
@@ -1489,8 +1489,8 @@ onChange={(e) => {
     <button
       type="button"
 onClick={() => {
-  const newVal = Math.max(1, Number(addFormData.seats || 1) - 1);
-  calculateAddAmount(addFormData.tourName, newVal);
+  const newSeats = Math.max(1, Number(editFormData.seats || 1) - 1);
+  calculateEditAmount(editFormData.tourName, newSeats);
 }}
       className="bg-zinc-800 hover:bg-zinc-300 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
     >
@@ -1514,8 +1514,8 @@ onClick={() => {
     <button
       type="button"
 onClick={() => {
-  const newVal = Number(addFormData.seats || 1) + 1;
-  calculateAddAmount(addFormData.tourName, newVal);
+  const newSeats = Number(editFormData.seats || 1) + 1;
+  calculateEditAmount(editFormData.tourName, newSeats);
 }}
       className="bg-zinc-800 hover:bg-zinc-300 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
     >
