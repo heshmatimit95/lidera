@@ -482,14 +482,24 @@ const calculateEditAmount = (selectedTourName: string, seatCount: number) => {
   };
 
 const openEditModal = (passenger: Passenger) => {
-    const p = passenger as any; // اضافه کردن این خط
-    const initialTour = passenger.tourName || activeTours[0]?.name || '';
-    const initialSeats = Number(passenger.seatsCount || passenger.seats) || 1;
-    setEditId(passenger.id);
+    const p = passenger as any; 
+    
+    // پیدا کردن نام تور مسافر به صورت انعطاف‌پذیر
+    const rawTourName = p.tourName || p.tourTitle || '';
+    const matchedTour = activeTours.find((t: any) => 
+      t.name === rawTourName || 
+      rawTourName.includes(t.name) || 
+      t.name.includes(rawTourName)
+    );
+    const initialTour = matchedTour ? matchedTour.name : (activeTours[0]?.name || '');
+    
+    const initialSeats = Number(p.seatsCount || p.seats) || 1;
+    
+    setEditId(p.id);
     setEditFormData({
       fullName: p.fullName || p.name || '',
       phone: p.phone || p.mobile || '',
-      nationalId: p.nationalId || p.national_code || p.nationalCode || p.national_id || '',
+      nationalId: p.nationalId || p.national_id || p.nationalCode || p.national_code || '',
       tourName: initialTour,
       paymentStatus: p.paymentStatus || 'در انتظار پرداخت',
       insurance: Boolean(p.insurance),
@@ -498,7 +508,10 @@ const openEditModal = (passenger: Passenger) => {
       receiptImage: p.receiptImage || '',
       seats: initialSeats,
     });
+    
+    // محاسبه اولیه مبلغ با توجه به تور پیدا شده و صندلی مسافر
     calculateEditAmount(initialTour, initialSeats);
+    
     setIsEditModalOpen(true);
   };
  
