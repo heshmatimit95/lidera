@@ -110,7 +110,7 @@ export async function PUT(request: Request) {
     const body = await request.json();
     console.log("Received PUT body:", body);
 
-    const { id, fullName, mobile, phone, nationalId, tourName, paymentStatus, insurance, receiptDate, amount, receiptImage } = body;
+   const { id, fullName, mobile, phone, nationalId, tourName, paymentStatus, insurance, receiptDate, amount, receiptImage } = body;
     const mobileValue = mobile || phone;
     
     // در بخش ویرایش (PUT)، تعداد صندلی تنها در صورتی به‌روز می‌شود که کاربر مقدار آن را در فرم ویرایش تغییر داده باشد
@@ -122,18 +122,18 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Passenger ID required' }, { status: 400 });
     }
 
-    const updated = await prisma.passenger.update({
+const updated = await prisma.passenger.update({
       where: { id },
-      data: { 
+      data: {
         ...(fullName !== undefined && { fullName }),
         ...(mobileValue !== undefined && { mobile: mobileValue }),
         ...(nationalId !== undefined && { nationalId }),
         ...(tourName !== undefined && { tourName }),
-        ...(seatsValue !== undefined && { seatsCount: seatsValue }), 
+        ...(seatsValue !== undefined && { seatsCount: seatsValue }),
         ...(paymentStatus !== undefined && { paymentStatus }),
         ...(insurance !== undefined && { insurance: Boolean(insurance) }),
         ...(receiptDate !== undefined && { receiptDate }),
-        ...(amount !== undefined && { amount }),
+        amount: amount || null, // <--- این خط را جایگزین خط ۱۳۶ کن تا همیشه مقدار مبلغ ذخیره شود
         ...(receiptImage !== undefined && { receiptImage })
       }
     });
