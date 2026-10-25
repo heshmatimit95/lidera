@@ -671,11 +671,11 @@ const handleAddTour = async (e: React.FormEvent) => {
       formData.append("receiptDate", selectedReceiptPassenger?.receiptDate || "");
       
       // محاسبه و ارسال مبلغ تور
-      const tourPriceRaw = selectedReceiptPassenger?.tourPrice || selectedReceiptPassenger?.price || 500000;
-      const rawPrice = parseInt(String(tourPriceRaw).replace(/[^0-9]/g, ''), 10) || 500000;
-      const seats = parseInt(String(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1), 10);
-      const calculated = rawPrice * seats;
-      formData.append("amount", calculated.toString());
+const tourPriceRaw = selectedReceiptPassenger?.tourPrice || selectedReceiptPassenger?.price || selectedReceiptPassenger?.tour?.price || 17890000;
+const rawPrice = parseInt(String(tourPriceRaw).replace(/[^0-9]/g, ''), 10) || 17890000;
+const seats = parseInt(String(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1), 10);
+const calculated = rawPrice * seats;
+formData.append("amount", calculated.toString());
 
       // فراخوانی اکشن سرور برای ذخیره اطلاعات
       const res = await savePassengerPayment(formData, window.location.pathname);
@@ -1844,18 +1844,20 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     <p>
       <span className="text-zinc-500">مبلغ تور (محاسبه خودکار): </span>
       <span className="text-emerald-400 font-bold">
-        {(() => {
-          const dbAmount = selectedReceiptPassenger?.amount;
-          if (dbAmount && dbAmount !== 'null' && dbAmount !== 'undefined' && dbAmount !== '') {
-            return `${dbAmount} تومان`;
-          }
-          // محاسبه خودکار بر اساس قیمت تور یا قیمت پیش‌فرض
-          const tourPriceRaw = selectedReceiptPassenger?.tourPrice || selectedReceiptPassenger?.price || 500000; 
-          const rawPrice = parseInt(String(tourPriceRaw).replace(/[^0-9]/g, ''), 10) || 500000;
-          const seats = parseInt(String(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1), 10);
-          const calculated = rawPrice * seats;
-          return `${calculated.toLocaleString('fa-IR')} تومان`;
-        })()}
+{(() => {
+  const dbAmount = selectedReceiptPassenger?.amount;
+  if (dbAmount && dbAmount !== 'null' && dbAmount !== 'undefined' && dbAmount !== '') {
+    return `${dbAmount} تومان`;
+  }
+  
+  // استخراج قیمت تور از فیلدهای مسافر یا قیمت پیش‌فرض
+  const tourPriceRaw = selectedReceiptPassenger?.tourPrice || selectedReceiptPassenger?.price || selectedReceiptPassenger?.tour?.price || 17890000;
+  const rawPrice = parseInt(String(tourPriceRaw).replace(/[^0-9]/g, ''), 10) || 17890000;
+  const seats = parseInt(String(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1), 10);
+  const calculated = rawPrice * seats;
+
+  return `${calculated.toLocaleString('fa-IR')} تومان`;
+})()}
       </span>
     </p>
     <p><span className="text-zinc-500">وضعیت فعلی:</span> <span className="text-amber-400">{selectedReceiptPassenger?.paymentStatus || 'در انتظار پرداخت'}</span></p>
