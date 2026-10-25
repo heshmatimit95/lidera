@@ -1,4 +1,5 @@
 'use server'
+
 import { prisma } from "../lib/db";
 import { revalidatePath } from "next/cache";
 import { writeFile } from "fs/promises";
@@ -31,7 +32,7 @@ export async function savePassengerPayment(formData: FormData, pathName: string)
       where: { id: passengerId },
       data: {
         paymentStatus: paymentStatus, // مثلاً "پرداخت شده" یا "در انتظار تایید"
-        amount: amount,
+        amount: amount ? String(amount) : null,
         receiptDate: receiptDate,
         ...(imagePath ? { receiptImage: imagePath } : {}),
       },
