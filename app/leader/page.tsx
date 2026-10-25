@@ -443,7 +443,6 @@ const handleTourImageUpload = (tourIndex: number, e: React.ChangeEvent<HTMLInput
       amount: total > 0 ? total.toString() : prev.amount,
     }));
   };
-
   // تابع محاسبه و بروزرسانی مبلغ برای فرم "ویرایش" (دیتای ثبت‌نامی قبلی را اصلاح می‌کند)
   const calculateEditAmount = (selectedTourName: string, seatCount: number) => {
     const foundTour = activeTours.find((t: any) => t.name === selectedTourName);
@@ -1472,11 +1471,10 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                     <label className="block text-xs text-zinc-300 mb-1.5 font-medium">انتخاب تور:</label>
                     <select 
                       value={editFormData.tourName} 
-                      onChange={(e) => {
-                        const selectedTour = e.target.value;
-                        setEditFormData((prev: any) => ({ ...prev, tourName: selectedTour }));
-                        calculateEditAmount(selectedTour, Number(editFormData.seats));
-                      }} 
+onChange={(e) => {
+  const selectedTour = e.target.value;
+  calculateEditAmount(selectedTour, editFormData.seats); // <--- این خط باید اضافه شود
+}} 
                       className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black"
                     >
                       {activeTours.map((t, idx) => (
@@ -1490,11 +1488,10 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     {/* دکمه منفی */}
     <button
       type="button"
-      onClick={() => {
-        const newVal = Math.max(1, Number(addFormData.seats) - 1);
-        setAddFormData((prev: any) => ({ ...prev, seats: newVal }));
-        calculateAddAmount(addFormData.tourName, newVal);
-      }}
+onClick={() => {
+  const newVal = Math.max(1, Number(addFormData.seats || 1) - 1);
+  calculateAddAmount(addFormData.tourName, newVal);
+}}
       className="bg-zinc-800 hover:bg-zinc-300 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
     >
       -
@@ -1516,11 +1513,10 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     {/* دکمه مثبت */}
     <button
       type="button"
-      onClick={() => {
-        const newVal = Number(addFormData.seats) + 1;
-        setAddFormData((prev: any)=> ({ ...prev, seats: newVal }));
-        calculateAddAmount(addFormData.tourName, newVal);
-      }}
+onClick={() => {
+  const newVal = Number(addFormData.seats || 1) + 1;
+  calculateAddAmount(addFormData.tourName, newVal);
+}}
       className="bg-zinc-800 hover:bg-zinc-300 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
     >
       +
@@ -1543,16 +1539,21 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       </select>
     </div>
 
-    <div>
-      <label className="block text-xs text-zinc-300 mb-1.5 font-medium">مبلغ واریزی (محاسبه خودکار بر اساس صندلی):</label>
-      <input 
-        type="text" 
-        readOnly
-        value={editFormData.amount ? `${Number(editFormData.amount).toLocaleString('fa-IR')} تومان` : '۰ تومان'} 
-        className="w-full bg-zinc-800 border border-zinc-700 p-2.5 rounded-xl text-xs text-emerald-400 font-bold font-mono text-left"
-        style={{ direction: 'ltr' }}
-      />
-    </div>
+   {/* محاسبه پویا و قابلیت ویرایش مبلغ بر اساس تعداد صندلی و تور */}
+<div className="space-y-1">
+  <label className="block text-xs text-zinc-300 mb-1.5 font-medium">مبلغ واریزی (محاسبه خودکار و قابل ویرایش):</label>
+  <input
+    type="text"
+    value={editFormData.amount ? Number(editFormData.amount).toLocaleString('fa-IR') + ' تومان' : ''}
+    onChange={(e) => {
+      const rawVal = e.target.value.replace(/[^0-9]/g, '');
+      setEditFormData({ ...editFormData, amount: rawVal });
+    }}
+    placeholder="مبلغ به تومان"
+    className="w-full bg-zinc-800 border border-zinc-700 text-emerald-400 font-bold p-2.5 rounded-xl text-xs font-mono text-left focus:outline-none focus:border-orange-600"
+    style={{ direction: 'ltr' }}
+  />
+</div>
   </div>
 <div>
   <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تاریخ پرداخت:</label>
