@@ -128,12 +128,11 @@ const updated = await prisma.passenger.update({
         ...(mobileValue !== undefined && { mobile: mobileValue }),
         ...(nationalId !== undefined && { nationalId }),
         ...(tourName !== undefined && { tourName }),
-        // ذخیره دقیق تعداد صندلی با نام صریح ستون دیتابیس
         ...(seatsValue !== undefined && { seatsCount: seatsValue }),
         ...(paymentStatus !== undefined && { paymentStatus }),
         ...(insurance !== undefined && { insurance: Boolean(insurance) }),
-        ...(receiptDate !== undefined && { receiptDate }),
-        amount: amount !== undefined && amount !== null ? String(amount) : '0',
+        ...(receiptDate !== undefined && { receiptDate: receiptDate || '' }),
+        amount: amount !== undefined && amount !== null && amount !== '' ? String(amount) : '0',
         ...(receiptImage !== undefined && { receiptImage })
       },
     });
