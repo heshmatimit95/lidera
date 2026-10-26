@@ -14,6 +14,7 @@ export async function fastRegisterLeader(mobile: string, nationalId: string) {
       mobile: mobile,
       nationalId: hashedId,
       status: 'PENDING',
+      password: "default_password_123",
     },
   });
 }
