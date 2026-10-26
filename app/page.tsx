@@ -327,15 +327,6 @@ const handleOnlinePayment = async (passengerData: any, tourName: string, amountI
   }
 };
 
-
-
-
-
-
-
-
-
-
 if (!isMounted || isLoadingLeader) {
   return (
     <div className="min-h-screen bg-[#09090b] flex items-center justify-center text-white text-xs">
@@ -720,20 +711,18 @@ return (
               )}
               {step === 3 && (
                 <div className="space-y-5">
-{/* ۱. نمایش مبلغ به تومان برای کاربر */}
- {/* ۱. نمایش مبلغ به تومان برای کاربر */}
+{/* بخش تومان داخل کادر */}
 <div className="bg-[#1c1c21] border border-[#F9704E] p-5 rounded-2xl space-y-4">
   
   {/* بخش تومان */}
-  <div className="flex flex-col gap-1">
-     <div className="flex items-center justify-between bg-[#121215] p-3 rounded-xl border border-[#F9704E]"> </div>
-    <span className="text-xs text-neutral-400 font-medium">💰 مبلغ  (تومان):</span>
+  <div className="flex flex-col gap-1.5 bg-[#121215] p-3.5 rounded-xl border border-neutral-800">
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز (تومان):</span>
+    </div>
     <div className="text-xl font-bold text-[#F9704E] tracking-tight block py-1 font-mono">
       {calculateTotalPrice()}
     </div>
-  </div>
-
-
+ </div>
 <div className="border-t border-[#F9704E] pt-3">
   <span className="block text-[11px] text-neutral-400 mb-1.5 font-medium">💳 شماره کارت‌های لیدر:</span>
   
