@@ -767,8 +767,8 @@ return (
   )}
 </div>
   {/* ۲. بخش ریال (دقیقاً هم‌شکل با تومان با فونت درشت و رنگ نارنجی) */}
-  <div className="border-t border-neutral-800/80 pt-4 flex flex-col gap-1">
-    <div className="flex items-center justify-between">
+  <div className="border-t border-[#F9704E] pt-4 flex flex-col gap-1">
+    <div className="flex items-center justify-between bg-[#121215] p-3 rounded-xl border border-[#F9704E]">
       <span className="text-xs text-neutral-400 font-medium">💳 مبلغ جهت واریز (ریال):</span>
       <button
         type="button"
@@ -778,7 +778,7 @@ return (
           navigator.clipboard.writeText(numericRial.toString());
           alert('!مبلغ ریالی برای کارت‌به‌کارت کپی شد');
         }}
-        className="text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-3 py-1.5 rounded-lg font-medium hover:bg-neutral-700 transition-colors flex items-center gap-1.5"
+        className="text-[10px] bg-neutral-800  border border-[#F9704E] text-white px-2.5 py-1.5 rounded-md transition-colors font-medium active:scale-95"
       >
         <span> کپی مبلغ </span>
       </button>
