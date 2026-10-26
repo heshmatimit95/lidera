@@ -716,8 +716,8 @@ return (
     
     {/* مبلغ کل به تومان */}
     <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
-      <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-neutral-800 flex items-center justify-between">
-        <span className="text-[11px] sm:text-xs text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز (تومان):</span>
+      <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex items-center justify-between">
+        <span className="text-[11px] sm:text-xs text-neutral-400 font-medium">💰 مبلغ دقیق  :</span>
         <div className="text-xs sm:text-base font-bold text-[#F9704E] tracking-tight font-mono">
           {calculateTotalPrice()}
         </div>
@@ -775,7 +775,7 @@ return (
                     }}
                     className="text-[10px] bg-neutral-800 border border-neutral-700 text-neutral-300 px-2 py-1 rounded-md hover:bg-neutral-700"
                   >
-                    کپی
+                  کپی کارت
                   </button>
                 </div>
               </div>
@@ -802,7 +802,7 @@ return (
                 }}
                 className="text-[10px] sm:text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-2.5 py-1 rounded-lg font-medium hover:bg-neutral-700 transition-colors"
               >
-                📋 کپی ریال
+                 کپی ریال
               </button>
             </div>
             
@@ -821,7 +821,7 @@ return (
 
     {/* محتوای روش دوم: درگاه آنلاین */}
     {paymentMethod === 'online' && (
-      <div className="bg-[#1c1c21] border border-emerald-500/50 p-4 sm:p-5 rounded-2xl space-y-3 animate-fadeIn text-center">
+      <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3 animate-fadeIn text-center">
         <p className="text-[11px] sm:text-xs text-neutral-300 leading-relaxed">
           با انتخاب پرداخت آنلاین، بدون نیاز به ارسال فیش، ثبت‌نام شما به صورت آنی قطعی می‌شود.
         </p>
@@ -838,10 +838,10 @@ return (
               currentLider?.id || currentLider?.slug || 'leader_1'
             );
           }}
-          className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all duration-200 shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm border border-emerald-500/40"
+          className="w-full py-3 px-4 bg-[#F9704E] hover:bg-[#F9704E] text-white font-bold rounded-xl transition-all duration-200 shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm border border-emerald-500/40"
         >
           <span>💳</span>
-          <span>اتصال به درگاه بانکی (زرین‌پال)</span>
+          <span>اتصال به درگاه بانکی </span>
         </button>
       </div>
     )}
