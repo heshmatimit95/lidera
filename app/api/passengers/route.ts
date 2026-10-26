@@ -132,7 +132,7 @@ const updated = await prisma.passenger.update({
         ...(paymentStatus !== undefined && { paymentStatus }),
         ...(insurance !== undefined && { insurance: Boolean(insurance) }),
         ...(receiptDate !== undefined && { receiptDate: receiptDate || '' }),
-        amount: amount !== undefined && amount !== null && amount !== '' ? String(amount) : '0',
+       ...(amount !== undefined && amount !== null && amount !== '' && String(amount) !== '0' && String(amount) !== 'NaN' && { amount: String(amount) }),
         ...(receiptImage !== undefined && { receiptImage })
       },
     });
