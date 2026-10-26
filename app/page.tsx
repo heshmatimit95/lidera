@@ -726,14 +726,15 @@ return (
   
   {/* بخش تومان */}
   <div className="flex flex-col gap-1">
+     <div className="flex items-center justify-between bg-[#121215] p-3 rounded-xl border border-[#F9704E]"> </div>
     <span className="text-xs text-neutral-400 font-medium">💰 مبلغ  (تومان):</span>
-    <div className="text-xl font-extrabold text-[#F9704E] tracking-tight block py-1 font-mono">
+    <div className="text-xl font-bold text-[#F9704E] tracking-tight block py-1 font-mono">
       {calculateTotalPrice()}
     </div>
   </div>
 
 
-<div className="border-t border-neutral-800/80 pt-3">
+<div className="border-t border-[#F9704E] pt-3">
   <span className="block text-[11px] text-neutral-400 mb-1.5 font-medium">💳 شماره کارت‌های لیدر:</span>
   
   {currentLider.cards && currentLider.cards.length > 0 ? (
@@ -770,8 +771,15 @@ return (
   <div className="border-t border-[#F9704E] pt-4 flex flex-col gap-1">
     <div className="flex items-center justify-between bg-[#121215] p-3 rounded-xl border border-[#F9704E]">
       <span className="text-xs text-neutral-400 font-medium">💳 مبلغ جهت واریز (ریال):</span>
+  <div className="text-xl font-bold text-[#F9704E] tracking-tight block py-1 font-mono">
+      {(() => {
+        let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+        let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+        return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
+      })()}
+    </div>
       <button
-        type="button"
+              type="button"
         onClick={() => {
           let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
           let numericRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
@@ -781,13 +789,7 @@ return (
                   
         className="text-[10px] bg-neutral-800  border border-[#F9704E] text-white px-2.5 py-1.5 rounded-md transition-colors font-medium active:scale-95"
       >
-    <div className="text-xl font-extrabold text-[#F9704E] tracking-tight block py-1 font-mono">
-      {(() => {
-        let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-        let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-        return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
-      })()}
-    </div>
+  
         <span> کپی مبلغ </span>
       </button>
     </div>
