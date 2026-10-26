@@ -756,26 +756,27 @@ return (
             <span>📋 کپی مبلغ ریال</span>
           </button>
         </div>
-
-<button
-  type="button"
-  onClick={() => {
-    // استفاده از متغیر tour موجود در کامپوننت شما
-    let rawPrice = (window as any).selectedTourPrice || '0';
-    const amountInRial = parseInt(rawPrice.replace(/[^0-9]/g, ''), 10) * 10 || 10000;
-    
-    // اگر فرم اطلاعات مسافر داری، یا می‌تونی مستقیماً آبجکت اطلاعات رو بفرستی:
-    handleOnlinePayment(
-      { fullName: "مسافر تستی", phone: "09123456789", nationalId: "0012345678" }, 
-      (window as any).selectedTourTitle || 'تور گردشگری',
-      amountInRial,
-      (window as any).currentLeaderId || 'leader-id'
-    );
-  }}
-  className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-emerald-500/20 flex items-center justify-center gap-2 mt-3"
->
-  💳 پرداخت آنلاین و ثبت‌نام آنی (درگاه بانکی) 🚀
-</button>
+{/* دکمه اختصاصی درگاه پرداخت آنلاین */}
+<div className="mb-4">
+  <button
+    type="button"
+    onClick={() => {
+      let rawPrice = (window as any).selectedTourPrice || '0';
+      const amountInRial = parseInt(rawPrice.replace(/[^0-9]/g, ''), 10) * 10 || 10000;
+      
+handleOnlinePayment(
+        { fullName: "مسافر تستی", phone: "09120000000", nationalId: "0000000000" }, 
+        (window as any).selectedTourTitle || 'تور گردشگری',
+        amountInRial,
+        currentLider?.id || currentLider?.slug || 'leader_1'
+      );
+    }}
+    className="w-full py-3.5 px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-emerald-500/30 flex items-center justify-center gap-2 text-sm border border-emerald-500/30"
+  >
+    <span className="text-lg">💳</span>
+    <span>پرداخت آنلاین و ثبت‌نام آنی (درگاه بانکی)</span>
+  </button>
+</div>
 
 <div className="border-t border-neutral-800/80 pt-3">
   <span className="block text-[11px] text-neutral-400 mb-1.5 font-medium">💳 شماره کارت‌های لیدر:</span>
