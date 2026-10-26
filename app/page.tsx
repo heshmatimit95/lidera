@@ -777,13 +777,10 @@ return (
           let numericRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
           navigator.clipboard.writeText(numericRial.toString());
           alert('!مبلغ ریالی برای کارت‌به‌کارت کپی شد');
-        }}
+                  }}
+                  
         className="text-[10px] bg-neutral-800  border border-[#F9704E] text-white px-2.5 py-1.5 rounded-md transition-colors font-medium active:scale-95"
       >
-        <span> کپی مبلغ </span>
-      </button>
-    </div>
-    
     <div className="text-xl font-extrabold text-[#F9704E] tracking-tight block py-1 font-mono">
       {(() => {
         let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
@@ -791,6 +788,11 @@ return (
         return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
       })()}
     </div>
+        <span> کپی مبلغ </span>
+      </button>
+    </div>
+    
+
   </div>
 {/* ۳. دکمه اختصاصی درگاه پرداخت آنلاین زرین‌پال */}
   <div>
