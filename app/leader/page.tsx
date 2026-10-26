@@ -554,19 +554,20 @@ const handleUpdatePassenger = async (e: React.FormEvent) => {
 
     try {
       // پیدا کردن قیمت تور انتخاب شده از لیست تورهای فعال
-      const foundTour = activeTours.find((t: any) => t.name === editFormData.tourName);
-      const unitPrice = foundTour ? Number(String(foundTour.price).replace(/[^0-9]/g, '')) || 0 : 0;
-      const seatCount = Number(editFormData.seats || 1);
-      const finalAmount = (unitPrice * seatCount).toString();
-
-const response = await fetch(`/api/passengers`, {
+const foundTour = activeTours.find((t: any) => 
+      t.name === editFormData.tourName || editFormData.tourName?.includes(t.name) || t.name?.includes(editFormData.tourName)
+    );
+    const unitPrice = foundTour ? Number(String(foundTour.price || 0).replace(/[^0-9]/g, '')) || 0 : 0;
+    const seatCount = Number(editFormData.seats || 1);
+    const calculatedFinalAmount = unitPrice > 0 ? (unitPrice * seatCount).toString() : (editFormData.amount || '0');
+     const response = await fetch(`/api/passengers`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         id: editId,
         tourName: editFormData.tourName,
         seats: Number(editFormData.seats || seatCount || 1), // <--- اصلاح دقیق تعداد صندلی
-        amount: String(editFormData.amount || finalAmount || '0'),
+        amount: String(calculatedFinalAmount !== '0' ? calculatedFinalAmount : (editFormData.amount || '4100000')),
         paymentStatus: editFormData.paymentStatus,
         receiptDate: editFormData.receiptDate,
         insurance: editFormData.insurance,
