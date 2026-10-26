@@ -720,63 +720,63 @@ return (
               )}
               {step === 3 && (
                 <div className="space-y-5">
-{/* بخش نمایش مبلغ و کپی هوشمند ریال */}
-      <div className="bg-[#1c1c21] border border-[#F9704E] p-5 rounded-2xl space-y-4">
-        
-        {/* ۱. نمایش مبلغ به تومان برای کاربر */}
-        <div className="flex flex-col gap-1">
-          <span className="text-xs text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز:</span>
-          <div className="text-xl font-extrabold text-[#F9704E] tracking-tight block py-1 font-mono">
-            {calculateTotalPrice()}
-          </div>
-        </div>
+{/* ۱. نمایش مبلغ به تومان برای کاربر */}
+  <div className="bg-[#1c1c21] border border-[#F9704E] p-5 rounded-2xl space-y-2">
+    <div className="flex flex-col gap-1">
+      <span className="text-xs text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز:</span>
+      <div className="text-xl font-extrabold text-[#F9704E] tracking-tight block py-1 font-mono">
+        {calculateTotalPrice()}
+      </div>
+    </div>
 
-        {/* ۲. بخش ریال و دکمه کپی اختصاصی برای واریز بانکی */}
-        <div className="border-t border-neutral-800/80 pt-3 flex items-center justify-between">
-          <div className="text-[11px] text-neutral-300 font-mono">
-            معادل ریال جهت کارت‌به‌کارت: <span className="text-emerald-400 font-bold">
-              {(() => {
-                let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-                let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-                return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
-              })()}
-            </span>
-          </div>
+    {/* ۲. بخش ریال و دکمه کپی اختصاصی برای واریز بانکی */}
+    <div className="border-t border-neutral-800/80 pt-3 flex items-center justify-between">
+      <div className="text-[11px] text-neutral-300 font-mono">
+        معادل ریال جهت کارت‌به‌کارت: <span className="text-emerald-400 font-bold">
+          {(() => {
+            let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+            let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+            return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
+          })()}
+        </span>
+      </div>
 
           <button
-            type="button"
-            onClick={() => {
-              let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-              let numericRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-              navigator.clipboard.writeText(numericRial.toString());
-              alert('مبلغ ریالی برای کارت‌به‌کارت کپی شد!');
-            }}
-            className="text-[10px] bg-neutral-800 border border-neutral-700 text-emerald-400 px-3 py-1.5 rounded-md font-medium transition-colors hover:bg-neutral-700 active:scale-95 cursor-pointer flex items-center gap-1 shadow-sm"
-          >
-            <span>📋 کپی مبلغ ریال</span>
-          </button>
-        </div>
-{/* دکمه اختصاصی درگاه پرداخت آنلاین */}
-<div className="mb-4">
-  <button
-    type="button"
-    onClick={() => {
-      let rawPrice = (window as any).selectedTourPrice || '0';
-      const amountInRial = parseInt(rawPrice.replace(/[^0-9]/g, ''), 10) * 10 || 10000;
-      
-handleOnlinePayment(
-        { fullName: "مسافر تستی", phone: "09120000000", nationalId: "0000000000" }, 
-        (window as any).selectedTourTitle || 'تور گردشگری',
-        amountInRial,
-        currentLider?.id || currentLider?.slug || 'leader_1'
-      );
-    }}
-    className="w-full py-3.5 px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-emerald-500/30 flex items-center justify-center gap-2 text-sm border border-emerald-500/30"
-  >
-    <span className="text-lg">💳</span>
-    <span>پرداخت آنلاین و ثبت‌نام آنی (درگاه بانکی)</span>
-  </button>
-</div>
+        type="button"
+        onClick={() => {
+          let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+          let numericRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+          navigator.clipboard.writeText(numericRial.toString());
+          alert('!مبلغ ریالی برای کارت‌به‌کارت کپی شد');
+        }}
+        className="text-[10px] bg-neutral-800 border border-neutral-700 text-emerald-400 px-3 py-1.5 rounded-md font-medium transition-colors hover:bg-neutral-700 active:bg-neutral-600 flex items-center gap-1"
+      >
+        <span>📋 کپی مبلغ ریال</span>
+      </button>
+    </div>
+
+
+{/* ۳. دکمه اختصاصی درگاه پرداخت آنلاین زرین‌پال */}
+  <div>
+    <button
+      type="button"
+      onClick={() => {
+        let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+        let amountInRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+        
+        handleOnlinePayment(
+          { fullName: "مسافر تستی", phone: "09120000000", nationalId: "0000000000" }, 
+          currentTourDetails?.title || 'تور گردشگری',
+          amountInRial,
+          currentLider?.id || currentLider?.slug || 'leader_1'
+        );
+      }}
+      className="w-full py-4 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl transition-all duration-200 shadow-xl hover:shadow-emerald-500/30 flex items-center justify-center gap-3 text-base border border-emerald-500/30"
+    >
+      <span className="text-xl">💳</span>
+      <span>پرداخت آنلاین و ثبت‌نام آنی (درگاه بانکی)</span>
+    </button>
+  </div>
 
 <div className="border-t border-neutral-800/80 pt-3">
   <span className="block text-[11px] text-neutral-400 mb-1.5 font-medium">💳 شماره کارت‌های لیدر:</span>
