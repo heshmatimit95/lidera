@@ -749,34 +749,14 @@ return (
           navigator.clipboard.writeText(numericRial.toString());
           alert('!مبلغ ریالی برای کارت‌به‌کارت کپی شد');
         }}
-        className="text-[10px] bg-neutral-800 border border-neutral-700 text-emerald-400 px-3 py-1.5 rounded-md font-medium transition-colors hover:bg-neutral-700 active:bg-neutral-600 flex items-center gap-1"
+        className="text-[12px] bg-neutral-800 border border-[#F9704E] text-emerald-400 px-3 py-1.5 rounded-md font-medium transition-colors hover:bg-neutral-700 active:bg-neutral-600 flex items-center gap-1"
       >
         <span>📋 کپی مبلغ ریال</span>
       </button>
     </div>
 
 
-{/* ۳. دکمه اختصاصی درگاه پرداخت آنلاین زرین‌پال */}
-  <div>
-    <button
-      type="button"
-      onClick={() => {
-        let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-        let amountInRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-        
-        handleOnlinePayment(
-          { fullName: "مسافر تستی", phone: "09120000000", nationalId: "0000000000" }, 
-          currentTourDetails?.title || 'تور گردشگری',
-          amountInRial,
-          currentLider?.id || currentLider?.slug || 'leader_1'
-        );
-      }}
-      className="w-full py-4 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl transition-all duration-200 shadow-xl hover:shadow-emerald-500/30 flex items-center justify-center gap-3 text-base border border-emerald-500/30"
-    >
-      <span className="text-xl">💳</span>
-      <span>پرداخت آنلاین و ثبت‌نام آنی (درگاه بانکی)</span>
-    </button>
-  </div>
+
 
 <div className="border-t border-neutral-800/80 pt-3">
   <span className="block text-[11px] text-neutral-400 mb-1.5 font-medium">💳 شماره کارت‌های لیدر:</span>
@@ -811,6 +791,33 @@ return (
     </div>
   )}
 </div>
+
+{/* ۳. دکمه اختصاصی درگاه پرداخت آنلاین زرین‌پال */}
+  <div>
+    <button
+      type="button"
+      onClick={() => {
+        let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+        let amountInRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+        
+        handleOnlinePayment(
+          { fullName: "مسافر تستی", phone: "09120000000", nationalId: "0000000000" }, 
+          currentTourDetails?.title || 'تور گردشگری',
+          amountInRial,
+          currentLider?.id || currentLider?.slug || 'leader_1'
+        );
+      }}
+      className="w-full py-4 px-6 bg-[#F9704E] hover:bg-[#F9704E] text-white font-bold rounded-2xl transition-all duration-200 shadow-xl hover:shadow-emerald-500/30 flex items-center justify-center gap-3 text-base border border-emerald-500/30"
+    >
+      <span className="text-xl">💳</span>
+      <span>پرداخت آنلاین  </span>
+    </button>
+  </div>
+
+
+
+
+
                   </div>
 
                   <div>
