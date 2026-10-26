@@ -935,6 +935,32 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
     }
   };
 
+// تابع هوشمند برای اسلاش‌گذاری خودکار تاریخ (فرمت 1405/08/04)
+const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<any>>, fieldName: string) => {
+  let value = e.target.value.replace(/\D/g, ''); // فقط اعداد را نگه دار
+  
+  if (value.length > 4 && value.length <= 6) {
+    value = value.slice(0, 4) + '/' + value.slice(4);
+  } else if (value.length > 6) {
+    value = value.slice(0, 4) + '/' + value.slice(4, 6) + '/' + value.slice(6, 8);
+  }
+
+  setter((prev: any) => ({ ...prev, [fieldName]: value }));
+};
+// تبدیل اعداد انگلیسی به فارسی برای نمایش روان به کاربر
+const toPersianDigits = (num: string | number) => {
+  if (num === null || num === undefined) return '';
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return String(num).replace(/\d/g, (d) => persianDigits[parseInt(d)]);
+};
+
+const toEnglishDigits = (str: string) => {
+  if (!str) return '';
+  return String(str).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString())
+                    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString());
+};
+
+
 
   return (
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
@@ -1192,7 +1218,8 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                   <div className="text-zinc-300 font-mono text-[11px]">{p.receiptDate || '-'}</div>
                 {p.amount ? Number(String(p.amount).replace(/[^0-9]/g, '')).toLocaleString() : '0'} تومان
                   {p.receiptImage && (
-                    <button
+                   
+                   <button
                       onClick={() => {
                         setSelectedReceiptPassenger(p);
                         setIsReceiptModalOpen(true);
@@ -1277,14 +1304,14 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
 
 <div>
     <label className="block text-xs sm:text-sm text-zinc-300 mb-1.5  font-bold">تاریخ تولد (مثلا 1375/05/12):</label>
-    <input
-      type="text"
-      dir="ltr"
-      placeholder="1370/01/01"
-      value={addFormData.birthDate || ''}
-      onChange={(e) => setAddFormData({ ...addFormData, birthDate: e.target.value })}
-      className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
-    />
+<input
+  type="text"
+  maxLength={10}
+  value={toPersianDigits(addFormData.receiptDate || '')}
+  onChange={(e) => handleSmartDateChange(e, setAddFormData, 'receiptDate')}
+  placeholder="۱۴۰۵/۰۷/۰۹"
+  className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+/>
   </div>
 
                 <div>
@@ -1393,14 +1420,17 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                 </div>
 <div>
   <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تاریخ پرداخت:</label>
-  <input 
-    type="text" 
-    placeholder="مثلاً ۱۴۰۵/۰۷/۱۸"
-    dir="ltr"
-    value={addFormData.receiptDate} 
-    onChange={(e) => setAddFormData({ ...addFormData, receiptDate: e.target.value })} 
-    className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
-  />
+<div>
+                <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تاریخ پرداخت:</label>
+                <input
+                  type="text"
+                  maxLength={10}
+                  value={toPersianDigits(addFormData.receiptDate || '')}
+                  onChange={(e) => handleSmartDateChange(e, setAddFormData, 'receiptDate')}
+                  placeholder="۱۴۰۵/۰۷/۰۹"
+                  className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
 </div>
 
                 {/* بخش فیش واریزی در افزودن */}
@@ -1464,17 +1494,17 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
                 </div>
 
 {/* تاریخ تولد (نمایش و ویرایش) */}
-  <div>
-    <label className="block text-xs sm:text-sm text-zinc-300 mb-1.5 font-medium">تاریخ تولد (مثلا 1370/01/01):</label>
-    <input 
-      type="text" 
-      dir="ltr"
-      placeholder="1370/01/01"
-      value={editFormData.birthDate || ''} 
-      onChange={(e) => setEditFormData({ ...editFormData, birthDate: e.target.value })} 
-      className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black font-bold text-left font-mono focus:outline-none"
-    />
-  </div>
+<div>
+                <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تاریخ پرداخت (۱۳۷۰/۰۱/۰۱ مثلا):</label>
+                <input
+                  type="text"
+                  maxLength={10}
+                  value={toPersianDigits(editFormData.receiptDate || '')}
+                  onChange={(e) => handleSmartDateChange(e, setEditFormData, 'receiptDate')}
+                  placeholder="۱۴۰۵/۰۷/۰۹"
+                  className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
 
 
 <div>
@@ -1572,34 +1602,34 @@ onChange={(e) => {
     </div>
 
    {/* محاسبه پویا و قابلیت ویرایش مبلغ بر اساس تعداد صندلی و تور */}
+{/* بخش مبلغ واریزی */}
 <div className="space-y-1">
   <label className="block text-xs text-zinc-300 mb-1.5 font-medium">مبلغ واریزی (محاسبه خودکار و قابل ویرایش):</label>
   <input
     type="text"
-    value={editFormData.amount ? Number(editFormData.amount).toLocaleString('fa-IR') + ' تومان' : ''}
+    value={toPersianDigits(editFormData.amount ? Number(editFormData.amount).toLocaleString() : '') + (editFormData.amount ? ' تومان' : '')}
     onChange={(e) => {
-      const rawVal = e.target.value.replace(/[^0-9]/g, '');
-      setEditFormData({ ...editFormData, amount: rawVal });
+      const rawVal = toEnglishDigits(e.target.value).replace(/[^0-9]/g, '');
+      setEditFormData((prev: any) => ({ ...prev, amount: rawVal }));
     }}
     placeholder="مبلغ به تومان"
-    className="w-full bg-zinc-800 border border-zinc-700 text-emerald-400 font-bold p-2.5 rounded-xl text-xs font-mono text-left focus:outline-none focus:border-orange-600"
-    style={{ direction: 'ltr' }}
+    className="w-full bg-zinc-800 border border-zinc-700 text-emerald-400 font-bold p-2.5 rounded-xl text-xs font-mono text-right focus:outline-none focus:border-amber-500"
   />
 </div>
-  </div>
-<div>
+
+{/* بخش تاریخ پرداخت */}
+<div className="space-y-1">
   <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تاریخ پرداخت:</label>
-  <input 
-    type="text" 
-    placeholder="مثلاً ۱۴۰۵/۰۷/۱۸"
-    dir="ltr"
-    value={editFormData.receiptDate} 
-    onChange={(e) => setEditFormData({ ...editFormData, receiptDate: e.target.value })} 
+  <input
+    type="text"
+    maxLength={10}
+    value={toPersianDigits(editFormData.receiptDate || '')}
+    onChange={(e) => handleSmartDateChange(e, setEditFormData, 'receiptDate')}
+    placeholder="۱۴۰۵/۰۷/۱۸"
     className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
   />
 </div>
-
-
+</div>
                {/* بخش فیش واریزی در ویرایش */}
                 <div>
                   <label className="block text-xs text-zinc-300 mb-1.5 font-medium">بارگذاری تصویر فیش:</label>

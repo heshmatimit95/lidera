@@ -288,6 +288,14 @@ const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     return total.toLocaleString('fa-IR') + " تومان";
   };
 
+// توابع کمکی برای تبدیل اعداد
+const toPersianDigits = (num: string | number) => {
+  if (num === null || num === undefined) return '';
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return String(num).replace(/\d/g, (d) => persianDigits[parseInt(d)]);
+};
+
+
 if (!isMounted || isLoadingLeader) {
   return (
     <div className="min-h-screen bg-[#09090b] flex items-center justify-center text-white text-xs">
@@ -572,18 +580,25 @@ return (
   {isPhoneValid && (
     <div className="animate-fadeIn transition-all duration-300">
       <label className="block text-sm text-white mb-2 font-medium">تاریخ تولد :</label>
-      <input
-        type="text"
-        required
-        placeholder="1370/01/01"
-        value={birthDate}
-        onChange={(e) => {
-          const enVal = toEnglishDigits(e.target.value);
-          setBirthDate(enVal);
-        }}
-        className="w-full bg-[#1c1c21] border border-[#F9704E] p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono"
-        style={{ direction: 'ltr' }}
-      />
+  <input
+              type="text"
+              required
+              maxLength={10}
+              placeholder="۱۳۷۰/۰۱/۰۱"
+              value={toPersianDigits(birthDate)}
+              onChange={(e) => {
+                // استفاده از تابع اسلاش‌گذاری هوشمند و تبدیل ارقام
+                const enVal = toEnglishDigits(e.target.value).replace(/\D/g, '');
+                let formatted = enVal;
+                if (enVal.length > 4 && enVal.length <= 6) {
+                  formatted = enVal.slice(0, 4) + '/' + enVal.slice(4);
+                } else if (enVal.length > 6) {
+                  formatted = enVal.slice(0, 4) + '/' + enVal.slice(4, 6) + '/' + enVal.slice(6, 8);
+                }
+                setBirthDate(formatted);
+              }}
+              className="w-full bg-[#1c1c21] border border-[#F9704E] p-4 rounded-xl text-xs text-right text-white placeholder-neutral-500 focus:outline-none transition-all duration-300 font-mono font-bold text-lg"
+            />
     </div>
   )}
 
