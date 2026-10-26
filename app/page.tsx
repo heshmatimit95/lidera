@@ -52,7 +52,7 @@ function TourForm() {
   const receiptInputRef = useRef<HTMLInputElement>(null);
 const [isTermsAccepted, setIsTermsAccepted] = useState(false);
 const [showTermsAccordion, setShowTermsAccordion] = useState(false);
-
+const [paymentMethod, setPaymentMethod] = useState<'card' | 'online'>('card');
 const isBirthDateValid = birthDate.trim().length >= 8; // مثلاً 1370/01/01
 const isNationalIdValid = nationalId.trim().length === 10;
 
@@ -711,104 +711,143 @@ return (
               )}
               {step === 3 && (
                 <div className="space-y-5">
-{/* بخش تومان داخل کادر */}
-<div className="bg-[#1c1c21] border border-[#F9704E] p-5 rounded-2xl space-y-4">
-  
-{/* بخش تومان */}
-<div className="bg-[#121215] p-4 rounded-xl border border-[#F9704E] flex flex-col items-center justify-center text-center space-y-2">
-  <span className="text-xs text-neutral-400 font-medium">💰 مبلغ دقیق  :</span>
-  <div className="text-sm sm:text-lg font-bold text-[#F9704E] tracking-tight font-mono">
-    {calculateTotalPrice()}
-  </div>
-
- </div>
-<div className="border-t border-[#F9704E] pt-3">
-  <span className="block text-[11px] text-neutral-400 mb-1.5 font-medium">💳 شماره کارت‌های لیدر:</span>
-  
-  {currentLider.cards && currentLider.cards.length > 0 ? (
-    <div className="space-y-2">
-      {currentLider.cards.map((card: any, index: number) => (
-        <div key={index} className="flex items-center justify-between bg-[#121215] p-3 rounded-xl border border-[#F9704E]">
-          <div className="flex flex-col">
-            <span className="text-xs text-orange-400 font-bold">
-              {card.bankName ? `بانک ${card.bankName}` : `کارت شماره ${index + 1}`}
-              {card.cardOwner ? ` - ${card.cardOwner}` : ''}
-            </span>
-            <span className="font-mono text-xs text-white tracking-wider mt-0.5" dir="ltr">
-              {card.cardNumber}
-            </span>
-          </div>
-          
-          <button
-            type="button"
-            onClick={() => handleCopyCard(card.cardNumber)}
-            className="text-[10px] bg-neutral-800  border border-[#F9704E] text-white px-2.5 py-1.5 rounded-md transition-colors font-medium active:scale-95"
-          >
-            {isCopied ? "کپی شد ✓" : "کپی کارت"}
-          </button>
-        </div>
-      ))}
-    </div>
-  ) : (
-    <div className="bg-[#121215] p-3 rounded-xl border border-[#F9704E] text-center">
-      <span className="text-xs text-neutral-400">شماره کارتی ثبت نشده است</span>
-    </div>
-  )}
-</div>
-  {/* ۲. بخش ریال (دقیقاً هم‌شکل با تومان با فونت درشت و رنگ نارنجی) */}
-{/* بخش ریال */}
-<div className="bg-[#121215] p-4 rounded-xl border border-[#F9704E] flex flex-col items-center justify-center text-center space-y-3">
-  <div className="flex items-center justify-between w-full">
-    <span className="text-xs text-neutral-400 font-medium">💰 مبلغ جهت واریز :</span>
-    <button
-      type="button"
-      onClick={() => {
-        let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-        let numericRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-        navigator.clipboard.writeText(numericRial.toString());
-        alert('!مبلغ ریالی برای کارت‌به‌کارت کپی شد');
-      }}
-      className="text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-3 py-1.5 rounded-lg font-base hover:bg-neutral-700 transition-colors flex items-center gap-1.5"
-    >
-      <span> کپی مبلغ </span>
-    </button>
-  </div>
-  
-  <div className="text-sm sm:text-lg font-bold text-[#F9704E] tracking-tight font-mono">
-    {(() => {
-      let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-      let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-      return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
-    })()}
-  </div>
-
+{step === 3 && (
+  <div className="space-y-4 my-4">
     
+    {/* مبلغ کل به تومان */}
+    <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
+      <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-neutral-800 flex items-center justify-between">
+        <span className="text-[11px] sm:text-xs text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز (تومان):</span>
+        <div className="text-xs sm:text-base font-bold text-[#F9704E] tracking-tight font-mono">
+          {calculateTotalPrice()}
+        </div>
+      </div>
+    </div>
 
-  </div>
-{/* ۳. دکمه اختصاصی درگاه پرداخت آنلاین زرین‌پال */}
-  <div>
-    <button
-      type="button"
-      onClick={() => {
-        let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-        let amountInRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+    {/* تب‌های انتخاب نحوه پرداخت (۱. کارت‌به‌کارت | ۲. پرداخت آنلاین) */}
+    <div className="grid grid-cols-2 gap-2 bg-[#1c1c21] p-1.5 sm:p-2 rounded-2xl border border-[#F9704E]/50">
+      <button
+        type="button"
+        onClick={() => setPaymentMethod('card')}
+        className={`py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
+          paymentMethod === 'card'
+            ? 'bg-[#F9704E] text-white shadow-lg'
+            : 'bg-[#121215] text-neutral-400 hover:text-white hover:bg-neutral-800'
+        }`}
+      >
+        <span>💳 ۱. کارت‌به‌کارت</span>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setPaymentMethod('online')}
+        className={`py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
+          paymentMethod === 'online'
+            ? 'bg-emerald-600 text-white shadow-lg'
+            : 'bg-[#121215] text-neutral-400 hover:text-white hover:bg-neutral-800'
+        }`}
+      >
+        <span>🌐 ۲. پرداخت آنلاین</span>
+      </button>
+    </div>
+
+    {/* محتوای روش اول: کارت‌به‌کارت */}
+    {paymentMethod === 'card' && (
+      <div className="space-y-3 animate-fadeIn">
         
-        handleOnlinePayment(
-          { fullName: "مسافر تستی", phone: "09120000000", nationalId: "0000000000" }, 
-          currentTourDetails?.title || 'تور گردشگری',
-          amountInRial,
-          currentLider?.id || currentLider?.slug || 'leader_1'
-        );
-      }}
-      className="w-full py-4 px-6 bg-[#F9704E] hover:bg-[#e6522d] text-white font-bold rounded-2xl transition-all duration-200  flex items-center justify-center gap-3 text-base border border-[#F9704E]"
-    >
-      <span className="text-xl">💳</span>
-      <span>پرداخت آنلاین  </span>
-    </button>
-  </div>
+        {/* شماره کارت‌های لیدر */}
+        <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
+          <span className="block text-[11px] text-neutral-400 font-medium">💳 شماره کارت‌های لیدر:</span>
+          {currentLider.cards && currentLider.cards.length > 0 ? (
+            currentLider.cards.map((card: any, index: number) => (
+              <div key={index} className="bg-[#121215] p-3 rounded-xl border border-neutral-800 flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[11px] sm:text-xs text-orange-400 font-bold">{card.bankName ? `بانک ${card.bankName}` : `کارت ${index + 1}`}</span>
+                  <span className="text-[10px] sm:text-xs text-neutral-300 font-mono mt-0.5">{card.cardOwner}</span>
+                </div>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <span className="font-mono text-[11px] sm:text-xs text-white tracking-wider" dir="ltr">{card.cardNumber}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(card.cardNumber);
+                      alert('شماره کارت کپی شد!');
+                    }}
+                    className="text-[10px] bg-neutral-800 border border-neutral-700 text-neutral-300 px-2 py-1 rounded-md hover:bg-neutral-700"
+                  >
+                    کپی
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="bg-[#121215] p-3 rounded-xl border border-neutral-800 text-center">
+              <span className="text-xs text-neutral-400">شماره کارتی ثبت نشده است.</span>
+            </div>
+          )}
+        </div>
+
+        {/* مبلغ ریالی و دکمه کپی ریال */}
+        <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
+          <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-neutral-800 flex flex-col items-center justify-center text-center space-y-2.5">
+            <div className="flex items-center justify-between w-full">
+              <span className="text-[11px] sm:text-xs text-neutral-400 font-medium">💳 مبلغ ریال جهت واریز:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+                  let numericRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+                  navigator.clipboard.writeText(numericRial.toString());
+                  alert('مبلغ ریالی برای کارت‌به‌کارت کپی شد!');
+                }}
+                className="text-[10px] sm:text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-2.5 py-1 rounded-lg font-medium hover:bg-neutral-700 transition-colors"
+              >
+                📋 کپی ریال
+              </button>
+            </div>
+            
+            <div className="text-xs sm:text-base font-bold text-[#F9704E] tracking-tight font-mono">
+              {(() => {
+                let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+                let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+                return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
+              })()}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    )}
+
+    {/* محتوای روش دوم: درگاه آنلاین */}
+    {paymentMethod === 'online' && (
+      <div className="bg-[#1c1c21] border border-emerald-500/50 p-4 sm:p-5 rounded-2xl space-y-3 animate-fadeIn text-center">
+        <p className="text-[11px] sm:text-xs text-neutral-300 leading-relaxed">
+          با انتخاب پرداخت آنلاین، بدون نیاز به ارسال فیش، ثبت‌نام شما به صورت آنی قطعی می‌شود.
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+            let amountInRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+            
+            handleOnlinePayment(
+              { fullName: "مسافر", phone: "09120000000", nationalId: "0000000000" }, 
+              currentTourDetails?.title || 'تور گردشگری',
+              amountInRial,
+              currentLider?.id || currentLider?.slug || 'leader_1'
+            );
+          }}
+          className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all duration-200 shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm border border-emerald-500/40"
+        >
+          <span>💳</span>
+          <span>اتصال به درگاه بانکی (زرین‌پال)</span>
+        </button>
+      </div>
+    )}
 
   </div>
-
+)}
                   <div>
                     <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر فیش واریزی</label>
                     <input type="file" ref={receiptInputRef} accept="image/*" onChange={handleReceiptChange} className="hidden" />
