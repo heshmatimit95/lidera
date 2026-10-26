@@ -1214,10 +1214,13 @@ const toEnglishDigits = (str: string) => {
                 <td className="p-3 sm:p-4 text-center font-medium">{p.tourName}</td>
                 
                 {/* ستون ۴: تاریخ، مبلغ و تصویر فیش */}
-                <td className="p-3 sm:p-4 text-center">
-                  <div className="text-zinc-300 font-mono text-[11px]">{p.receiptDate || '-'}</div>
-                {p.amount ? Number(String(p.amount).replace(/[^0-9]/g, '')).toLocaleString() : '0'} تومان
-                  {p.receiptImage && (
+           {/* ستون ۴: تاریخ، مبلغ و تصویر فیش */}
+            <td className="p-3 sm:p-4 text-center">
+              <div className="text-zinc-300 font-mono text-[11px]">{toPersianDigits(p.receiptDate || '-')}</div>
+              <div className="font-mono text-xs text-emerald-400 font-bold mt-0.5">
+                {p.amount ? toPersianDigits(Number(String(p.amount).replace(/[^0-9]/g, '')).toLocaleString()) + ' تومان' : '۰ تومان'}
+              </div>
+              {p.receiptImage && (
                    
                    <button
                       onClick={() => {
@@ -1880,7 +1883,7 @@ onChange={(e) => {
             {/* جزئیات مسافر و محاسبه خودکار مبلغ برمبنای تعداد صندلی */}
 {/* نمایش هوشمند مبلغ تور */}
 <div className="space-y-3 text-xs sm:text-sm">
-  <div className="grid grid-cols-2 gap-2 bg-zinc-900/60 p-3 rounded-xl border border-zinc-800">
+  <div className="grid grid-cols-2 gap-2 bg-zinc-900/60 p-3 rounded-xl border border-[#F9704E]">
     <p><span className="text-zinc-500">شماره تماس:</span> {selectedReceiptPassenger?.mobile || selectedReceiptPassenger?.phone || 'ـ'}</p>
     <p>
       <span className="text-zinc-500">مبلغ تور (محاسبه خودکار): </span>
@@ -1927,7 +1930,7 @@ onChange={(e) => {
                 receiptDate: formatted
               }));
             }}
-            className="w-full bg-[#1c1c21] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#E5C060] font-mono font-bold text-right"
+            className="w-full bg-[#5c5c5c] border border-[#F9704E]  rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#F9704E] font-mono font-bold text-right"
           />
         </div>
         </div>
