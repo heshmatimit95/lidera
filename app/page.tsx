@@ -757,9 +757,9 @@ return (
 </div>
   {/* ۲. بخش ریال (دقیقاً هم‌شکل با تومان با فونت درشت و رنگ نارنجی) */}
 {/* بخش ریال */}
-<div className="bg-[#121215] p-4 rounded-xl border border-neutral-800 flex flex-col items-center justify-center text-center space-y-3">
+<div className="bg-[#121215] p-4 rounded-xl border border-[#F9704E] flex flex-col items-center justify-center text-center space-y-3">
   <div className="flex items-center justify-between w-full">
-    <span className="text-xs text-neutral-400 font-medium">💳 مبلغ جهت واریز :</span>
+    <span className="text-xs text-neutral-400 font-medium">💰 مبلغ جهت واریز :</span>
     <button
       type="button"
       onClick={() => {
@@ -768,7 +768,7 @@ return (
         navigator.clipboard.writeText(numericRial.toString());
         alert('!مبلغ ریالی برای کارت‌به‌کارت کپی شد');
       }}
-      className="text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-3 py-1.5 rounded-lg font-medium hover:bg-neutral-700 transition-colors flex items-center gap-1.5"
+      className="text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-3 py-1.5 rounded-lg font-base hover:bg-neutral-700 transition-colors flex items-center gap-1.5"
     >
       <span> کپی مبلغ </span>
     </button>
