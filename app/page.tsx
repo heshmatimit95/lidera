@@ -716,7 +716,7 @@ return (
   
 {/* بخش تومان */}
 <div className="bg-[#121215] p-4 rounded-xl border border-[#F9704E] flex flex-col items-center justify-center text-center space-y-2">
-  <span className="text-xs text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز :</span>
+  <span className="text-xs text-neutral-400 font-medium">💰 مبلغ دقیق  :</span>
   <div className="text-sm sm:text-lg font-bold text-[#F9704E] tracking-tight font-mono">
     {calculateTotalPrice()}
   </div>
@@ -759,7 +759,7 @@ return (
 {/* بخش ریال */}
 <div className="bg-[#121215] p-4 rounded-xl border border-neutral-800 flex flex-col items-center justify-center text-center space-y-3">
   <div className="flex items-center justify-between w-full">
-    <span className="text-xs text-neutral-400 font-medium">💳 مبلغ جهت واریز (ریال):</span>
+    <span className="text-xs text-neutral-400 font-medium">💳 مبلغ جهت واریز :</span>
     <button
       type="button"
       onClick={() => {
