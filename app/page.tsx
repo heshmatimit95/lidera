@@ -715,8 +715,8 @@ return (
 <div className="bg-[#1c1c21] border border-[#F9704E] p-5 rounded-2xl space-y-4">
   
 {/* بخش تومان */}
-<div className="bg-[#121215] p-3.5 rounded-xl border border-[#F9704E]  flex items-center justify-between">
-  <span className="text-xs text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز (تومان):</span>
+<div className="bg-[#121215] p-4 rounded-xl border border-[#F9704E] flex flex-col items-center justify-center text-center space-y-2">
+  <span className="text-xs text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز :</span>
   <div className="text-sm sm:text-lg font-bold text-[#F9704E] tracking-tight font-mono">
     {calculateTotalPrice()}
   </div>
@@ -756,31 +756,32 @@ return (
   )}
 </div>
   {/* ۲. بخش ریال (دقیقاً هم‌شکل با تومان با فونت درشت و رنگ نارنجی) */}
-  <div className="border-t border-[#F9704E] pt-4 flex flex-col gap-1">
-    <div className="flex items-center justify-between bg-[#121215] p-3 rounded-xl border border-[#F9704E]">
-      <span className="text-xs text-neutral-400 font-medium">💳 مبلغ جهت واریز (ریال):</span>
-<div className="text-sm sm:text-lg font-bold text-[#F9704E] tracking-tight font-mono">
-  {(() => {
-    let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-    let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-    return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
-  })()}
-</div>
-      <button
-              type="button"
-        onClick={() => {
-          let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-          let numericRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-          navigator.clipboard.writeText(numericRial.toString());
-          alert('!مبلغ ریالی برای کارت‌به‌کارت کپی شد');
-                  }}
-                  
-        className="text-[10px] bg-neutral-800  border border-[#F9704E] text-white px-2.5 py-1.5 rounded-md transition-colors font-medium active:scale-95"
-      >
+{/* بخش ریال */}
+<div className="bg-[#121215] p-4 rounded-xl border border-neutral-800 flex flex-col items-center justify-center text-center space-y-3">
+  <div className="flex items-center justify-between w-full">
+    <span className="text-xs text-neutral-400 font-medium">💳 مبلغ جهت واریز (ریال):</span>
+    <button
+      type="button"
+      onClick={() => {
+        let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+        let numericRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+        navigator.clipboard.writeText(numericRial.toString());
+        alert('!مبلغ ریالی برای کارت‌به‌کارت کپی شد');
+      }}
+      className="text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-3 py-1.5 rounded-lg font-medium hover:bg-neutral-700 transition-colors flex items-center gap-1.5"
+    >
+      <span> کپی مبلغ </span>
+    </button>
+  </div>
   
-        <span> کپی مبلغ </span>
-      </button>
-    </div>
+  <div className="text-sm sm:text-lg font-bold text-[#F9704E] tracking-tight font-mono">
+    {(() => {
+      let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+      let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+      return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
+    })()}
+  </div>
+
     
 
   </div>
