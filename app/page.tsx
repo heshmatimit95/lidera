@@ -721,27 +721,22 @@ return (
               {step === 3 && (
                 <div className="space-y-5">
 {/* ۱. نمایش مبلغ به تومان برای کاربر */}
-  <div className="bg-[#1c1c21] border border-[#F9704E] p-5 rounded-2xl space-y-2">
-    <div className="flex flex-col gap-1">
-      <span className="text-xs text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز:</span>
-      <div className="text-xl font-extrabold text-[#F9704E] tracking-tight block py-1 font-mono">
-        {calculateTotalPrice()}
-      </div>
+ {/* ۱. نمایش مبلغ به تومان برای کاربر */}
+<div className="bg-[#1c1c21] border border-[#F9704E] p-5 rounded-2xl space-y-4">
+  
+  {/* بخش تومان */}
+  <div className="flex flex-col gap-1">
+    <span className="text-xs text-neutral-400 font-medium">💰 مبلغ  (تومان):</span>
+    <div className="text-xl font-extrabold text-[#F9704E] tracking-tight block py-1 font-mono">
+      {calculateTotalPrice()}
     </div>
+  </div>
 
-    {/* ۲. بخش ریال و دکمه کپی اختصاصی برای واریز بانکی */}
-    <div className="border-t border-neutral-800/80 pt-3 flex items-center justify-between">
-      <div className="text-[11px] text-neutral-300 font-mono">
-        معادل ریال جهت کارت‌به‌کارت: <span className="text-emerald-400 font-bold">
-          {(() => {
-            let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-            let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-            return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
-          })()}
-        </span>
-      </div>
-
-          <button
+  {/* ۲. بخش ریال (دقیقاً هم‌شکل با تومان با فونت درشت و رنگ نارنجی) */}
+  <div className="border-t border-neutral-800/80 pt-4 flex flex-col gap-1">
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-neutral-400 font-medium">💳 مبلغ جهت واریز (ریال):</span>
+      <button
         type="button"
         onClick={() => {
           let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
@@ -749,13 +744,20 @@ return (
           navigator.clipboard.writeText(numericRial.toString());
           alert('!مبلغ ریالی برای کارت‌به‌کارت کپی شد');
         }}
-        className="text-[12px] bg-neutral-800 border border-[#F9704E] text-emerald-400 px-3 py-1.5 rounded-md font-medium transition-colors hover:bg-neutral-700 active:bg-neutral-600 flex items-center gap-1"
+        className="text-[11px] bg-neutral-800 border border-neutral-700 text-emerald-400 px-3 py-1.5 rounded-lg font-medium hover:bg-neutral-700 transition-colors flex items-center gap-1.5"
       >
-        <span>📋 کپی مبلغ ریال</span>
+        <span> کپی مبلغ </span>
       </button>
     </div>
-
-
+    
+    <div className="text-xl font-extrabold text-[#F9704E] tracking-tight block py-1 font-mono">
+      {(() => {
+        let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+        let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+        return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
+      })()}
+    </div>
+  </div>
 
 
 <div className="border-t border-neutral-800/80 pt-3">
@@ -807,18 +809,14 @@ return (
           currentLider?.id || currentLider?.slug || 'leader_1'
         );
       }}
-      className="w-full py-4 px-6 bg-[#F9704E] hover:bg-[#F9704E] text-white font-bold rounded-2xl transition-all duration-200 shadow-xl hover:shadow-emerald-500/30 flex items-center justify-center gap-3 text-base border border-emerald-500/30"
+      className="w-full py-4 px-6 bg-[#F9704E] hover:bg-[#F9704E] text-white font-bold rounded-2xl transition-all duration-200  flex items-center justify-center gap-3 text-base border border-[#F9704E]"
     >
       <span className="text-xl">💳</span>
       <span>پرداخت آنلاین  </span>
     </button>
   </div>
 
-
-
-
-
-                  </div>
+  </div>
 
                   <div>
                     <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر فیش واریزی</label>
