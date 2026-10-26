@@ -714,9 +714,8 @@ return (
 {/* بخش تومان داخل کادر */}
 <div className="bg-[#1c1c21] border border-[#F9704E] p-5 rounded-2xl space-y-4">
   
-  {/* بخش تومان */}
-  {/* بخش تومان */}
-<div className="bg-[#121215] p-3.5 rounded-xl border border-[#F9704E]flex items-center justify-between">
+{/* بخش تومان */}
+<div className="bg-[#121215] p-3.5 rounded-xl border border-[#F9704E]  flex items-center justify-between">
   <span className="text-xs text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز (تومان):</span>
   <div className="text-xl font-extrabold text-[#F9704E] tracking-tight font-mono">
     {calculateTotalPrice()}
