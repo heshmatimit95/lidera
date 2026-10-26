@@ -701,12 +701,18 @@ const handleAddTour = async (e: React.FormEvent) => {
       formData.append("receiptDate", selectedReceiptPassenger?.receiptDate || "");
       
       // محاسبه و ارسال مبلغ تور
-const tourPriceRaw = selectedReceiptPassenger?.tourPrice || selectedReceiptPassenger?.price || selectedReceiptPassenger?.tour?.price || 17890000;
-const rawPrice = parseInt(String(tourPriceRaw).replace(/[^0-9]/g, ''), 10) || 17890000;
-const seats = parseInt(String(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1), 10);
-const calculated = rawPrice * seats;
-formData.append("amount", calculated.toString());
+// اول چک کن ببین مسافر از قبل مبلغی دارد یا نه؛ اگر داشت همان را حفظ کن، وگرنه محاسبه خودکار کن
+    const existingAmount = selectedReceiptPassenger?.amount;
+    const finalAmountToSend = existingAmount && existingAmount !== '0' && existingAmount !== 'NaN' 
+      ? existingAmount 
+      : (() => {
+          const tourPriceRaw = selectedReceiptPassenger?.tourPrice || selectedReceiptPassenger?.price || selectedReceiptPassenger?.tour?.price || 17890000;
+          const rawPrice = parseInt(String(tourPriceRaw).replace(/[^0-9]/g, ''), 10) || 17890000;
+          const seats = parseInt(String(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1), 10);
+          return (rawPrice * seats).toString();
+        })();
 
+    formData.append("amount", finalAmountToSend);
       // فراخوانی اکشن سرور برای ذخیره اطلاعات
       const res = await savePassengerPayment(formData, window.location.pathname);
 
