@@ -743,7 +743,7 @@ return (
         onClick={() => setPaymentMethod('online')}
         className={`py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
           paymentMethod === 'online'
-            ? 'bg-emerald-600 text-white shadow-lg'
+            ? 'bg-[#F9704E] text-white shadow-lg'
             : 'bg-[#121215] text-neutral-400 hover:text-white hover:bg-neutral-800'
         }`}
       >
@@ -760,7 +760,7 @@ return (
           <span className="block text-[11px] text-neutral-400 font-medium">💳 شماره کارت‌های لیدر:</span>
           {currentLider.cards && currentLider.cards.length > 0 ? (
             currentLider.cards.map((card: any, index: number) => (
-              <div key={index} className="bg-[#121215] p-3 rounded-xl border border-neutral-800 flex items-center justify-between">
+              <div key={index} className="bg-[#121215] p-3 rounded-xl border border-[#F9704E] flex items-center justify-between">
                 <div className="flex flex-col">
                   <span className="text-[11px] sm:text-xs text-orange-400 font-bold">{card.bankName ? `بانک ${card.bankName}` : `کارت ${index + 1}`}</span>
                   <span className="text-[10px] sm:text-xs text-neutral-300 font-mono mt-0.5">{card.cardOwner}</span>
@@ -773,7 +773,7 @@ return (
                       navigator.clipboard.writeText(card.cardNumber);
                       alert('شماره کارت کپی شد!');
                     }}
-                    className="text-[10px] bg-neutral-800 border border-neutral-700 text-neutral-300 px-2 py-1 rounded-md hover:bg-neutral-700"
+                    className="text-[10px] bg-neutral-800 border border-[#F9704E] text-neutral-300 px-2 py-1 rounded-md hover:bg-[#F9704E]"
                   >
                   کپی کارت
                   </button>
@@ -781,7 +781,7 @@ return (
               </div>
             ))
           ) : (
-            <div className="bg-[#121215] p-3 rounded-xl border border-neutral-800 text-center">
+            <div className="bg-[#121215] p-3 rounded-xl border border-#F9704E] text-center">
               <span className="text-xs text-neutral-400">شماره کارتی ثبت نشده است.</span>
             </div>
           )}
@@ -789,9 +789,17 @@ return (
 
         {/* مبلغ ریالی و دکمه کپی ریال */}
         <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
-          <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-neutral-800 flex flex-col items-center justify-center text-center space-y-2.5">
+          <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex flex-col items-center justify-center text-center space-y-2.5">
             <div className="flex items-center justify-between w-full">
-              <span className="text-[11px] sm:text-xs text-neutral-400 font-medium">💳 مبلغ ریال جهت واریز:</span>
+              <span className="text-[11px] sm:text-xs text-neutral-400 font-base">💳 مبلغ ریال جهت واریز:</span>
+    <div className="text-xs sm:text-base font-bold text-[#F9704E] tracking-tight font-mono">
+              {(() => {
+                let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+                let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+                return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
+              })()}
+            </div>
+
               <button
                 type="button"
                 onClick={() => {
@@ -800,19 +808,12 @@ return (
                   navigator.clipboard.writeText(numericRial.toString());
                   alert('مبلغ ریالی برای کارت‌به‌کارت کپی شد!');
                 }}
-                className="text-[10px] sm:text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-2.5 py-1 rounded-lg font-medium hover:bg-neutral-700 transition-colors"
+                className="text-[10px] sm:text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-2.5 py-1 rounded-lg font-medium hover:bg-[#F9704E] transition-colors"
               >
                  کپی ریال
               </button>
             </div>
-            
-            <div className="text-xs sm:text-base font-bold text-[#F9704E] tracking-tight font-mono">
-              {(() => {
-                let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-                let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-                return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
-              })()}
-            </div>
+                   
           </div>
         </div>
 
@@ -838,7 +839,7 @@ return (
               currentLider?.id || currentLider?.slug || 'leader_1'
             );
           }}
-          className="w-full py-3 px-4 bg-[#F9704E] hover:bg-[#F9704E] text-white font-bold rounded-xl transition-all duration-200 shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm border border-emerald-500/40"
+          className="w-full py-3 px-4 bg-[#F9704E] hover:bg-[#F9704E] text-white font-bold rounded-xl transition-all duration-200 shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm border border-[#F9704E]"
         >
           <span>💳</span>
           <span>اتصال به درگاه بانکی </span>
