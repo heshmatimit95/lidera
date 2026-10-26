@@ -715,13 +715,13 @@ return (
 <div className="bg-[#1c1c21] border border-[#F9704E] p-5 rounded-2xl space-y-4">
   
   {/* بخش تومان */}
-  <div className="flex flex-col gap-1.5 bg-[#121215] p-3.5 rounded-xl border border-neutral-800">
-    <div className="flex items-center justify-between">
-      <span className="text-xs text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز (تومان):</span>
-    </div>
-    <div className="text-xl font-bold text-[#F9704E] tracking-tight block py-1 font-mono">
-      {calculateTotalPrice()}
-    </div>
+  {/* بخش تومان */}
+<div className="bg-[#121215] p-3.5 rounded-xl border border-[#F9704E]flex items-center justify-between">
+  <span className="text-xs text-neutral-400 font-medium">💰 مبلغ دقیق جهت واریز (تومان):</span>
+  <div className="text-xl font-extrabold text-[#F9704E] tracking-tight font-mono">
+    {calculateTotalPrice()}
+  </div>
+
  </div>
 <div className="border-t border-[#F9704E] pt-3">
   <span className="block text-[11px] text-neutral-400 mb-1.5 font-medium">💳 شماره کارت‌های لیدر:</span>
@@ -800,7 +800,7 @@ return (
           currentLider?.id || currentLider?.slug || 'leader_1'
         );
       }}
-      className="w-full py-4 px-6 bg-[#F9704E] hover:bg-[#F9704E] text-white font-bold rounded-2xl transition-all duration-200  flex items-center justify-center gap-3 text-base border border-[#F9704E]"
+      className="w-full py-4 px-6 bg-[#F9704E] hover:bg-[#e6522d] text-white font-bold rounded-2xl transition-all duration-200  flex items-center justify-center gap-3 text-base border border-[#F9704E]"
     >
       <span className="text-xl">💳</span>
       <span>پرداخت آنلاین  </span>
