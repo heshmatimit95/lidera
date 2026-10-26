@@ -1302,18 +1302,6 @@ const toEnglishDigits = (str: string) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
 
-<div>
-    <label className="block text-xs sm:text-sm text-zinc-300 mb-1.5  font-bold">تاریخ تولد (مثلا 1375/05/12):</label>
-<input
-  type="text"
-  maxLength={10}
-  value={toPersianDigits(addFormData.receiptDate || '')}
-  onChange={(e) => handleSmartDateChange(e, setAddFormData, 'receiptDate')}
-  placeholder="۱۴۰۵/۰۷/۰۹"
-  className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
-/>
-  </div>
-
                 <div>
 
   <label className="block text-xs text-zinc-300 mb-1.5 font-medium">شماره موبایل:</label>
@@ -1350,7 +1338,7 @@ const toEnglishDigits = (str: string) => {
     const selectedTour = e.target.value;
     calculateEditAmount(selectedTour, Number(editFormData.seats || 1));
   }}
-  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-xs text-white"
+  className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
 >
   {activeTours.map((tour: any, idx: number) => (
     <option key={idx} value={tour.name}>
@@ -1419,8 +1407,8 @@ const toEnglishDigits = (str: string) => {
                   </div>
                 </div>
 <div>
-  <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تاریخ پرداخت:</label>
-<div>
+ <div>
+  
                 <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تاریخ پرداخت:</label>
                 <input
                   type="text"
@@ -1428,7 +1416,9 @@ const toEnglishDigits = (str: string) => {
                   value={toPersianDigits(addFormData.receiptDate || '')}
                   onChange={(e) => handleSmartDateChange(e, setAddFormData, 'receiptDate')}
                   placeholder="۱۴۰۵/۰۷/۰۹"
-                  className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
+
+                  
                 />
               </div>
 </div>
@@ -1493,18 +1483,6 @@ const toEnglishDigits = (str: string) => {
                   <input type="text" required value={editFormData.fullName} onChange={(e) => setEditFormData({ ...editFormData, fullName: e.target.value })} className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black placeholder-white/70" />
                 </div>
 
-{/* تاریخ تولد (نمایش و ویرایش) */}
-<div>
-                <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تاریخ پرداخت (۱۳۷۰/۰۱/۰۱ مثلا):</label>
-                <input
-                  type="text"
-                  maxLength={10}
-                  value={toPersianDigits(editFormData.receiptDate || '')}
-                  onChange={(e) => handleSmartDateChange(e, setEditFormData, 'receiptDate')}
-                  placeholder="۱۴۰۵/۰۷/۰۹"
-                  className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
-                />
-              </div>
 
 
 <div>
@@ -1928,25 +1906,31 @@ onChange={(e) => {
   </div>
 
 {/* Input برای تاریخ واریز دستی */}
-  <div className="bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-800">
-    <label className="block text-zinc-400 text-xs mb-1 font-medium">تاریخ واریز فیش (توسط لیدر):</label>
-    <input
-      type="text"
-      placeholder="مثلاً: 1405/07/09"
-      value={selectedReceiptPassenger?.receiptDate || ''}
-      onChange={(e) => {
-        const updatedDate = e.target.value;
-        setSelectedReceiptPassenger((prev: any) => ({
-          ...prev,
-          receiptDate: updatedDate
-        }));
-      }}
-      className="w-full bg-[#1c1c21] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#E5C060] font-mono text-left"
-      style={{ direction: 'ltr' }}
-    />
-  </div>
-</div>
-
+{/* Input برای تاریخ واریز دستی */}
+        <div className="space-y-1">
+          <label className="block text-xs text-zinc-400 mb-1 font-medium">تاریخ واریز فیش (توسط لیدر):</label>
+          <input
+            type="text"
+            maxLength={10}
+            placeholder="۱۴۰۵/۰۷/۰۹"
+            value={toPersianDigits(selectedReceiptPassenger?.receiptDate || '')}
+            onChange={(e) => {
+              const enVal = toEnglishDigits(e.target.value).replace(/\D/g, '');
+              let formatted = enVal;
+              if (enVal.length > 4 && enVal.length <= 6) {
+                formatted = enVal.slice(0, 4) + '/' + enVal.slice(4);
+              } else if (enVal.length > 6) {
+                formatted = enVal.slice(0, 4) + '/' + enVal.slice(4, 6) + '/' + enVal.slice(6, 8);
+              }
+              setSelectedReceiptPassenger((prev: any) => ({
+                ...prev,
+                receiptDate: formatted
+              }));
+            }}
+            className="w-full bg-[#1c1c21] border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#E5C060] font-mono font-bold text-right"
+          />
+        </div>
+        </div>
             {/* نمایش تصویر فیش (با ارتفاع کنترل شده جهت جلوگیری از اورفلو) */}
             <div className="bg-black/50 border border-zinc-800 rounded-xl overflow-hidden flex items-center justify-center min-h-160px] max-h-240px] shrink-0">
               {selectedReceiptPassenger.receiptImage ? (

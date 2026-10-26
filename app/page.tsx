@@ -597,7 +597,7 @@ return (
                 }
                 setBirthDate(formatted);
               }}
-              className="w-full bg-[#1c1c21] border border-[#F9704E] p-4 rounded-xl text-xs text-right text-white placeholder-neutral-500 focus:outline-none transition-all duration-300 font-mono font-bold text-lg"
+              className="w-full bg-[#1c1c21] border border-[#F9704E] p-4 rounded-xl text-xs text-right text-white placeholder-neutral-500 focus:outline-none transition-all duration-300 font-mono font-bold"
             />
     </div>
   )}
