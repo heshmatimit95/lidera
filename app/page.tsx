@@ -717,8 +717,8 @@ return (
     {/* مبلغ کل به تومان */}
     <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
       <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex items-center justify-between">
-        <span className="text-[11px] sm:text-xs text-neutral-400 font-medium">💰 مبلغ دقیق  :</span>
-        <div className="text-xs sm:text-base font-bold text-white tracking-tight font-mono">
+        <span className="text-[11px] sm:text-xs text-[#F9704E] font-medium">💰 مبلغ دقیق  :</span>
+        <div className="text-xs sm:text-base font-bold text-white tracking-tight font-bold">
           {calculateTotalPrice()}
         </div>
       </div>
@@ -758,7 +758,7 @@ return (
         {/* شماره کارت‌های لیدر */}
        {/* شماره کارت‌های لیدر */}
 <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
-  <span className="block text-[11px] text-neutral-400 font-medium text-right">💳 شماره کارت‌های لیدر:</span>
+  <span className="block text-[11px] text-[#F9704E] font-bold text-right">💳 شماره کارت‌های لیدر:</span>
   {currentLider.cards && currentLider.cards.length > 0 ? (
     currentLider.cards.map((card: any, index: number) => (
       <div key={index} className="bg-[#121215] p-3.5 rounded-xl border border-[#F9704E] flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -791,7 +791,7 @@ return (
 {/* مبلغ ریالی و دکمه کپی ریال */}
 <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
   <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex flex-col sm:flex-row items-center justify-between gap-3">
-    <span className="text-[11px] sm:text-xs text-[#F9704E] font-medium">💳 مبلغ ریال جهت واریز:</span>
+    <span className="text-[11px] sm:text-xs text-[#F9704E] font-bold ">💳 مبلغ ریال جهت واریز:</span>
     
     {/* بخش مبلغ که دقیقاً وسط و مرتب قرار گرفته است */}
     <div className="flex items-center justify-center gap-3 w-full sm:w-auto">
@@ -819,7 +819,7 @@ return (
 </div>
         {/* بارگذاری تصویر فیش واریزی (فقط در حالت کارت‌به‌کارت نمایش داده می‌شود) */}
         <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
-          <label className="block text-sm text-white mb-2 font-medium text-center">بارگذاری تصویر فیش واریزی</label>
+          <label className="block text-sm text-[#F9704E] mb-2 font-medium text-center">بارگذاری تصویر فیش واریزی</label>
           <input type="file" ref={receiptInputRef} accept="image/*" onChange={handleReceiptChange} className="hidden" />
           
           {receiptPreview ? (
