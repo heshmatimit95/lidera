@@ -16,24 +16,23 @@ export async function POST(req: Request) {
       },
     });
 
-    // استفاده از مرچنت اختصاصی لیدر (در پلن طلایی) یا مرچنت عمومی سیستم
- const merchant = leader?.zarinpalMerchantId || process.env.ZARINPAL_MERCHANT || '00000000-0000-0000-0000-000000000000';
+    // استفاده از مرچنت اختصاصی لیدر یا مرچنت سندباکس پیش‌فرض
+    const merchant = leader?.zarinpalMerchantId || process.env.ZARINPAL_MERCHANT || '00000000-0000-0000-0000-000000000000';
 
     // آدرس بازگشت به سایت روی دامنه اصلی lidera.ir همراه با شناسه اختصاصی لیدر
-    const callbackUrl = `https://lidera.ir/api/payment/verify?leaderId=${leaderId}&fullName=${encodeURIComponent(passengerData.fullName)}&phone=${passengerData.phone}&nationalId=${passengerData.nationalId}&tourName=${encodeURIComponent(passengerData.tourName)}&amount=${amountInRial}`;
+    const callbackUrl = `https://lidera.ir/api/payment/verify?leaderId=${leaderId}&fullName=${encodeURIComponent(passengerData.fullName || '')}&phone=${passengerData.phone || ''}&nationalId=${passengerData.nationalId || ''}&tourName=${encodeURIComponent(passengerData.tourName || '')}&amount=${amountInRial}`;
 
-    // ارسال درخواست به درگاه زرین‌پال
-   // تبدیل سندباکس به آدرس واقعی زرین‌پال
-const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/request.json', {
+    // ارسال درخواست به درگاه زرین‌پال (محیط سندباکس)
+    const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/request.json', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         merchant_id: merchant,
         amount: Number(amountInRial), // مبلغ به ریال
         callback_url: callbackUrl,
-        description: description || `رزرو تور ${passengerData.tourName} - لیدرا`,
+        description: description || `رزرو تور لیدرا`,
         metadata: {
-          mobile: passengerData.phone,
+          mobile: passengerData.phone || '',
           email: passengerData.email || ''
         }
       })
@@ -42,7 +41,8 @@ const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/request
     const data = await response.json();
 
     if (data.data && data.data.code === 100) {
-      const paymentUrl = `https://www.zarinpal.com/pg/StartPay/${data.data.authority}`;
+      // آدرس StartPay برای محیط سندباکس تنظیم شد
+      const paymentUrl = `https://sandbox.zarinpal.com/pg/StartPay/${data.data.authority}`;
       return NextResponse.json({ success: true, url: paymentUrl });
     } else {
       return NextResponse.json({ 
