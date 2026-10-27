@@ -32,9 +32,7 @@ export async function GET(request: Request) {
       "YOUR_MERCHANT_ID";
 
     // تایید تراکنش با زرین‌پال (Sandbox / Production)
-    const response = await fetch(
-      "https://sandbox.zarinpal.com/pg/v4/payment/verify.json",
-      {
+   const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/verify.json', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
