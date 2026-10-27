@@ -756,66 +756,65 @@ return (
       <div className="space-y-3 animate-fadeIn">
         
         {/* شماره کارت‌های لیدر */}
-        <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
-          <span className="block text-[11px] text-neutral-400 font-medium">💳 شماره کارت‌های لیدر:</span>
-          {currentLider.cards && currentLider.cards.length > 0 ? (
-            currentLider.cards.map((card: any, index: number) => (
-              <div key={index} className="bg-[#121215] p-3 rounded-xl border border-[#F9704E] flex items-center justify-between">
-                <div className="flex flex-col">
-                  <span className="text-[11px] sm:text-xs text-orange-400 font-bold">{card.bankName ? `بانک ${card.bankName}` : `کارت ${index + 1}`}</span>
-                  <span className="text-[10px] sm:text-xs text-neutral-300 font-mono mt-0.5">{card.cardOwner}</span>
-                </div>
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <span className="font-mono text-[11px] sm:text-xs text-white tracking-wider" dir="ltr">{card.cardNumber}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(card.cardNumber);
-                      alert('شماره کارت کپی شد!');
-                    }}
-                    className="text-[10px] bg-neutral-800 border border-[#F9704E] text-neutral-300 px-2 py-1 rounded-md hover:bg-[#F9704E]"
-                  >
-                    کپی کارت
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="bg-[#121215] p-3 rounded-xl border border-[#F9704E] text-center">
-              <span className="text-xs text-neutral-400">شماره کارتی ثبت نشده است.</span>
-            </div>
-          )}
+       {/* شماره کارت‌های لیدر */}
+<div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
+  <span className="block text-[11px] text-neutral-400 font-medium text-right">💳 شماره کارت‌های لیدر:</span>
+  {currentLider.cards && currentLider.cards.length > 0 ? (
+    currentLider.cards.map((card: any, index: number) => (
+      <div key={index} className="bg-[#121215] p-3.5 rounded-xl border border-[#F9704E] flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex flex-col items-center sm:items-start">
+          <span className="text-[11px] sm:text-xs text-orange-400 font-bold">{card.bankName ? `بانک ${card.bankName}` : `کارت ${index + 1}`}</span>
+          <span className="text-[10px] sm:text-xs text-neutral-300 font-mono mt-0.5">{card.cardOwner}</span>
         </div>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs sm:text-sm text-white tracking-wider" dir="ltr">{card.cardNumber}</span>
+          <button
+            type="button"
+            onClick={() => {
+              navigator.clipboard.writeText(card.cardNumber);
+              alert('شماره کارت کپی شد!');
+            }}
+            className="text-[10px] bg-neutral-800 border border-[#F9704E] text-neutral-300 px-2.5 py-1 rounded-md hover:bg-[#F9704E] hover:text-white transition-colors"
+          >
+            کپی کارت
+          </button>
+        </div>
+      </div>
+    ))
+  ) : (
+    <div className="bg-[#121215] p-3 rounded-xl border border-[#F9704E] text-center">
+      <span className="text-xs text-neutral-400">شماره کارتی ثبت نشده است.</span>
+    </div>
+  )}
+</div>
 
         {/* مبلغ ریالی و دکمه کپی ریال */}
-        <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
-          <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex flex-col items-center justify-center text-center space-y-2.5">
-            <div className="flex items-center justify-between w-full">
-              <span className="text-[11px] sm:text-xs text-neutral-400 font-base">💳 مبلغ ریال جهت واریز:</span>
-              <button
-                type="button"
-                onClick={() => {
-                  let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-                  let numericRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-                  navigator.clipboard.writeText(numericRial.toString());
-                  alert('مبلغ ریالی برای کارت‌به‌کارت کپی شد!');
-                }}
-                className="text-[10px] sm:text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-2.5 py-1 rounded-lg font-medium hover:bg-[#F9704E] transition-colors"
-              >
-                کپی ریال
-              </button>
-            </div>
-            
-            <div className="text-xs sm:text-base font-bold text-[#F9704E] tracking-tight font-mono">
-              {(() => {
-                let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-                let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-                return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
-              })()}
-            </div>
-          </div>
-        </div>
-
+<div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
+  <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex items-center justify-between">
+    <span className="text-[11px] sm:text-xs text-neutral-400 font-medium">💳 مبلغ ریال جهت واریز:</span>
+    <div className="flex items-center gap-3">
+      <div className="text-xs sm:text-base font-bold text-[#F9704E] tracking-tight font-mono">
+        {(() => {
+          let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+          let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+          return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
+        })()}
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+          let numericRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+          navigator.clipboard.writeText(numericRial.toString());
+          alert('مبلغ ریالی برای کارت‌به‌کارت کپی شد!');
+        }}
+        className="text-[10px] sm:text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-2.5 py-1.5 rounded-lg font-medium hover:bg-[#F9704E] transition-colors"
+      >
+        کپی ریال
+      </button>
+    </div>
+  </div>
+</div>
         {/* بارگذاری تصویر فیش واریزی (فقط در حالت کارت‌به‌کارت نمایش داده می‌شود) */}
         <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
           <label className="block text-sm text-white mb-2 font-medium text-center">بارگذاری تصویر فیش واریزی</label>
