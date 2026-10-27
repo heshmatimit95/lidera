@@ -717,8 +717,8 @@ return (
     {/* مبلغ کل به تومان */}
     <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
       <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex items-center justify-between">
-        <span className="text-[11px] sm:text-xs text-[#F9704E] font-bold font-medium">💰 مبلغ دقیق  :</span>
-        <div className="text-xs sm:text-base  text-white tracking-tight font-bold">
+        <span className="text-[11px] sm:text-xs text-[#F9704E] font-bold ">💰 مبلغ دقیق  :</span>
+        <div className="text-xs sm:text-base  text-white tracking-tight font-medium">
           {calculateTotalPrice()}
         </div>
       </div>
@@ -755,8 +755,7 @@ return (
     {paymentMethod === 'card' && (
       <div className="space-y-3 animate-fadeIn">
         
-        {/* شماره کارت‌های لیدر */}
-       {/* شماره کارت‌های لیدر */}
+{/* شماره کارت‌های لیدر */}
 <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
   <span className="block text-[11px] text-[#F9704E] font-bold text-right">💳 شماره کارت‌های لیدر:</span>
   {currentLider.cards && currentLider.cards.length > 0 ? (
@@ -767,11 +766,14 @@ return (
           <span className="text-[10px] sm:text-xs text-neutral-300 font-mono mt-0.5">{card.cardOwner}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs sm:text-sm text-white tracking-wider" dir="ltr">{card.cardNumber}</span>
+          {/* تبدیل شماره کارت به ارقام فارسی */}
+          <span className="font-mono text-xs sm:text-sm text-white tracking-wider">
+            {toPersianDigits(card.cardNumber)}
+          </span>
           <button
             type="button"
             onClick={() => {
-              navigator.clipboard.writeText(card.cardNumber);
+              navigator.clipboard.writeText(card.cardNumber); // مقدار کپی‌شده همچنان انگلیسی و استاندارد می‌ماند تا در کارت‌به‌کارت با خطا مواجه نشود
               alert('شماره کارت کپی شد!');
             }}
             className="text-[10px] bg-neutral-800 border border-[#F9704E] text-neutral-300 px-2.5 py-1 rounded-md hover:bg-[#F9704E] hover:text-white transition-colors"
@@ -858,80 +860,79 @@ return (
       </div>
     )}
 
-    {/* محتوای روش دوم: درگاه آنلاین (بخش فیش کلاً محو است) */}
+    {/* محتوای روش دوم: درگاه آنلاین */}
     {paymentMethod === 'online' && (
       <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3 animate-fadeIn text-center">
         <p className="text-[11px] sm:text-xs text-neutral-300 leading-relaxed">
-          با انتخاب پرداخت آنلاین، بدون نیاز به ارسال فیش، ثبت‌نام شما به صورت آنی قطعی می‌شود.
+          ⚡ با انتخاب پرداخت آنلاین، بدون نیاز به ارسال فیش، با کلیک روی دکمه ثبت نهایی زیر مستقیماً به درگاه امن بانکی منتقل می‌شوید و ثبت‌نام شما به صورت آنی قطعی می‌شود.
         </p>
-        <button
-          type="button"
-          onClick={() => {
-            let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-            let amountInRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-            
-            handleOnlinePayment(
-              { fullName: "مسافر", phone: "09120000000", nationalId: "0000000000" }, 
-              currentTourDetails?.title || 'تور گردشگری',
-              amountInRial,
-              currentLider?.id || currentLider?.slug || 'leader_1'
-            );
-          }}
-          className="w-full py-3 px-4 bg-[#F9704E] hover:bg-[#F9704E]/90 text-white font-bold rounded-xl transition-all duration-200 shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm border border-[#F9704E]"
-        >
-          <span>💳</span>
-          <span>اتصال به درگاه بانکی</span>
-        </button>
       </div>
     )}
 
   </div>
 )}
-                <div className="flex gap-3">
-                  {step > 1 && (
-                    <button type="button" onClick={prevStep} className="w-1/3 bg-amber-500/10 hover:bg-amber-500/10 text-white font-bold py-4 rounded-xl text-xs transition-all border border-[#F9704E] active:scale-95">
-                      مرحله قبل
-                    </button>
-                  )}
 
-                  {step < 3 ? (
-                    <button 
-                      type="button" 
-                    disabled={isSubmitting || !isStepValid()} 
-                      onClick={nextStep} 
-                      className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-95 flex items-center justify-center disabled:cursor-not-allowed border" 
-                      style={
-                        isStepValid() 
-                          ? { backgroundColor: activeColor, borderColor: activeColor } 
-                          : { backgroundColor: 'rgba(249, 112, 78, 0.15)', borderColor: 'rgba(249, 112, 78, 0.3)', color: 'rgba(255, 255, 255, 0.4)' }
-                      }
-                    >
-                      مرحله بعدی 
-                    </button>
-                    
-                  ) : (
-                   
-                    <button 
-                      type="submit" 
-                      disabled={isSubmitting || !isStepValid()} 
-                      className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-[0.99] flex items-center justify-center gap-2 disabled:cursor-not-allowed border" 
-                      style={
-                        isStepValid() 
-                          ? { backgroundColor: activeColor, borderColor: activeColor, boxShadow: `0 8px 24px ${activeColor}30` } 
-                          : { backgroundColor: 'rgba(249, 112, 78, 0.15)', borderColor: 'rgba(249, 112, 78, 0.3)', color: 'rgba(255, 255, 255, 0.4)' }
-                      }
-                    >
-                      {isSubmitting ? "در حال ارسال..." : "ثبت نهایی و ارسال مدارک"}
-                    </button>
-                  )}
-                </div>
-              </div>
+<div className="flex gap-3">
+  {step > 1 && (
+    <button type="button" onClick={prevStep} className="w-1/3 bg-amber-500/10 hover:bg-amber-500/10 text-white font-bold py-4 rounded-xl text-xs transition-all border border-[#F9704E] active:scale-95">
+      مرحله قبل
+    </button>
+  )}
 
+  {step < 3 ? (
+    <button 
+      type="button" 
+      disabled={isSubmitting || !isStepValid()} 
+      onClick={nextStep} 
+      className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-95 flex items-center justify-center disabled:cursor-not-allowed border" 
+      style={
+        isStepValid() 
+          ? { backgroundColor: activeColor, borderColor: activeColor } 
+          : { backgroundColor: 'rgba(249, 112, 78, 0.15)', borderColor: 'rgba(249, 112, 78, 0.3)', color: 'rgba(255, 255, 255, 0.4)' }
+      }
+    >
+      مرحله بعدی 
+    </button>
+  ) : (
+    <button 
+      type="submit" 
+      disabled={isSubmitting} 
+      onClick={(e) => {
+        if (paymentMethod === 'online') {
+          e.preventDefault();
+          let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+          let amountInRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+          
+          handleOnlinePayment(
+            { fullName: "مسافر", phone: "09120000000", nationalId: "0000000000" }, 
+            currentTourDetails?.title || 'تور گردشگری',
+            amountInRial,
+            currentLider?.id || currentLider?.slug || 'leader_1'
+          );
+        }
+      }}
+      className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-[0.99] flex items-center justify-center gap-2 disabled:cursor-not-allowed border" 
+      style={{ 
+        backgroundColor: activeColor, 
+        borderColor: activeColor, 
+        boxShadow: `0 8px 24px ${activeColor}30` 
+      }}
+    >
+      {isSubmitting 
+        ? "در حال پردازش..." 
+        : paymentMethod === 'online' 
+          ? "💳 انتقال به درگاه بانکی و ثبت‌نام آنی" 
+          : "ثبت نهایی و ارسال مدارک"
+      }
+    </button>
+  )}
+</div>
+ </div>
           </form>
         )}
       </div>
-
     </div>
+    
   </div>
 );
 } 
