@@ -717,8 +717,8 @@ return (
     {/* مبلغ کل به تومان */}
     <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
       <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex items-center justify-between">
-        <span className="text-[11px] sm:text-xs text-[#F9704E] font-medium">💰 مبلغ دقیق  :</span>
-        <div className="text-xs sm:text-base font-bold text-white tracking-tight font-bold">
+        <span className="text-[11px] sm:text-xs text-[#F9704E] font-bold font-medium">💰 مبلغ دقیق  :</span>
+        <div className="text-xs sm:text-base  text-white tracking-tight font-bold">
           {calculateTotalPrice()}
         </div>
       </div>
