@@ -687,23 +687,23 @@ return (
         </div>
       )}
 <div>
-                        <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
-                        <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
-                        {idCardPreview ? (
-                          <div className="relative w-full aspect-4/2] rounded-xl overflow-hidden border border-neutral-700 bg-neutral-900">
-                            <img src={idCardPreview} alt="کارت ملی" className="w-full h-full object-cover opacity-60" />
-                            <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
-                              <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-neutral-200 transition-all cursor-pointer">تغییر عکس</button>
-                              <button type="button" onClick={handleRemoveIdCard} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-bold transition-all cursor-pointer">حذف عکس</button>
-                            </div>
-                          </div>
-                        ) : (
-                          <button type="button" onClick={() => idCardInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${idCardError ? 'border-red-500/50 text-red-400' : 'border-neutral-800 hover:border-[#F9704E]/50 text-neutral-400'}`}>
-                            <span className="text-lg">🪪</span>
-                            <span>برای آپلود عکس کارت ملی کلیک کنید</span>
-                          </button>
-                        )}
-                        {idCardError && <p className="text-xs text-red-400 mt-2 font-medium">{idCardError}</p>}
+<label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
+  <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
+  {idCardPreview ? (
+    <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] bg-neutral-900">
+      <img src={idCardPreview} alt="کارت ملی" className="w-full h-full object-cover opacity-80" />
+      <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
+        <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-neutral-200 transition-all cursor-pointer">تغییر عکس</button>
+        <button type="button" onClick={handleRemoveIdCard} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-bold transition-all cursor-pointer">حذف عکس</button>
+      </div>
+    </div>
+  ) : (
+    <button type="button" onClick={() => idCardInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${idCardError ? 'border-red-500/50 text-red-400' : 'border-[#F9704E] text-neutral-400'}`}>
+      <span className="text-lg">🪪</span>
+      <span>برای آپلود عکس کارت ملی کلیک کنید</span>
+    </button>
+  )}
+  {idCardError && <p className="text-xs text-red-400 mt-2 font-medium">{idCardError}</p>}
                       </div>
                     </div>
                   )}
