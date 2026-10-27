@@ -718,7 +718,7 @@ return (
     <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
       <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex items-center justify-between">
         <span className="text-[11px] sm:text-xs text-neutral-400 font-medium">💰 مبلغ دقیق  :</span>
-        <div className="text-xs sm:text-base font-bold text-[#F9704E] tracking-tight font-mono">
+        <div className="text-xs sm:text-base font-bold text-white tracking-tight font-mono">
           {calculateTotalPrice()}
         </div>
       </div>
@@ -763,7 +763,7 @@ return (
     currentLider.cards.map((card: any, index: number) => (
       <div key={index} className="bg-[#121215] p-3.5 rounded-xl border border-[#F9704E] flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex flex-col items-center sm:items-start">
-          <span className="text-[11px] sm:text-xs text-orange-400 font-bold">{card.bankName ? `بانک ${card.bankName}` : `کارت ${index + 1}`}</span>
+          <span className="text-[11px] sm:text-xs text-[#F9704E] font-bold">{card.bankName ? `بانک ${card.bankName}` : `کارت ${index + 1}`}</span>
           <span className="text-[10px] sm:text-xs text-neutral-300 font-mono mt-0.5">{card.cardOwner}</span>
         </div>
         <div className="flex items-center gap-2">
@@ -788,12 +788,14 @@ return (
   )}
 </div>
 
-        {/* مبلغ ریالی و دکمه کپی ریال */}
+{/* مبلغ ریالی و دکمه کپی ریال */}
 <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
-  <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex items-center justify-between">
-    <span className="text-[11px] sm:text-xs text-neutral-400 font-medium">💳 مبلغ ریال جهت واریز:</span>
-    <div className="flex items-center gap-3">
-      <div className="text-xs sm:text-base font-bold text-[#F9704E] tracking-tight font-mono">
+  <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex flex-col sm:flex-row items-center justify-between gap-3">
+    <span className="text-[11px] sm:text-xs text-[#F9704E] font-medium">💳 مبلغ ریال جهت واریز:</span>
+    
+    {/* بخش مبلغ که دقیقاً وسط و مرتب قرار گرفته است */}
+    <div className="flex items-center justify-center gap-3 w-full sm:w-auto">
+      <div className="text-xs sm:text-base font-bold text-white tracking-tight font-mono text-center">
         {(() => {
           let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
           let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
