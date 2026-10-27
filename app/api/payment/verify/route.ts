@@ -14,12 +14,16 @@ export async function GET(request: Request) {
   const tourName = url.searchParams.get("tourName");
   const amountInRial = url.searchParams.get("amount"); // مبلغ به ریال
 
+  // در محیط سندباکس تست، اگر پرداخت ناموفق بود به صفحه اصلی لیدر با پارامتر خطا برمی‌گردیم
   if (status !== "OK" || !authority || !amountInRial) {
-    return NextResponse.redirect(new URL("/payment-failed", request.url));
+    const fallbackSlug = leaderIdentifier || 'leader_1';
+    return NextResponse.redirect(
+      new URL(`/?slug=${fallbackSlug}&payment=canceled`, request.url)
+    );
   }
 
   try {
-    // پیدا کردن لیدر جهت دریافت Merchant اختصاصی (در صورت وجود در پلن طلایی)
+    // پیدا کردن لیدر بر اساس slug یا id
     const leader = await prisma.leader.findFirst({
       where: {
         OR: [{ id: leaderIdentifier || "" }, { slug: leaderIdentifier || "" }],
@@ -29,10 +33,10 @@ export async function GET(request: Request) {
     const ZARINPAL_MERCHANT =
       leader?.zarinpalMerchantId ||
       process.env.ZARINPAL_MERCHANT ||
-      "YOUR_MERCHANT_ID";
+      "00000000-0000-0000-0000-000000000000";
 
-    // تایید تراکنش با زرین‌پال (Sandbox / Production)
-   const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/verify.json', {
+    // تایید تراکنش با زرین‌پال (Sandbox)
+    const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/verify.json', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -47,18 +51,17 @@ export async function GET(request: Request) {
 
     // کد ۱۰۰ یعنی پرداخت موفق و کد ۱۰۱ یعنی قبلاً تایید شده
     if (data.data && (data.data.code === 100 || data.data.code === 101)) {
-      if (leaderIdentifier && fullName && phone && nationalId && tourName && leader) {
-        
+      if (leader) {
         // محاسبه مبلغ به تومان برای ذخیره یکدست در دیتابیس
         const amountInToman = Math.floor(Number(amountInRial) / 10);
 
-        // ثبت اتوماتیک مسافر در دیتابیس پس از پرداخت موفق
+        // ثبت اتوماتیک مسافر در دیتابیس Prisma پس از پرداخت موفق
         await prisma.passenger.create({
           data: {
-            fullName,
-            mobile: phone,
-            nationalId,
-            tourName,
+            fullName: fullName || "مسافر آنلاین",
+            mobile: phone || "09120000000",
+            nationalId: nationalId || "0000000000",
+            tourName: tourName || "تور عمومی",
             paymentStatus: "پرداخت شده آنلاین",
             amount: `${amountInToman.toLocaleString('fa-IR')} تومان`,
             receiptDate: new Date().toLocaleDateString('fa-IR'),
@@ -67,16 +70,23 @@ export async function GET(request: Request) {
           },
         });
 
-        // هدایت مستقیم مسافر به پنل لیدر با پیغامی موفقیت‌آمیز
+        // هدایت مستقیم و موفقیت‌آمیز مسافر به صفحه اختصاصی لیدر در lidera.ir
         return NextResponse.redirect(
-          new URL(`/leader?slug=${leaderIdentifier}&success=true`, request.url)
+          new URL(`/?slug=${leader.slug || leaderIdentifier}&payment=success`, request.url)
         );
       }
     }
 
-    return NextResponse.redirect(new URL("/payment-failed", request.url));
+    // اگر تایید درگاه موفق نبود
+    const fallbackSlug = leaderIdentifier || 'leader_1';
+    return NextResponse.redirect(
+      new URL(`/?slug=${fallbackSlug}&payment=failed`, request.url)
+    );
   } catch (error) {
     console.error("Verification Error:", error);
-    return NextResponse.redirect(new URL("/payment-failed", request.url));
+    const fallbackSlug = leaderIdentifier || 'leader_1';
+    return NextResponse.redirect(
+      new URL(`/?slug=${fallbackSlug}&payment=error`, request.url)
+    );
   }
 }
