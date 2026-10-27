@@ -295,37 +295,48 @@ const toPersianDigits = (num: string | number) => {
   return String(num).replace(/\d/g, (d) => persianDigits[parseInt(d)]);
 };
 
-const handleOnlinePayment = async (passengerData: any, tourName: string, amountInRial: number, leaderId: string) => {
-  try {
-    const res = await fetch('/api/payment/request', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        amountInRial: amountInRial, // مبلغ به ریال (مثلا ۵۰۰ هزار تومان = ۵,۰۰۰,۰۰۰ ریال)
-        description: `رزرو تور ${tourName}`,
-        leaderId: leaderId,
-        passengerData: {
-          fullName: passengerData.fullName,
-          phone: passengerData.phone,
-          nationalId: passengerData.nationalId,
-          tourName: tourName
-        }
-      })
-    });
+const handleOnlinePayment = async () => {
+    try {
+      setIsSubmitting(true);
+      
+      // محاسبه مبلغ ریالی
+      let rawPrice = currentTourDetails?.price ? p2e(String(currentTourDetails.price)).replace(/[^0-9]/g, '') : '0';
+      let amountInRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
 
-    const data = await res.json();
+      // خواندن امن اطلاعات فرم بدون ایجاد خطای عدم تعریف
+      const currentFullName = (typeof window !== 'undefined' && (document.getElementById('fullName') as HTMLInputElement)?.value) || "مسافر لیدرا";
+      const currentMobile = (typeof window !== 'undefined' && (document.getElementById('mobile') as HTMLInputElement)?.value) || "09120000000";
+      const currentNationalId = (typeof window !== 'undefined' && (document.getElementById('nationalId') as HTMLInputElement)?.value) || "0000000000";
 
-    if (data.success && data.url) {
-      // انتقال مسافر به صفحه درگاه بانکی زرین‌پال
-      window.location.href = data.url;
-    } else {
-      alert(data.message || 'خطا در اتصال به درگاه پرداخت');
+      const res = await fetch('/api/payment/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amountInRial: amountInRial,
+          description: `رزرو تور ${currentTourDetails?.title || ''}`,
+          leaderId: currentLider?.id || currentLider?.slug || 'leader_1',
+          passengerData: {
+            fullName: currentFullName,
+            phone: currentMobile,
+            mobile: currentMobile,
+            nationalId: currentNationalId
+          }
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url; // انتقال مستقیم به درگاه بانکی
+      } else {
+        alert(data.message || 'خطا در ایجاد درگاه پرداخت');
+      }
+    } catch (err) {
+      alert('خطا در ارتباط با سرور پرداخت');
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (err) {
-    console.error('Payment Error:', err);
-    alert('خطا در برقراری ارتباط با سرور');
-  }
-};
+  };
 
 if (!isMounted || isLoadingLeader) {
   return (
@@ -896,20 +907,11 @@ return (
   ) : (
     <button 
       type="submit" 
-      // شرط کلیدی: اگر روی کارت‌به‌کارت هستیم و فیش آپلود نشده، دکمه غیرفعال باشد
       disabled={isSubmitting || (paymentMethod === 'card' && !receiptPreview)} 
       onClick={(e) => {
         if (paymentMethod === 'online') {
           e.preventDefault();
-          let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-          let amountInRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-          
-          handleOnlinePayment(
-            { fullName: "مسافر", phone: "09120000000", nationalId: "0000000000" }, 
-            currentTourDetails?.title || 'تور گردشگری',
-            amountInRial,
-            currentLider?.id || currentLider?.slug || 'leader_1'
-          );
+          handleOnlinePayment(); // فراخوانی مستقیم بدون نیاز به ارسال پارامتر
         }
       }}
       className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-[0.99] flex items-center justify-center gap-2 disabled:cursor-not-allowed border" 

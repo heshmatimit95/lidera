@@ -23,7 +23,8 @@ export async function POST(req: Request) {
     const callbackUrl = `https://lidera.ir/api/payment/verify?leaderId=${leaderId}&fullName=${encodeURIComponent(passengerData.fullName)}&phone=${passengerData.phone}&nationalId=${passengerData.nationalId}&tourName=${encodeURIComponent(passengerData.tourName)}&amount=${amountInRial}`;
 
     // ارسال درخواست به درگاه زرین‌پال
-    const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/request.json', {
+   // تبدیل سندباکس به آدرس واقعی زرین‌پال
+const response = await fetch('https://api.zarinpal.com/pg/v4/payment/request.json', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
