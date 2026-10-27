@@ -71,16 +71,17 @@ export async function GET(request: Request) {
         });
 
         // هدایت مستقیم و موفقیت‌آمیز مسافر به صفحه اختصاصی لیدر در lidera.ir
+// هدایت مستقیم و موفقیت‌آمیز مسافر به دامنه اصلی لیدرا
         return NextResponse.redirect(
-          new URL(`/?slug=${leader.slug || leaderIdentifier}&payment=success`, request.url)
+          `https://lidera.ir/?slug=${leader.slug || leaderIdentifier}&payment=success`
         );
       }
     }
 
     // اگر تایید درگاه موفق نبود
     const fallbackSlug = leaderIdentifier || 'leader_1';
-    return NextResponse.redirect(
-      new URL(`/?slug=${fallbackSlug}&payment=failed`, request.url)
+return NextResponse.redirect(
+      `https://lidera.ir/?slug=${leaderIdentifier || 'leader_1'}&payment=canceled`
     );
   } catch (error) {
     console.error("Verification Error:", error);
