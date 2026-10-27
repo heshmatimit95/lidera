@@ -896,7 +896,8 @@ return (
   ) : (
     <button 
       type="submit" 
-      disabled={isSubmitting} 
+      // شرط کلیدی: اگر روی کارت‌به‌کارت هستیم و فیش آپلود نشده، دکمه غیرفعال باشد
+      disabled={isSubmitting || (paymentMethod === 'card' && !receiptPreview)} 
       onClick={(e) => {
         if (paymentMethod === 'online') {
           e.preventDefault();
@@ -912,11 +913,11 @@ return (
         }
       }}
       className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-[0.99] flex items-center justify-center gap-2 disabled:cursor-not-allowed border" 
-      style={{ 
-        backgroundColor: activeColor, 
-        borderColor: activeColor, 
-        boxShadow: `0 8px 24px ${activeColor}30` 
-      }}
+      style={
+        (paymentMethod === 'online' || (paymentMethod === 'card' && receiptPreview))
+          ? { backgroundColor: activeColor, borderColor: activeColor, boxShadow: `0 8px 24px ${activeColor}30` }
+          : { backgroundColor: 'rgba(249, 112, 78, 0.15)', borderColor: 'rgba(249, 112, 78, 0.3)', color: 'rgba(255, 255, 255, 0.4)' }
+      }
     >
       {isSubmitting 
         ? "در حال پردازش..." 
