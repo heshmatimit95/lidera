@@ -709,8 +709,8 @@ return (
                   )}
                 </div>
               )}
-              {step === 3 && (
-                <div className="space-y-5">
+            <div className="space-y-5">
+                
 {step === 3 && (
   <div className="space-y-4 my-4">
     
@@ -725,14 +725,14 @@ return (
     </div>
 
     {/* تب‌های انتخاب نحوه پرداخت (۱. کارت‌به‌کارت | ۲. پرداخت آنلاین) */}
-    <div className="grid grid-cols-2 gap-2 bg-[#1c1c21] p-1.5 sm:p-2 rounded-2xl border border-[#F9704E]/50">
+    <div className="grid grid-cols-2 gap-2 bg-[#1c1c21] p-1.5 sm:p-2 rounded-2xl border border-[#F9704E]">
       <button
         type="button"
         onClick={() => setPaymentMethod('card')}
         className={`py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
           paymentMethod === 'card'
             ? 'bg-[#F9704E] text-white shadow-lg'
-            : 'bg-[#121215] text-neutral-400 hover:text-white hover:bg-neutral-800'
+            : 'bg-[#121215] text-neutral-400 hover:text-white border border-[#F9704E]'
         }`}
       >
         <span>💳 ۱. کارت‌به‌کارت</span>
@@ -744,7 +744,7 @@ return (
         className={`py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
           paymentMethod === 'online'
             ? 'bg-[#F9704E] text-white shadow-lg'
-            : 'bg-[#121215] text-neutral-400 hover:text-white hover:bg-neutral-800'
+            : 'bg-[#121215] text-neutral-400 hover:text-white border border-[#F9704E]'
         }`}
       >
         <span>🌐 ۲. پرداخت آنلاین</span>
@@ -775,13 +775,13 @@ return (
                     }}
                     className="text-[10px] bg-neutral-800 border border-[#F9704E] text-neutral-300 px-2 py-1 rounded-md hover:bg-[#F9704E]"
                   >
-                  کپی کارت
+                    کپی کارت
                   </button>
                 </div>
               </div>
             ))
           ) : (
-            <div className="bg-[#121215] p-3 rounded-xl border border-#F9704E] text-center">
+            <div className="bg-[#121215] p-3 rounded-xl border border-[#F9704E] text-center">
               <span className="text-xs text-neutral-400">شماره کارتی ثبت نشده است.</span>
             </div>
           )}
@@ -792,14 +792,6 @@ return (
           <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex flex-col items-center justify-center text-center space-y-2.5">
             <div className="flex items-center justify-between w-full">
               <span className="text-[11px] sm:text-xs text-neutral-400 font-base">💳 مبلغ ریال جهت واریز:</span>
-    <div className="text-xs sm:text-base font-bold text-[#F9704E] tracking-tight font-mono">
-              {(() => {
-                let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-                let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-                return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
-              })()}
-            </div>
-
               <button
                 type="button"
                 onClick={() => {
@@ -810,17 +802,62 @@ return (
                 }}
                 className="text-[10px] sm:text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-2.5 py-1 rounded-lg font-medium hover:bg-[#F9704E] transition-colors"
               >
-                 کپی ریال
+                کپی ریال
               </button>
             </div>
-                   
+            
+            <div className="text-xs sm:text-base font-bold text-[#F9704E] tracking-tight font-mono">
+              {(() => {
+                let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+                let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+                return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
+              })()}
+            </div>
           </div>
+        </div>
+
+        {/* بارگذاری تصویر فیش واریزی (فقط در حالت کارت‌به‌کارت نمایش داده می‌شود) */}
+        <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
+          <label className="block text-sm text-white mb-2 font-medium text-center">بارگذاری تصویر فیش واریزی</label>
+          <input type="file" ref={receiptInputRef} accept="image/*" onChange={handleReceiptChange} className="hidden" />
+          
+          {receiptPreview ? (
+            <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
+              <img src={receiptPreview} alt="فیش" className="w-full h-full object-cover opacity-80" />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 gap-3">
+                <button type="button" onClick={() => receiptInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-medium">
+                  تغییر فیش
+                </button>
+                <button type="button" onClick={handleRemoveReceipt} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-medium">
+                  حذف فیش
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button 
+              type="button" 
+              onClick={() => receiptInputRef.current?.click()} 
+              className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${receiptError ? 'border-red-500/50 text-red-400' : ' border-[#F9704E] hover:border-[#F9704E]/50 text-neutral-400'}`}
+            >
+              <span className="text-lg">📸</span>
+              <span>برای آپلود عکس فیش کلیک کنید</span>
+            </button>
+          )}
+        </div>
+
+        {/* خطای اعتبارسنجی فیش */}
+        <div className="space-y-3 pt-2">
+          {!isStepValid() && getValidationHint() && (
+            <div className="text-[11px] font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl text-center">
+              {getValidationHint()}
+            </div>
+          )}
         </div>
 
       </div>
     )}
 
-    {/* محتوای روش دوم: درگاه آنلاین */}
+    {/* محتوای روش دوم: درگاه آنلاین (بخش فیش کلاً محو است) */}
     {paymentMethod === 'online' && (
       <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3 animate-fadeIn text-center">
         <p className="text-[11px] sm:text-xs text-neutral-300 leading-relaxed">
@@ -839,48 +876,16 @@ return (
               currentLider?.id || currentLider?.slug || 'leader_1'
             );
           }}
-          className="w-full py-3 px-4 bg-[#F9704E] hover:bg-[#F9704E] text-white font-bold rounded-xl transition-all duration-200 shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm border border-[#F9704E]"
+          className="w-full py-3 px-4 bg-[#F9704E] hover:bg-[#F9704E]/90 text-white font-bold rounded-xl transition-all duration-200 shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm border border-[#F9704E]"
         >
           <span>💳</span>
-          <span>اتصال به درگاه بانکی </span>
+          <span>اتصال به درگاه بانکی</span>
         </button>
       </div>
     )}
 
   </div>
 )}
-                  <div>
-                    <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر فیش واریزی</label>
-                    <input type="file" ref={receiptInputRef} accept="image/*" onChange={handleReceiptChange} className="hidden" />
-{receiptPreview ? (
-<div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
-    <img src={receiptPreview} alt="فیش" className="w-full h-full object-cover opacity-80" />
-    <div className="absolute inset-0 flex items-center justify-center bg-black/40 gap-3">
-      <button type="button" onClick={() => receiptInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-medium">
-         تغییر  فیش
-      </button>
-      {/* اصلاح دکمه حذف برای پاک کردن فیش واریزی */}
-      <button type="button" onClick={handleRemoveReceipt} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-medium">
-       حذف فیش
-      </button>
-    </div>
-  </div>
-                    ) : (
-                      <button type="button" onClick={() => receiptInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${receiptError ? 'border-red-500/50 text-red-400' : ' border-[#F9704E] hover:border-[#F9704E]/50 text-neutral-400'}`}>
-                        <span className="text-lg">📸</span>
-                        <span>برای آپلود عکس فیش کلیک کنید</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-
-               <div className="space-y-3 pt-2">
-                {!isStepValid() && getValidationHint() && (
-                  <div className="text-[11px] font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl text-center">
-                    {getValidationHint()}
-                  </div>
-                )}
                 <div className="flex gap-3">
                   {step > 1 && (
                     <button type="button" onClick={prevStep} className="w-1/3 bg-amber-500/10 hover:bg-amber-500/10 text-white font-bold py-4 rounded-xl text-xs transition-all border border-[#F9704E] active:scale-95">
