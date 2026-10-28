@@ -5,25 +5,28 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     
-    // ۱. استخراج هوشمند مبلغ
-    const rawAmount = body.amountInRial || body.amount || body.price || body.totalAmount || 0;
+    // چاپ کل بدنه ارسالی در ترمینال برای اطمینان خاطر
+    console.log("=== FRONTEND PAYLOAD ===", JSON.stringify(body, null, 2));
+
+    // ۱. استخراج هوشمند مبلغ (پشتیبانی از تمام کلیدهای احتمالی)
+    const rawAmount = body.amountInRial || body.amount || body.price || body.totalAmount || body.cost || body.fee || 0;
     const amountInRial = Number(rawAmount);
 
     const leaderId = body.leaderId || body.leader_id || body.slug || '';
     if (!amountInRial || !leaderId) {
-      return NextResponse.json({ success: false, message: 'اطلاعات ناقص است' }, { status: 400 });
+      return NextResponse.json({ success: false, message: 'اطلاعات ناقص است (مبلغ یا لیدر نامعتبر)' }, { status: 400 });
     }
 
-    // ۲. استخراج هوشمند اطلاعات مسافر از تمام کلیدهای احتمالی فرانت‌اند
-    const pData = body.passengerData || body.passenger || body.user || body;
+    // ۲. استخراج هوشمند اطلاعات مسافر (پشتیبانی از تمام حالت‌های ممکن در بدنه یا آبجکت‌های داخلی)
+    const pData = body.passengerData || body.passenger || body.user || body.formData || body;
 
-    const fName = pData.fullName || pData.name || pData.passengerName || pData.passenger_name || pData.fullNameFa || '';
-    const fPhone = pData.phone || pData.mobile || pData.phoneNumber || pData.phone_number || body.phone || body.mobile || '';
-    const fNationalId = pData.nationalId || pData.national_id || pData.codeMelli || pData.nationalCode || body.nationalId || '';
+    const fName = pData.fullName || pData.name || pData.passengerName || pData.passenger_name || pData.fullNameFa || pData['نام'] || pData['نام و نام خانوادگی'] || '';
+    const fPhone = pData.phone || pData.mobile || pData.phoneNumber || pData.phone_number || pData['تلفن'] || pData['شماره تماس'] || body.phone || body.mobile || '';
+    const fNationalId = pData.nationalId || pData.national_id || pData.codeMelli || pData.nationalCode || pData['کد ملی'] || body.nationalId || '';
     
     // عنوان تور
-    const description = body.description || '';
-    const fTourName = pData.tourName || pData.tour_name || pData.tourTitle || description || 'تور گردشگری';
+    const description = body.description || body.tourName || pData.tourName || pData.tourTitle || '';
+    const fTourName = description || 'تور گردشگری';
 
     // ۳. پیدا کردن لیدر در دیتابیس
     const leader = await prisma.leader.findFirst({
@@ -33,11 +36,9 @@ export async function POST(req: Request) {
     });
 
     const merchant = leader?.zarinpalMerchantId || process.env.ZARINPAL_MERCHANT || '00000000-0000-0000-0000-000000000000';
-
-    // ۴. ساخت callbackUrl (ارسال leaderId برای شناسایی لیدر موقع برگشت)
     const callbackUrl = `https://lidera.ir/api/payment/verify?leaderId=${leaderId}`;
 
-    // ۵. ارسال درخواست به درگاه زرین‌پال
+    // ۴. ارسال درخواست به درگاه زرین‌پال
     const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/request.json', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
     if (data.data && data.data.code === 100) {
       const paymentUrl = `https://sandbox.zarinpal.com/pg/StartPay/${data.data.authority}`;
       
-      // ساخت پاسخ همراه با ذخیره امن اطلاعات مسافر در کوکی (جهت جلوگیری از گم شدن دیتا)
+      // ۵. ذخیره امن و کامل تمام اطلاعات در کوکی
       const resNext = NextResponse.json({ success: true, url: paymentUrl });
       resNext.cookies.set({
         name: 'pending_passenger_data',
@@ -73,7 +74,7 @@ export async function POST(req: Request) {
         secure: true,
         sameSite: 'lax',
         path: '/',
-        maxAge: 600 // ۱۰ دقیقه اعتبار
+        maxAge: 600
       });
 
       return resNext;
