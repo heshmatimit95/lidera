@@ -63,7 +63,7 @@ const SocialLinksInput = ({ values, onChange }) => {
               
               {/* آیکون داخل کادر سمت راست */}
               <div 
-                className="absolute right-4 bottom-[14px] p-2 rounded-lg"
+                className="absolute right-4 bottom-14px] p-2 rounded-lg"
                 style={{ backgroundColor: platform.bg }}
               >
                 <Icon className="text-xl" style={{ color: platform.color }} />

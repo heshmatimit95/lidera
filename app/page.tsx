@@ -275,7 +275,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       setIsSubmitting(false);
     }
   };
-  
+
   const handleReset = () => {
     setFullName('');
     setPhone('');
@@ -366,45 +366,6 @@ const handleOnlinePayment = async () => {
     }
   };
 
-if (!isMounted || isLoadingLeader) {
-  return (
-    <div className="min-h-screen bg-[#09090b] flex items-center justify-center text-white text-xs">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-        <p>در حال بارگذاری اطلاعات...</p>
-      </div>
-    </div>
-  );
-}
-
-// حتماً بررسی کن که لودینگ تمام شده باشد و بعد خطای عدم وجود تورلیدر را نشان دهی
-// ۱. اول لودینگ و صفحه خوش‌آمدگویی چک می‌شود
-  if (!isMounted || isLoadingLeader) {
-    return (
-      <div className="min-h-screen bg-[#F9704E] flex items-center justify-center p-3 sm:p-6" dir="rtl">
-         <div className="w-full max-w-lg bg-[#121215] border-2 border-[#E5C060] rounded-[28px] sm:rounded-[28px] p-5 sm:p-8 overflow-hidden shadow-2xl shadow-black/80 my-2">
-
-          
-          <div className="flex flex-col items-center mb-6">
-            <h1 className="text-lg font-bold text-white mt-1">به پلتفرم لیدرا خوش آمدید</h1>
-            <p className="text-zinc-400 text-xs mt-1">در حال آماده‌سازی اطلاعات تور...</p>
-          </div>
-
-          <div className="flex flex-col items-center justify-center py-6">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#F9704E] mx-auto mb-3"></div>
-            <p className="text-xs text-zinc-300 font-medium">لطفاً چند لحظه صبر کنید...</p>
-          </div>
-
-          <div className="p-3 text-center border-t border-zinc-800/60 mt-4">
-            <p className="text-[10px] text-zinc-500 font-medium tracking-wide">
-              تمام حقوق این پلتفرم برای لیدرا محفوظ است. ۱۴۰۵ ©
-            </p>
-          </div>
-
-        </div>
-      </div>
-    );
-  }
 
 const handleRemoveReceipt = () => {
   setReceiptPreview(null);
@@ -414,13 +375,40 @@ const handleRemoveReceipt = () => {
 };
 
 
-  // ۲. بعد از اتمام لودینگ، اگر واقعاً تورلیدری پیدا نشد خطای معتبر نبودن لینک را بده
+// ۱. لودینگ اصلی و شکیل صفحه (در حال دریافت اطلاعات لیدر)
+  if (!isMounted || isLoadingLeader) {
+    return (
+      <div className="min-h-screen bg-[#F9704E] flex items-center justify-center p-3 sm:p-6 dir-rtl">
+        <div className="w-full max-w-lg bg-[#121215] border-2 border-[#E5C060] rounded-[28px] sm:rounded-[28px] p-5 sm:p-8 overflow-hidden shadow-2xl shadow-black/80 my-2">
+          
+          <div className="flex flex-col items-center mb-6">
+            <h1 className="text-lg font-bold text-white mt-1">به پلتفرم لیدرا خوش آمدید</h1>
+            <p className="text-zinc-400 text-xs mt-1">...در حال آماده‌سازی اطلاعات تور</p>
+          </div>
+
+          <div className="flex flex-col items-center justify-center py-6">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#F9704E] mx-auto mb-3"></div>
+            <p className="text-xs text-zinc-300 font-medium">لطفاً چند لحظه صبر کنید...</p>
+          </div>
+
+          <div className="p-3 text-center border-t border-zinc-800/60 mt-4">
+            <p className="text-[10px] text-zinc-500 font-medium tracking-wide">
+              © تمام حقوق این پلتفرم برای لیدرا محفوظ است. ۱۴۰۵
+            </p>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+  // ۲. اگر لودینگ تمام شد اما لیدر یافت نشد
   if (!currentLider) {
     return (
-      <div className="min-h-screen bg-[#121214] text-white flex flex-col items-center justify-center p-4" dir="rtl">
+      <div className="min-h-screen bg-[#121214] text-white flex flex-col items-center justify-center p-4 dir-rtl">
         <div className="text-center p-10 bg-neutral-900 border border-[#F9704E] rounded-2xl max-w-sm">
-          <h2 className="text-base font-bold text-[#F9704E] mb-2">در حال بارگذاری دیتابیس...</h2>
-        
+          <h2 className="text-base font-bold text-[#F9704E] mb-2">اطلاعات لیدر یافت نشد</h2>
+          <p className="text-xs text-zinc-400">لطفاً از معتبر بودن لینک مطمئن شوید.</p>
         </div>
       </div>
     );
