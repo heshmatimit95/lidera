@@ -20,7 +20,8 @@ export async function POST(req: Request) {
     const merchant = leader?.zarinpalMerchantId || process.env.ZARINPAL_MERCHANT || '00000000-0000-0000-0000-000000000000';
 
     // آدرس بازگشت به سایت روی دامنه اصلی lidera.ir همراه با شناسه اختصاصی لیدر
-    const callbackUrl = `https://lidera.ir/api/payment/verify?leaderId=${leaderId}&fullName=${encodeURIComponent(passengerData.fullName || '')}&phone=${passengerData.phone || ''}&nationalId=${passengerData.nationalId || ''}&tourName=${encodeURIComponent(passengerData.tourName || '')}&amount=${amountInRial}`;
+    // آدرس بازگشت کامل همراه با تمام پارامترهای واقعی مسافر، تور و مبلغ
+    const callbackUrl = `https://lidera.ir/api/payment/verify?leaderId=${leaderId}&fullName=${encodeURIComponent(passengerData?.fullName || passengerData?.name || '')}&phone=${passengerData?.phone || passengerData?.mobile || ''}&nationalId=${passengerData?.nationalId || ''}&tourName=${encodeURIComponent(passengerData?.tourName || 'تور گردشگری')}&amount=${amountInRial}`;
 
     // ارسال درخواست به درگاه زرین‌پال (محیط سندباکس)
     const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/request.json', {
