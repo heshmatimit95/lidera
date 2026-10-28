@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
   const authority = url.searchParams.get("Authority");
   const status = url.searchParams.get("Status");
   const leaderIdentifier = url.searchParams.get("leaderId");
+  const phone = url.searchParams.get("phone") || "";
   const amountInRial = Number(url.searchParams.get("amount") || 0);
 
   const fallbackSlug = leaderIdentifier || 'leader_1';
@@ -42,16 +43,20 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
 
     if (data.data && (data.data.code === 100 || data.data.code === 101)) {
-      // پیدا کردن آخرین مسافر ثبت شده این لیدر و آپدیت وضعیت پرداخت به موفق
-      const latestPassenger = await prisma.passenger.findFirst({
-        where: { leaderId: leader.id },
-        orderBy: { id: 'desc' }, // آخرین رکورد ثبت شده
+      const amountInToman = Math.floor(amountInRial / 10);
+
+      // پیدا کردن مسافر بر اساس شماره تماس یا آخرین رکورد ثبت شده برای این لیدر
+      const passenger = await prisma.passenger.findFirst({
+        where: {
+          leaderId: leader.id,
+          ...(phone ? { mobile: phone } : {})
+        },
+        orderBy: { id: 'desc' },
       });
 
-      if (latestPassenger) {
-        const amountInToman = Math.floor(amountInRial / 10);
+      if (passenger) {
         await prisma.passenger.update({
-          where: { id: latestPassenger.id },
+          where: { id: passenger.id },
           data: {
             paymentStatus: "پرداخت شده آنلاین",
             amount: `${amountInToman.toLocaleString('fa-IR')} تومان`,

@@ -31,8 +31,7 @@ export async function POST(req: Request) {
     const merchant = leader?.zarinpalMerchantId || process.env.ZARINPAL_MERCHANT || '00000000-0000-0000-0000-000000000000';
 
     // ۳. قرار دادن مستقیم تمام اطلاعات در callbackUrl جهت جلوگیری از گم شدن
-    const callbackUrl = `https://lidera.ir/api/payment/verify?leaderId=${leaderId}&fullName=${encodeURIComponent(fName)}&phone=${fPhone}&nationalId=${fNationalId}&tourName=${encodeURIComponent(fTourName)}&amount=${amountInRial}`;
-
+   const callbackUrl = `https://lidera.ir/api/payment/verify?leaderId=${leaderId}&phone=${fPhone}&amount=${amountInRial}`;
     const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/request.json', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
