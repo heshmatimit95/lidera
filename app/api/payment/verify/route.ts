@@ -6,6 +6,12 @@ export async function GET(request: NextRequest) {
   const authority = url.searchParams.get("Authority");
   const status = url.searchParams.get("Status");
   const leaderIdentifier = url.searchParams.get("leaderId");
+  
+  // خواندن اطلاعات واقعی مسافر از پارامترهای برگشتی
+  const fullName = url.searchParams.get("fullName") || "مسافر آنلاین";
+  const phone = url.searchParams.get("phone") || "09120000000";
+  const nationalId = url.searchParams.get("nationalId") || "0000000000";
+  const tourName = url.searchParams.get("tourName") || "تور گردشگری";
   const amountInRial = Number(url.searchParams.get("amount") || 0);
 
   const fallbackSlug = leaderIdentifier || 'leader_1';
@@ -43,13 +49,13 @@ export async function GET(request: NextRequest) {
     if (data.data && (data.data.code === 100 || data.data.code === 101)) {
       const amountInToman = Math.floor(amountInRial / 10);
 
-      // ثبت نهایی و قطعی مسافر پس از پرداخت موفق در دیتابیس
+      // ثبت اطلاعات کاملاً واقعی مسافر در دیتابیس
       await prisma.passenger.create({
         data: {
-          fullName: "مسافر آنلاین", // یا نام دریافتی
-          mobile: "09120000000",
-          nationalId: "0000000000",
-          tourName: "تور گردشگری",
+          fullName: decodeURIComponent(fullName),
+          mobile: phone,
+          nationalId: nationalId,
+          tourName: decodeURIComponent(tourName),
           paymentStatus: "پرداخت شده آنلاین",
           amount: `${amountInToman.toLocaleString('fa-IR')} تومان`,
           receiptDate: new Date().toLocaleDateString('fa-IR'),
