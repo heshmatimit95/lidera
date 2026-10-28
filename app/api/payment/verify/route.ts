@@ -6,12 +6,7 @@ export async function GET(request: NextRequest) {
   const authority = url.searchParams.get("Authority");
   const status = url.searchParams.get("Status");
   const leaderIdentifier = url.searchParams.get("leaderId");
-  
-  // خواندن اطلاعات واقعی مسافر از پارامترهای URL
-  const fullName = url.searchParams.get("fullName") || "مسافر آنلاین";
-  const phone = url.searchParams.get("phone") || "09120000000";
-  const nationalId = url.searchParams.get("nationalId") || "0000000000";
-  const tourName = url.searchParams.get("tourName") || "تور گردشگری";
+  const passengerId = url.searchParams.get("passengerId");
   const amountInRial = Number(url.searchParams.get("amount") || 0);
 
   const fallbackSlug = leaderIdentifier || 'leader_1';
@@ -47,22 +42,13 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
 
     if (data.data && (data.data.code === 100 || data.data.code === 101)) {
-      const amountInToman = Math.floor(amountInRial / 10);
-
-      // ثبت اطلاعات کاملاً واقعی مسافر در دیتابیس
-      await prisma.passenger.create({
-        data: {
-          fullName: decodeURIComponent(fullName),
-          mobile: phone,
-          nationalId: nationalId,
-          tourName: decodeURIComponent(tourName),
-          paymentStatus: "پرداخت شده آنلاین",
-          amount: `${amountInToman.toLocaleString('fa-IR')} تومان`,
-          receiptDate: new Date().toLocaleDateString('fa-IR'),
-          leaderId: leader.id,
-          tenantId: leader.id,
-        },
-      });
+      // آپدیت وضعیت مسافر از در انتظار به پرداخت شده آنلاین
+      if (passengerId) {
+        await prisma.passenger.update({
+          where: { id: passengerId },
+          data: { paymentStatus: "پرداخت شده آنلاین" },
+        }).catch(() => {});
+      }
 
       return NextResponse.redirect(`https://lidera.ir/?slug=${leader.slug || fallbackSlug}&payment=success`);
     }

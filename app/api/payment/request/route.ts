@@ -5,13 +5,12 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { amountInRial, description, leaderId } = body;
-    
-    // تعریف pData برای استفاده در سراسر تابع
     const pData = body.passengerData || {};
 
-    const fPhone = pData.phone || pData.mobile || pData.phoneNumber || '';
-    const fNationalId = pData.nationalId || pData.national_id || pData.codeMelli || '';
-    const fTourName = description || body.tourName || pData.tourName || 'تور گردشگری';
+    const fPhone = pData.phone || pData.mobile || '09120000000';
+    const fNationalId = pData.nationalId || '0000000000';
+    const fFullName = pData.fullName || 'مسافر لیدرا';
+    const fTourName = description || pData.tourName || 'تور گردشگری';
 
     const leader = await prisma.leader.findFirst({
       where: { OR: [{ id: leaderId }, { slug: leaderId }] },
@@ -21,12 +20,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'لیدر مورد نظر یافت نشد' }, { status: 404 });
     }
 
+    // ۱. ثبت اولیه مسافر در دیتابیس با وضعیت در انتظار پرداخت
+    const amountInToman = Math.floor(amountInRial / 10);
+    const newPassenger = await prisma.passenger.create({
+      data: {
+        fullName: fFullName,
+        mobile: fPhone,
+        nationalId: fNationalId,
+        tourName: fTourName,
+        paymentStatus: "در انتظار پرداخت",
+        amount: `${amountInToman.toLocaleString('fa-IR')} تومان`,
+        receiptDate: new Date().toLocaleDateString('fa-IR'),
+        leaderId: leader.id,
+        tenantId: leader.id,
+      },
+    });
+
     const merchant =
       leader?.zarinpalMerchantId ||
       process.env.ZARINPAL_MERCHANT ||
       "00000000-0000-0000-0000-000000000000";
 
-    const callbackUrl = `https://lidera.ir/api/payment/verify?leaderId=${leaderId}&fullName=${encodeURIComponent(pData.fullName || '')}&phone=${fPhone}&nationalId=${fNationalId}&tourName=${encodeURIComponent(fTourName)}&amount=${amountInRial}`;
+    // ارسال آی‌دی مسافر در callbackUrl
+    const callbackUrl = `https://lidera.ir/api/payment/verify?leaderId=${leaderId}&passengerId=${newPassenger.id}&amount=${amountInRial}`;
 
     const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/request.json', {
       method: 'POST',
@@ -35,8 +51,8 @@ export async function POST(req: NextRequest) {
         merchant_id: merchant,
         amount: amountInRial,
         callback_url: callbackUrl,
-        description: description || `رزرو تور ${fTourName}`,
-        metadata: { mobile: fPhone, email: pData.email || '' }
+        description: `رزرو تور ${fTourName}`,
+        metadata: { mobile: fPhone }
       })
     });
 
