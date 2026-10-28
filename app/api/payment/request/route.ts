@@ -7,9 +7,10 @@ export async function POST(req: NextRequest) {
     const { amountInRial, description, leaderId } = body;
     const pData = body.passengerData || {};
 
-    const fPhone = pData.phone || pData.mobile || '09120000000';
-    const fNationalId = pData.nationalId || '0000000000';
-    const fFullName = pData.fullName || 'مسافر لیدرا';
+    // دریافت دقیق اطلاعات با بررسی کامل خالی نبودن رشته‌ها
+    const fPhone = pData.phone?.trim() || pData.mobile?.trim() || '09120000000';
+    const fNationalId = pData.nationalId?.trim() || '0000000000';
+    const fFullName = pData.fullName?.trim() ? pData.fullName.trim() : 'مسافر آنلاین';
     const fTourName = description || pData.tourName || 'تور گردشگری';
 
     const leader = await prisma.leader.findFirst({
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'لیدر مورد نظر یافت نشد' }, { status: 404 });
     }
 
-    // ۱. ثبت اولیه مسافر در دیتابیس با وضعیت در انتظار پرداخت
+    // ۱. ثبت اولیه مسافر در دیتابیس با اطلاعات واقعی فرم
     const amountInToman = Math.floor(amountInRial / 10);
     const newPassenger = await prisma.passenger.create({
       data: {
@@ -41,7 +42,6 @@ export async function POST(req: NextRequest) {
       process.env.ZARINPAL_MERCHANT ||
       "00000000-0000-0000-0000-000000000000";
 
-    // ارسال آی‌دی مسافر در callbackUrl
     const callbackUrl = `https://lidera.ir/api/payment/verify?leaderId=${leaderId}&passengerId=${newPassenger.id}&amount=${amountInRial}`;
 
     const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/request.json', {
