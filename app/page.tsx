@@ -375,20 +375,8 @@ const handleRemoveReceipt = () => {
 };
 
 
-// ۱. لودینگ اصلی و شکیل صفحه (در حال دریافت اطلاعات لیدر)
 
 
-  // ۲. اگر لودینگ تمام شد اما لیدر یافت نشد
-  if (!currentLider) {
-    return (
-      <div className="min-h-screen bg-[#121214] text-white flex flex-col items-center justify-center p-4 dir-rtl">
-        <div className="text-center p-10 bg-neutral-900 border border-[#F9704E] rounded-2xl max-w-sm">
-          <h2 className="text-base font-bold text-[#F9704E] mb-2">بارگذاری اطلاعات ......</h2>
-        
-        </div>
-      </div>
-    );
-  }
 
 return (
   <div className="min-h-screen bg-[#F9704E] text-white p-4 flex flex-col items-center justify-center" dir="rtl">
