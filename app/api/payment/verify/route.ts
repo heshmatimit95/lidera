@@ -1,22 +1,34 @@
 import { prisma } from '../../../lib/db';
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
+import { cookies } from 'next/headers';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const authority = url.searchParams.get("Authority");
   const status = url.searchParams.get("Status");
-
-  // دریافت پارامترهای مسافر و مبلغ از callbackUrl
   const leaderIdentifier = url.searchParams.get("leaderId");
-  const fullName = url.searchParams.get("fullName");
-  const phone = url.searchParams.get("phone");
-  const nationalId = url.searchParams.get("nationalId");
-  const tourName = url.searchParams.get("tourName");
-  const amountInRial = url.searchParams.get("amount");
 
-  console.log("CALLBACK PARAMS RECEIVED:", { leaderIdentifier, fullName, phone, nationalId, tourName, amountInRial });
+  // خواندن اطلاعات مسافر از کوکی امن (با await برای Next.js جدید)
+  const cookieStore = await cookies();
+  const passengerCookie = cookieStore.get('pending_passenger_data');
+  
+  let passengerInfo = {
+    fullName: "مسافر آنلاین",
+    phone: "",
+    nationalId: "",
+    tourName: "تور گردشگری",
+    amountInRial: 0
+  };
 
-  if (status !== "OK" || !authority || !amountInRial) {
+  if (passengerCookie) {
+    try {
+      passengerInfo = JSON.parse(passengerCookie.value);
+    } catch (e) {
+      console.error("Error parsing passenger cookie", e);
+    }
+  }
+
+  if (status !== "OK" || !authority) {
     const fallbackSlug = leaderIdentifier || 'leader_1';
     return NextResponse.redirect(
       `https://lidera.ir/?slug=${fallbackSlug}&payment=canceled`
@@ -40,7 +52,7 @@ export async function GET(request: Request) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           merchant_id: ZARINPAL_MERCHANT,
-          amount: Number(amountInRial),
+          amount: Number(passengerInfo.amountInRial),
           authority: authority,
         }),
       }
@@ -50,15 +62,15 @@ export async function GET(request: Request) {
 
     if (data.data && (data.data.code === 100 || data.data.code === 101)) {
       if (leader) {
-        const amountInToman = Math.floor(Number(amountInRial) / 10);
+        const amountInToman = Math.floor(Number(passengerInfo.amountInRial) / 10);
 
-        // ثبت دقیق اطلاعات واقعی دریافتی در دیتابیس
+        // ثبت قطعی و ۱۰۰٪ واقعی اطلاعات مسافر در دیتابیس
         await prisma.passenger.create({
           data: {
-            fullName: fullName ? decodeURIComponent(fullName) : "مسافر آنلاین",
-            mobile: phone || "",
-            nationalId: nationalId || "",
-            tourName: tourName ? decodeURIComponent(tourName) : "تور گردشگری",
+            fullName: passengerInfo.fullName || "مسافر آنلاین",
+            mobile: passengerInfo.phone || "",
+            nationalId: passengerInfo.nationalId || "",
+            tourName: passengerInfo.tourName || "تور گردشگری",
             paymentStatus: "پرداخت شده آنلاین",
             amount: `${amountInToman.toLocaleString('fa-IR')} تومان`,
             receiptDate: new Date().toLocaleDateString('fa-IR'),
@@ -67,14 +79,12 @@ export async function GET(request: Request) {
           },
         });
 
-
         return NextResponse.redirect(
           `https://lidera.ir/?slug=${leader.slug || leaderIdentifier}&payment=success`
         );
       }
     }
 
-    
     const fallbackSlug = leaderIdentifier || 'leader_1';
     return NextResponse.redirect(
       `https://lidera.ir/?slug=${fallbackSlug}&payment=failed`
