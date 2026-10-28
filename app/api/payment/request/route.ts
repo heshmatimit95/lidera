@@ -4,21 +4,28 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { amountInRial, description, leaderId, passengerData } = body;
+    
+    // ۱. استخراج هوشمند مبلغ (از کلیدهای مختلف فرانت‌اند)
+    const rawAmount = body.amountInRial || body.amount || body.price || body.totalAmount || 0;
+    const amountInRial = Number(rawAmount);
 
+    const leaderId = body.leaderId || body.leader_id || body.slug || '';
     if (!amountInRial || !leaderId) {
       return NextResponse.json({ success: false, message: 'اطلاعات ناقص است' }, { status: 400 });
     }
 
-    // استخراج هوشمند اطلاعات مسافر (از passengerData یا از خود body مستقیم)
-    const pData = passengerData || body;
+    // ۲. استخراج هوشمند اطلاعات مسافر از تمام لایه‌های ممکن JSON
+    const pData = body.passengerData || body.passenger || body.user || body;
 
-    const fName = pData.fullName || pData.name || pData.passengerName || pData.passenger_name || '';
-    const fPhone = pData.phone || pData.mobile || pData.phoneNumber || pData.phone_number || '';
-    const fNationalId = pData.nationalId || pData.national_id || pData.codeMelli || '';
+    const fName = pData.fullName || pData.name || pData.passengerName || pData.passenger_name || pData.fullNameFa || '';
+    const fPhone = pData.phone || pData.mobile || pData.phoneNumber || pData.phone_number || body.phone || body.mobile || '';
+    const fNationalId = pData.nationalId || pData.national_id || pData.codeMelli || pData.nationalCode || body.nationalId || '';
+    
+    // عنوان تور
+    const description = body.description || '';
     const fTourName = pData.tourName || pData.tour_name || pData.tourTitle || description || 'تور گردشگری';
 
-    // پیدا کردن لیدر
+    // ۳. پیدا کردن لیدر
     const leader = await prisma.leader.findFirst({
       where: {
         OR: [{ id: leaderId }, { slug: leaderId }],
@@ -27,16 +34,16 @@ export async function POST(req: Request) {
 
     const merchant = leader?.zarinpalMerchantId || process.env.ZARINPAL_MERCHANT || '00000000-0000-0000-0000-000000000000';
 
-    // ساخت آدرس بازگشت با تمام متغیرهای ممکن
+    // ۴. ساخت callbackUrl کامل و بدون نقص
     const callbackUrl = `https://lidera.ir/api/payment/verify?leaderId=${leaderId}&fullName=${encodeURIComponent(fName)}&phone=${fPhone}&nationalId=${fNationalId}&tourName=${encodeURIComponent(fTourName)}&amount=${amountInRial}`;
 
-    // ارسال درخواست به درگاه
+    // ۵. ارسال درخواست به درگاه زرین‌پال
     const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/request.json', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         merchant_id: merchant,
-        amount: Number(amountInRial),
+        amount: amountInRial,
         callback_url: callbackUrl,
         description: description || `رزرو تور ${fTourName}`,
         metadata: {
