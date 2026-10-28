@@ -208,19 +208,16 @@ const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isStepValid()) return;
-
     setIsSubmitting(true);
-
 
     const tourObj = currentLider?.tours?.find((t: any) => (t.id || t._id) === selectedTour);
     const tourTitle = tourObj ? `${tourObj.title || tourObj.name} (${tourObj.date || ''})` : 'تور عمومی';
 
-    // محاسبه دقیق مبلغ کل بر اساس قیمت تور و تعداد صندلی‌های انتخابی
     const rawPrice = tourObj?.price ? parseInt(tourObj.price.replace(/[^0-9]/g, ''), 10) || 0 : 0;
     const calculatedAmount = (rawPrice * parseInt(String(seatsCount || 1), 10)).toString();
+
     try {
       const res = await submitPassengerAction({
         fullName: fullName.trim(),
@@ -229,25 +226,56 @@ const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         birthDate: birthDate,
         tourName: tourTitle,
         seatsCount: seatsCount,
-        amount: calculatedAmount, // <--- اضافه کردن مبلغ محاسبه شده اینجا
+        amount: calculatedAmount,
         leaderSlug: currentLider?.slug || 'default',
         tenantId: currentLider?.slug || 'default',
         idCardImage: idCardPreview || null,
         receiptImage: receiptPreview || null,
       });
+
       if (res && res.success) {
+        // ۱. هدایت خودکار به درگاه پرداخت زرین‌پال
+        try {
+          const payRes = await fetch('/api/payment/request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              amountInRial: Number(calculatedAmount) * 10, // تبدیل تومان به ریال
+              description: tourTitle,
+              leaderId: currentLider?.slug || 'default',
+              passengerData: {
+                fullName: fullName.trim(),
+                phone: phone.trim(),
+                nationalId: nationalId.trim(),
+                tourName: tourTitle
+              }
+            })
+          });
+
+          const payData = await payRes.json();
+          if (payData.success && payData.url) {
+            window.location.href = payData.url;
+            return;
+          } else {
+            alert(payData.message || 'خطا در اتصال به درگاه پرداخت');
+          }
+        } catch (payErr) {
+          console.error('Payment redirect error:', payErr);
+          alert('خطا در ارتباط با سرور پرداخت');
+        }
+
         setIsSuccess(true);
       } else {
         alert(res?.message || 'خطا در ثبت اطلاعات.');
       }
     } catch (error) {
       console.error('خطا در ثبت اطلاعات مسافر:', error);
-      alert('خطای سرور در ثبت نام.');
+      alert('خطای سرور در ثبت نام');
     } finally {
       setIsSubmitting(false);
     }
   };
-
+  
   const handleReset = () => {
     setFullName('');
     setPhone('');
@@ -390,7 +418,7 @@ const handleRemoveReceipt = () => {
   if (!currentLider) {
     return (
       <div className="min-h-screen bg-[#121214] text-white flex flex-col items-center justify-center p-4" dir="rtl">
-        <div className="text-center p-6 bg-neutral-900 border border-neutral-800 rounded-2xl max-w-sm">
+        <div className="text-center p-10 bg-neutral-900 border border-[#F9704E] rounded-2xl max-w-sm">
           <h2 className="text-base font-bold text-[#F9704E] mb-2">در حال بارگذاری دیتابیس...</h2>
         
         </div>
@@ -444,7 +472,7 @@ return (
     <div className="flex items-center gap-1 shrink-0">
       <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-400'}`}>1</span>
       <span className={step >= 1 ? 'text-white' : ''}>انتخاب تور</span>
-    </div>
+    </div>_
 
     {/* خط رابط ۱ */}
     <div className="h-2px] flex-1 mx-2 bg-neutral-800 rounded-full overflow-hidden">
