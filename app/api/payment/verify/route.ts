@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const status = url.searchParams.get("Status");
   const leaderIdentifier = url.searchParams.get("leaderId");
   
-  // خواندن اطلاعات واقعی مسافر از پارامترهای برگشتی
+  // خواندن اطلاعات واقعی مسافر از پارامترهای URL
   const fullName = url.searchParams.get("fullName") || "مسافر آنلاین";
   const phone = url.searchParams.get("phone") || "09120000000";
   const nationalId = url.searchParams.get("nationalId") || "0000000000";
