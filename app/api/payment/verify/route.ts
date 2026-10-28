@@ -1,45 +1,27 @@
 import { prisma } from '../../../lib/db';
 import { NextResponse, NextRequest } from "next/server";
-import { cookies } from 'next/headers';
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const authority = url.searchParams.get("Authority");
   const status = url.searchParams.get("Status");
   const leaderIdentifier = url.searchParams.get("leaderId");
-
-  // خواندن اطلاعات مسافر از کوکی امن (با await برای Next.js جدید)
-  const cookieStore = await cookies();
-  const passengerCookie = cookieStore.get('pending_passenger_data');
   
-  let passengerInfo = {
-    fullName: "مسافر آنلاین",
-    phone: "",
-    nationalId: "",
-    tourName: "تور گردشگری",
-    amountInRial: 0
-  };
-
-  if (passengerCookie) {
-    try {
-      passengerInfo = JSON.parse(passengerCookie.value);
-    } catch (e) {
-      console.error("Error parsing passenger cookie", e);
-    }
-  }
+  // خواندن مستقیم اطلاعات مسافر از URL بازگشتی بانک
+  const fullName = url.searchParams.get("fullName") || "مسافر آنلاین";
+  const phone = url.searchParams.get("phone") || "";
+  const nationalId = url.searchParams.get("nationalId") || "";
+  const tourName = url.searchParams.get("tourName") || "تور گردشگری";
+  const amountInRial = Number(url.searchParams.get("amount") || 0);
 
   if (status !== "OK" || !authority) {
     const fallbackSlug = leaderIdentifier || 'leader_1';
-    return NextResponse.redirect(
-      `https://lidera.ir/?slug=${fallbackSlug}&payment=canceled`
-    );
+    return NextResponse.redirect(`https://lidera.ir/?slug=${fallbackSlug}&payment=canceled`);
   }
 
   try {
     const leader = await prisma.leader.findFirst({
-      where: {
-        OR: [{ id: leaderIdentifier || "" }, { slug: leaderIdentifier || "" }],
-      },
+      where: { OR: [{ id: leaderIdentifier || "" }, { slug: leaderIdentifier || "" }] },
     });
 
     const ZARINPAL_MERCHANT =
@@ -52,7 +34,7 @@ export async function GET(request: NextRequest) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           merchant_id: ZARINPAL_MERCHANT,
-          amount: Number(passengerInfo.amountInRial),
+          amount: amountInRial,
           authority: authority,
         }),
       }
@@ -62,15 +44,15 @@ export async function GET(request: NextRequest) {
 
     if (data.data && (data.data.code === 100 || data.data.code === 101)) {
       if (leader) {
-        const amountInToman = Math.floor(Number(passengerInfo.amountInRial) / 10);
+        const amountInToman = Math.floor(amountInRial / 10);
 
-        // ثبت قطعی و ۱۰۰٪ واقعی اطلاعات مسافر در دیتابیس
+        // ثبت قطعی اطلاعات واقعی مسافر در دیتابیس
         await prisma.passenger.create({
           data: {
-            fullName: passengerInfo.fullName || "مسافر آنلاین",
-            mobile: passengerInfo.phone || "",
-            nationalId: passengerInfo.nationalId || "",
-            tourName: passengerInfo.tourName || "تور گردشگری",
+            fullName: decodeURIComponent(fullName),
+            mobile: phone,
+            nationalId: nationalId,
+            tourName: decodeURIComponent(tourName),
             paymentStatus: "پرداخت شده آنلاین",
             amount: `${amountInToman.toLocaleString('fa-IR')} تومان`,
             receiptDate: new Date().toLocaleDateString('fa-IR'),
@@ -79,21 +61,15 @@ export async function GET(request: NextRequest) {
           },
         });
 
-        return NextResponse.redirect(
-          `https://lidera.ir/?slug=${leader.slug || leaderIdentifier}&payment=success`
-        );
+        return NextResponse.redirect(`https://lidera.ir/?slug=${leader.slug || leaderIdentifier}&payment=success`);
       }
     }
 
     const fallbackSlug = leaderIdentifier || 'leader_1';
-    return NextResponse.redirect(
-      `https://lidera.ir/?slug=${fallbackSlug}&payment=failed`
-    );
+    return NextResponse.redirect(`https://lidera.ir/?slug=${fallbackSlug}&payment=failed`);
   } catch (error) {
     console.error("Verification Error:", error);
     const fallbackSlug = leaderIdentifier || 'leader_1';
-    return NextResponse.redirect(
-      `https://lidera.ir/?slug=${fallbackSlug}&payment=error`
-    );
+    return NextResponse.redirect(`https://lidera.ir/?slug=${fallbackSlug}&payment=error`);
   }
 }
