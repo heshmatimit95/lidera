@@ -56,12 +56,13 @@ export async function GET(request: Request) {
         const amountInToman = Math.floor(Number(amountInRial) / 10);
 
 // ثبت دقیق اطلاعات واقعی مسافر در دیتابیس Prisma پس از پرداخت موفق
-await prisma.passenger.create({
+// ثبت دقیق اطلاعات واقعی مسافر (بدون مقدار پیش‌فرض فریبنده)
+        await prisma.passenger.create({
           data: {
-            fullName: fullName && fullName !== "undefined" ? fullName : "ثبت‌نام آنلاین",
-            mobile: phone && phone !== "undefined" ? phone : "نامشخص",
-            nationalId: nationalId && nationalId !== "undefined" ? nationalId : "0000000000",
-            tourName: tourName && tourName !== "undefined" ? tourName : "تور لیدرا",
+            fullName: fullName || "نامشخص",
+            mobile: phone || "نامشخص",
+            nationalId: nationalId || "0000000000",
+            tourName: tourName || "تور گردشگری",
             paymentStatus: "پرداخت شده آنلاین",
             amount: `${amountInToman.toLocaleString('fa-IR')} تومان`,
             receiptDate: new Date().toLocaleDateString('fa-IR'),
