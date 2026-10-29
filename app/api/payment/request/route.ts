@@ -1,77 +1,83 @@
 import { prisma } from '../../../lib/db';
 import { NextResponse, NextRequest } from "next/server";
 
-export async function GET(request: NextRequest) {
-  const url = new URL(request.url);
-  const authority = url.searchParams.get("Authority");
-  const status = url.searchParams.get("Status");
-  const leaderIdentifier = url.searchParams.get("leaderId");
-  const passengerId = url.searchParams.get("passengerId");
-  const amountInRial = Number(url.searchParams.get("amount") || 0);
-
-  // اگر لیدر مشخص نبود، حتماً از leader_1 به عنوان مقدار مطمئن استفاده کن
-  let targetSlug = 'leader_1';
-
+export async function POST(req: NextRequest) {
   try {
-    if (leaderIdentifier) {
-      const leader = await prisma.leader.findFirst({
-        where: { OR: [{ id: leaderIdentifier }, { slug: leaderIdentifier }] },
-      });
-      if (leader?.slug) {
-        targetSlug = leader.slug;
-      } else if (leader?.id) {
-        targetSlug = leader.id;
-      }
+    const body = await req.json();
+    const { amountInRial, description, leaderId } = body;
+    const pData = body.passengerData || {};
+
+    const fFullName = (pData.fullName || body.fullName || '').trim();
+    const fPhone = (pData.phone || pData.mobile || body.phone || body.mobile || '').trim();
+    const fNationalId = (pData.nationalId || body.nationalId || '').trim();
+    const fTourName = description || pData.tourName || body.tourName || 'تور گردشگری';
+    const fSeatsCount = Number(pData.seatsCount || body.seatsCount || 1);
+
+    if (!fFullName || !fPhone || !fNationalId) {
+      return NextResponse.json({ success: false, message: 'اطلاعات مسافر ناقص است' }, { status: 400 });
     }
-  } catch (e) {
-    console.error("Leader lookup error in verify:", e);
-  }
 
-  // لینک دقیق بازگشت با تضمین وجود slug
-  const buildRedirectUrl = (paymentStatus: string) => {
-    return `https://lidera.ir/?slug=${encodeURIComponent(targetSlug)}&payment=${paymentStatus}`;
-  };
-
-  if (status !== "OK" || !authority) {
-    return NextResponse.redirect(buildRedirectUrl("canceled"));
-  }
-
-  try {
-    const leaderObj = await prisma.leader.findFirst({
-      where: { OR: [{ id: leaderIdentifier || "" }, { slug: leaderIdentifier || "" }] },
+    const leader = await prisma.leader.findFirst({
+      where: { OR: [{ id: leaderId }, { slug: leaderId }] },
     });
 
-    const ZARINPAL_MERCHANT =
-      leaderObj?.zarinpalMerchantId ||
-      process.env.ZARINPAL_MERCHANT ||
-      "1c337482-1e50-11e9-a417-005056a205be";
+    if (!leader) {
+      return NextResponse.json({ success: false, message: 'لیدر یافت نشد' }, { status: 404 });
+    }
 
-    const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/verify.json', {
+    const amountInToman = Math.floor(amountInRial / 10);
+    
+    const newPassenger = await prisma.passenger.create({
+      data: {
+        fullName: fFullName,
+        mobile: fPhone,
+        nationalId: fNationalId,
+        tourName: fTourName,
+        paymentStatus: "در انتظار پرداخت",
+        amount: String(amountInToman),
+        seatsCount: fSeatsCount,
+        receiptDate: new Date().toLocaleDateString('fa-IR'),
+        leaderId: leader.id,
+        tenantId: leader.id,
+      },
+    });
+
+    const merchant = leader?.zarinpalMerchantId || process.env.ZARINPAL_MERCHANT || "1c337482-1e50-11e9-a417-005056a205be";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lidera.ir';
+    const callbackUrl = `${baseUrl}/api/payment/verify?leaderId=${leader.id}&passengerId=${newPassenger.id}&amount=${amountInRial}`;
+
+    const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/request.json', {
       method: 'POST',
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        merchant_id: ZARINPAL_MERCHANT,
+        merchant_id: merchant,
         amount: amountInRial,
-        authority: authority,
-      }),
+        callback_url: callbackUrl,
+        description: `رزرو تور ${fTourName} (${fSeatsCount} نفر)`,
+        metadata: { mobile: fPhone }
+      })
     });
 
     const data = await response.json();
 
-    if (data.data && (data.data.code === 100 || data.data.code === 101)) {
-      if (passengerId) {
-        await prisma.passenger.update({
-          where: { id: passengerId },
-          data: { paymentStatus: "پرداخت شده آنلاین" },
-        }).catch(() => {});
-      }
+    if (data.data && data.data.code === 100) {
+      return NextResponse.json({
+        success: true,
+        url: `https://sandbox.zarinpal.com/pg/StartPay/${data.data.authority}`
+      });
+    } else {
+      await prisma.passenger.update({
+        where: { id: newPassenger.id },
+        data: { paymentStatus: 'ناموفق' },
+      }).catch(() => {});
 
-      return NextResponse.redirect(buildRedirectUrl("success"));
+      return NextResponse.json({
+        success: false,
+        message: data.errors?.message || 'خطا در ارتباط با درگاه زرین‌پال'
+      }, { status: 400 });
     }
-
-    return NextResponse.redirect(buildRedirectUrl("failed"));
   } catch (error) {
-    console.error("Verification Error:", error);
-    return NextResponse.redirect(buildRedirectUrl("error"));
+    console.error('Payment Request Fatal Error:', error);
+    return NextResponse.json({ success: false, message: 'خطای داخلی سرور' }, { status: 500 });
   }
 }
