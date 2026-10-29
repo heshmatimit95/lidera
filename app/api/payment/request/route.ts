@@ -4,22 +4,21 @@ import { NextResponse, NextRequest } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log('BACKEND BODY RECEIVED:', JSON.stringify(body, null, 2));
-
     const { amountInRial, description, leaderId } = body;
     const pData = body.passengerData || {};
 
-    // حذف مقادیر فیک و دریافت واقعی داده‌ها
     const fFullName = (pData.fullName || body.fullName || '').trim();
     const fPhone = (pData.phone || pData.mobile || body.phone || body.mobile || '').trim();
     const fNationalId = (pData.nationalId || body.nationalId || '').trim();
     const fTourName = description || pData.tourName || body.tourName || 'تور گردشگری';
+    
+    // دریافت تعداد صندلی از فرانت‌اند
+    const fSeatsCount = Number(pData.seatsCount || body.seatsCount || 1);
 
-    // اعتبارسنجی جدی: اگر اطلاعات ناقص بود، خطا بده تا مشکل فرانت مشخص شود
     if (!fFullName || !fPhone || !fNationalId) {
       return NextResponse.json({ 
         success: false, 
-        message: 'اطلاعات مسافر ناقص است (نام، شماره تماس و کد ملی الزامی است)' 
+        message: 'اطلاعات مسافر ناقص است' 
       }, { status: 400 });
     }
 
@@ -33,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     const amountInToman = Math.floor(amountInRial / 10);
     
-    // ثبت مسافر با اطلاعات کاملاً واقعی
+    // ثبت رکورد مسافر با مبلغ کل و تعداد صندلی واقعی
     const newPassenger = await prisma.passenger.create({
       data: {
         fullName: fFullName,
@@ -63,7 +62,7 @@ export async function POST(req: NextRequest) {
         merchant_id: merchant,
         amount: amountInRial,
         callback_url: callbackUrl,
-        description: `رزرو تور ${fTourName}`,
+        description: `رزرو تور ${fTourName} (${fSeatsCount} نفر)`,
         metadata: { mobile: fPhone }
       })
     });
@@ -76,7 +75,6 @@ export async function POST(req: NextRequest) {
         url: `https://sandbox.zarinpal.com/pg/StartPay/${data.data.authority}`
       });
     } else {
-      // اگر زرین‌پال خطا داد، وضعیت مسافر را ناموفق کن
       await prisma.passenger.update({
         where: { id: newPassenger.id },
         data: { paymentStatus: 'ناموفق' },

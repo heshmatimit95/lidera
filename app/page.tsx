@@ -336,7 +336,7 @@ const handleOnlinePayment = async () => {
       const res = await fetch('/api/payment/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+body: JSON.stringify({
           amountInRial: amountInRial,
           description: `رزرو تور ${currentTourDetails?.title || ''}`,
           leaderId: currentLider?.id || currentLider?.slug || 'leader_1',
@@ -344,11 +344,13 @@ const handleOnlinePayment = async () => {
           mobile: finalPhone,
           phone: finalPhone,
           nationalId: finalNationalId,
+          seatsCount: seatsCount, // ارسال تعداد صندلی
           passengerData: {
             fullName: finalFullName,
             phone: finalPhone,
             mobile: finalPhone,
-            nationalId: finalNationalId
+            nationalId: finalNationalId,
+            seatsCount: seatsCount // ارسال تعداد صندلی
           }
         }),
       });
