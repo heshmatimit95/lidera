@@ -5,23 +5,23 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { amountInRial, description, leaderId } = body;
-    const pData = body.passengerData || {};
+    const pData = body.passengerData || body || {};
 
-    // استخراج دقیق مشخصات مسافر فرستاده شده از فرم
-    const fFullName = pData.fullName?.trim() || body.fullName?.trim() || 'مسافر گرامی';
-    const fPhone = pData.phone?.trim() || pData.mobile?.trim() || '09120000000';
-    const fNationalId = pData.nationalId?.trim() || '0000000000';
-    const fTourName = description || pData.tourName || 'تور گردشگری';
+    // خواندن مستقیم و بدون ابهام از فرانت
+    const fFullName = pData.fullName || body.fullName || 'مسافر آنلاین';
+    const fPhone = pData.phone || pData.mobile || body.phone || body.mobile || '09120000000';
+    const fNationalId = pData.nationalId || body.nationalId || '0000000000';
+    const fTourName = description || pData.tourName || body.tourName || 'تور گردشگری';
 
     const leader = await prisma.leader.findFirst({
       where: { OR: [{ id: leaderId }, { slug: leaderId }] },
     });
 
     if (!leader) {
-      return NextResponse.json({ success: false, message: 'لیدر مورد نظر یافت نشد' }, { status: 404 });
+      return NextResponse.json({ success: false, message: 'لیدر یافت نشد' }, { status: 404 });
     }
 
-    // ۱. ثبت اولیه با اطلاعات کاملاً واقعی کاربر در دیتابیس
+    // ۱. ثبت مسافر با مشخصات کاملاً واقعی وارد شده در فرم
     const amountInToman = Math.floor(amountInRial / 10);
     const newPassenger = await prisma.passenger.create({
       data: {
