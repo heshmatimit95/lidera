@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const fallbackSlug = leaderIdentifier || 'leader_1';
 
   if (status !== "OK" || !authority) {
-    return NextResponse.redirect(`https://lidera.ir/?slug=${fallbackSlug}&payment=canceled`);
+    return NextResponse.redirect(`https://lidera.ir/leader?slug=${fallbackSlug}&payment=canceled`);
   }
 
   try {
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!leader) {
-      return NextResponse.redirect(`https://lidera.ir/?slug=${fallbackSlug}&payment=error`);
+      return NextResponse.redirect(`https://lidera.ir/leader?slug=${fallbackSlug}&payment=error`);
     }
 
     const ZARINPAL_MERCHANT =
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       "00000000-0000-0000-0000-000000000000";
 
     const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/verify.json', {
-      method: "POST",
+      method: 'POST',
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         merchant_id: ZARINPAL_MERCHANT,
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
 
     if (data.data && (data.data.code === 100 || data.data.code === 101)) {
-      // آپدیت وضعیت مسافر از در انتظار به پرداخت شده آنلاین
+      // آپدیت وضعیت مسافر به پرداخت شده آنلاین بدون دستکاری صندلی و مبلغ
       if (passengerId) {
         await prisma.passenger.update({
           where: { id: passengerId },
@@ -50,12 +50,13 @@ export async function GET(request: NextRequest) {
         }).catch(() => {});
       }
 
-      return NextResponse.redirect(`https://lidera.ir/?slug=${leader.slug || fallbackSlug}&payment=success`);
+      // اصلاح مسیر ریدایرکت به صفحه صحیح پنل لیدر
+      return NextResponse.redirect(`https://lidera.ir/leader?slug=${leader.slug || fallbackSlug}&payment=success`);
     }
 
-    return NextResponse.redirect(`https://lidera.ir/?slug=${fallbackSlug}&payment=failed`);
+    return NextResponse.redirect(`https://lidera.ir/leader?slug=${fallbackSlug}&payment=failed`);
   } catch (error) {
     console.error("Verification Error:", error);
-    return NextResponse.redirect(`https://lidera.ir/?slug=${fallbackSlug}&payment=error`);
+    return NextResponse.redirect(`https://lidera.ir/leader?slug=${fallbackSlug}&payment=error`);
   }
 }
