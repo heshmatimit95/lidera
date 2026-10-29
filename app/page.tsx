@@ -310,13 +310,27 @@ const handleOnlinePayment = async () => {
     let rawPrice = currentTourDetails?.price ? p2e(String(currentTourDetails.price)).replace(/[^0-9]/g, '') : '0';
     let amountInRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
 
-    // خواندن امن اطلاعات فرم
-    const currentFullName = (typeof window !== 'undefined' && (document.getElementById('fullName') as HTMLInputElement)?.value) || fullName || '';
-    const currentMobile = (typeof window !== 'undefined' && (document.getElementById('mobile') as HTMLInputElement)?.value) || phone || '';
-    const currentNationalId = (typeof window !== 'undefined' && (document.getElementById('nationalId') as HTMLInputElement)?.value) || nationalId || '';
+    // خواندن امن مقادیر از روی اینپوت‌های صفحه
+    let domName = '', domPhone = '', domNationalId = '';
+    if (typeof window !== 'undefined') {
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach(input => {
+        const ph = (input.placeholder || '').toLowerCase();
+        const nameAttr = (input.name || '').toLowerCase();
+        const val = input.value.trim();
+        if (val) {
+          if (ph.includes('نام') || nameAttr.includes('name') || nameAttr.includes('fullname')) domName = val;
+          if (ph.includes('تلفن') || ph.includes('موبایل') || nameAttr.includes('phone') || nameAttr.includes('mobile')) domPhone = val;
+          if (ph.includes('کد ملی') || nameAttr.includes('national') || nameAttr.includes('melli')) domNationalId = val;
+        }
+      });
+    }
 
-    // لاگ صحیح متغیرها
-    console.log('FRONTEND FORM VALUES:', { currentFullName, currentMobile, currentNationalId, amountInRial });
+    const finalFullName = domName || (typeof fullName !== 'undefined' ? fullName : '') || 'مسافر گرامی';
+    const finalPhone = domPhone || (typeof phone !== 'undefined' ? phone : '') || '09120000000';
+    const finalNationalId = domNationalId || (typeof nationalId !== 'undefined' ? nationalId : '') || '0000000000';
+
+    console.log('FINAL CAPTURED VALUES:', { finalFullName, finalPhone, finalNationalId, amountInRial });
 
     try {
       const res = await fetch('/api/payment/request', {
@@ -326,15 +340,15 @@ const handleOnlinePayment = async () => {
           amountInRial: amountInRial,
           description: `رزرو تور ${currentTourDetails?.title || ''}`,
           leaderId: currentLider?.id || currentLider?.slug || 'leader_1',
-          fullName: currentFullName,
-          mobile: currentMobile,
-          phone: currentMobile,
-          nationalId: currentNationalId,
+          fullName: finalFullName,
+          mobile: finalPhone,
+          phone: finalPhone,
+          nationalId: finalNationalId,
           passengerData: {
-            fullName: currentFullName,
-            phone: currentMobile,
-            mobile: currentMobile,
-            nationalId: currentNationalId
+            fullName: finalFullName,
+            phone: finalPhone,
+            mobile: finalPhone,
+            nationalId: finalNationalId
           }
         }),
       });

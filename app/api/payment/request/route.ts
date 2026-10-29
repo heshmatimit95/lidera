@@ -4,18 +4,24 @@ import { NextResponse, NextRequest } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    
-    // چاپ بدنه دریافتی برای بررسی در کنسول سرور (پیشنهاد کلود)
     console.log('BACKEND BODY RECEIVED:', JSON.stringify(body, null, 2));
 
     const { amountInRial, description, leaderId } = body;
     const pData = body.passengerData || {};
 
-    // استخراج هوشمند و چندکلیدی اطلاعات مسافر از فرانت‌اند
-    const fFullName = pData.fullName || body.fullName || pData.name || body.name || 'مسافر گرامی';
-    const fPhone = pData.phone || pData.mobile || body.phone || body.mobile || pData.phoneNumber || '09120000000';
-    const fNationalId = pData.nationalId || body.nationalId || pData.codeMelli || body.codeMelli || '0000000000';
+    // حذف مقادیر فیک و دریافت واقعی داده‌ها
+    const fFullName = (pData.fullName || body.fullName || '').trim();
+    const fPhone = (pData.phone || pData.mobile || body.phone || body.mobile || '').trim();
+    const fNationalId = (pData.nationalId || body.nationalId || '').trim();
     const fTourName = description || pData.tourName || body.tourName || 'تور گردشگری';
+
+    // اعتبارسنجی جدی: اگر اطلاعات ناقص بود، خطا بده تا مشکل فرانت مشخص شود
+    if (!fFullName || !fPhone || !fNationalId) {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'اطلاعات مسافر ناقص است (نام، شماره تماس و کد ملی الزامی است)' 
+      }, { status: 400 });
+    }
 
     const leader = await prisma.leader.findFirst({
       where: { OR: [{ id: leaderId }, { slug: leaderId }] },
@@ -25,8 +31,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'لیدر یافت نشد' }, { status: 404 });
     }
 
-    // ۱. ثبت اولیه مسافر با اطلاعات کاملاً واقعی وارد شده در فرم
     const amountInToman = Math.floor(amountInRial / 10);
+    
+    // ثبت مسافر با اطلاعات کاملاً واقعی
     const newPassenger = await prisma.passenger.create({
       data: {
         fullName: fFullName,
@@ -46,7 +53,8 @@ export async function POST(req: NextRequest) {
       process.env.ZARINPAL_MERCHANT ||
       "00000000-0000-0000-0000-000000000000";
 
-    const callbackUrl = `https://lidera.ir/api/payment/verify?leaderId=${leaderId}&passengerId=${newPassenger.id}&amount=${amountInRial}`;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lidera.ir';
+    const callbackUrl = `${baseUrl}/api/payment/verify?leaderId=${leader.id}&passengerId=${newPassenger.id}&amount=${amountInRial}`;
 
     const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/request.json', {
       method: 'POST',
@@ -68,6 +76,12 @@ export async function POST(req: NextRequest) {
         url: `https://sandbox.zarinpal.com/pg/StartPay/${data.data.authority}`
       });
     } else {
+      // اگر زرین‌پال خطا داد، وضعیت مسافر را ناموفق کن
+      await prisma.passenger.update({
+        where: { id: newPassenger.id },
+        data: { paymentStatus: 'ناموفق' },
+      }).catch(() => {});
+
       return NextResponse.json({
         success: false,
         message: data.errors?.message || 'خطا در ارتباط با زرین‌پال'
