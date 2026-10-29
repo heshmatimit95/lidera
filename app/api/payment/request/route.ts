@@ -5,12 +5,12 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { amountInRial, description, leaderId } = body;
-    const pData = body.passengerData || body || {};
+    const pData = body.passengerData || {};
 
-    // خواندن مستقیم و بدون ابهام از فرانت
-    const fFullName = pData.fullName || body.fullName || 'مسافر آنلاین';
-    const fPhone = pData.phone || pData.mobile || body.phone || body.mobile || '09120000000';
-    const fNationalId = pData.nationalId || body.nationalId || '0000000000';
+    // استخراج هوشمند و چندکلیدی اطلاعات مسافر از فرانت‌اند
+    const fFullName = pData.fullName || body.fullName || pData.name || body.name || 'مسافر گرامی';
+    const fPhone = pData.phone || pData.mobile || body.phone || body.mobile || pData.phoneNumber || '09120000000';
+    const fNationalId = pData.nationalId || body.nationalId || pData.codeMelli || body.codeMelli || '0000000000';
     const fTourName = description || pData.tourName || body.tourName || 'تور گردشگری';
 
     const leader = await prisma.leader.findFirst({
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'لیدر یافت نشد' }, { status: 404 });
     }
 
-    // ۱. ثبت مسافر با مشخصات کاملاً واقعی وارد شده در فرم
+    // ۱. ثبت اولیه مسافر با اطلاعات کاملاً واقعی وارد شده در فرم
     const amountInToman = Math.floor(amountInRial / 10);
     const newPassenger = await prisma.passenger.create({
       data: {

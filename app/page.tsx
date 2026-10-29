@@ -220,26 +220,29 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     try {
       // 1. ارسال مستقیم اطلاعات به درگاه پرداخت (فایل request خودش اطلاعات را هندل می‌کند)
-      const payRes = await fetch('/api/payment/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amountInRial: Number(calculatedAmount) * 10, // تبدیل تومان به ریال
-          description: tourTitle,
-          leaderId: currentLider?.slug || 'default',
-          passengerData: {
+const payRes = await fetch('/api/payment/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amountInRial: Number(calculatedAmount) * 10, // تبدیل تومان به ریال
+            description: tourTitle,
+            leaderId: currentLider?.slug || 'default',
+            // ارسال فیلدها به صورت مستقیم
             fullName: fullName.trim(),
             phone: phone.trim(),
             nationalId: nationalId.trim(),
             tourName: tourTitle,
-            seatsCount: seatsCount,
-            birthDate: birthDate,
-            idCardImage: idCardPreview || null,
-            receiptImage: receiptPreview || null
-          }
-        })
-      });
-
+            // و به صورت تو در تو برای اطمینان کامل
+            passengerData: {
+              fullName: fullName.trim(),
+              phone: phone.trim(),
+              nationalId: nationalId.trim(),
+              tourName: tourTitle,
+              seatsCount: seatsCount,
+              birthDate: birthDate
+            }
+          })
+        });
       const payData = await payRes.json();
       if (payData.success && payData.url) {
         // 2. انتقال کاربر به درگاه بانکی زرین‌پال
