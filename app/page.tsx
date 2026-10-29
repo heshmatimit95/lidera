@@ -21,7 +21,6 @@ const leader = await prisma.leader.findFirst({
     name: true, 
     phone: true, 
     zarinpalMerchantId: true,
-    // فقط فیلدهای ضروری تور را می‌گیریم
     tours: {
       select: {
         id: true,
@@ -41,6 +40,6 @@ const leader = await prisma.leader.findFirst({
     );
   }
 
-  // ارسال داده‌ها به کامپوننت فرم
+
   return <TourForm leader={leader} />;
 }
