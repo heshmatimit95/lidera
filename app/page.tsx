@@ -9,18 +9,18 @@ export default async function Page({
   const slug = resolvedParams.slug || resolvedParams.leader || 'leader_1';
 
 const leader = await prisma.leader.findFirst({
-  where: { 
+  where: {
     OR: [
-      { slug: slug }, 
+      { slug: slug },
       { id: slug }
-    ] 
+    ]
   },
-  select: { 
-    id: true, 
-    slug: true, 
-    name: true, 
-  // این خط رو پاک کن:
-// phone: true,
+  select: {
+    id: true,
+    slug: true,
+    name: true,
+    fullName: true,
+    mobile: true, 
     zarinpalMerchantId: true,
     tours: {
       select: {
@@ -29,8 +29,8 @@ const leader = await prisma.leader.findFirst({
         price: true,
         date: true,
       }
-    } 
-  },
+    }
+  }
 });
 
   if (!leader) {

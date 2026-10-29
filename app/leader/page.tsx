@@ -63,7 +63,7 @@ const [waiverFilter, setWaiverFilter] = useState('all');
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentTenantSlug, setCurrentTenantSlug] = useState<string>('');
-  const [leaderId, setLeaderId] = useState<string>('');
+  const [leaderName, setLeaderName] = useState<string>('');
 const [selectedReceiptPassenger, setSelectedReceiptPassenger] = useState<any>(null);
 const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
 const [rejectReason, setRejectReason] = useState('');
@@ -166,7 +166,7 @@ const [promoData, setPromoData] = useState<string>('');         // مخصوص ت
 
       if (data.success && data.leader) {
         const l = data.leader;
-        setLeaderId(l.id);
+        setLeaderName(data.leader.fullName || data.leader.name || '');
         setPaymentMethod(l.paymentMethod || 'card');
         setLeaderCards(l.cards || l.leaderCards || [{ id: '1', cardNumber: '', bankName: '', cardHolder: '' }]);
         setActiveTours(l.tours || []);
@@ -187,29 +187,27 @@ const [promoData, setPromoData] = useState<string>('');         // مخصوص ت
     }
   };
 
-  // ذخیره تنظیمات مالی در دیتابیس
-  const handleSaveFinancialSettings = async () => {
+ const handleSaveFinancialSettings = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const tenantSlug = urlParams.get('slug') || currentTenantSlug;
 
     if (!tenantSlug) {
-      alert('⚠️ اسلاگ لیدر در آدرس صفحه یافت نشد!');
+      alert('⚠️ اسلاگ لیدر در آدرس صفحه یافته نشد!');
       return;
     }
 
     try {
-      const res = await fetch('/api/leaders/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          tenantId: tenantSlug, 
-          slug: tenantSlug, 
-          leaderId: leaderId,
-          paymentMethod, 
-          cards: leaderCards,
-          leaderCards: leaderCards 
-        })
-      });
+    const res = await fetch('/api/leaders/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tenantId: tenantSlug,
+        slug: tenantSlug,
+        paymentMethod,
+        cards: leaderCards,
+        leaderCards: leaderCards,
+      }),
+    });
       if (res.ok) {
         alert('✅ تنظیمات مالی و شماره کارت‌ها با موفقیت ذخیره شد!');
       } else {
@@ -977,9 +975,9 @@ const toEnglishDigits = (str: string) => {
       alt="Lidera Logo" 
     />
     <div>
-      <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
-        پنل مدیریت تور لیدر
-      </h1>
+<h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
+  {leaderName ? `${leaderName} عزیز، خوش آمدید` : 'پنل مدیریت تور لیدر'}
+</h1>
 </div>
     </div>
           </div>
