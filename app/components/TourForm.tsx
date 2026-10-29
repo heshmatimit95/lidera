@@ -32,7 +32,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
   const [selectedTour, setSelectedTour] = useState<string>(
     initialLeader?.tours?.[0]?.id ?? ''
   );
-  const [isloadingLeader, setIsLoadingLeader] = useState(!initialLeader);
+const [isloadingLeader, setIsLoadingLeader] = useState(!initialLeader);
   const router = useRouter();
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
   const searchParams = useSearchParams();
