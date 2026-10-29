@@ -7,10 +7,10 @@ export async function POST(req: NextRequest) {
     const { amountInRial, description, leaderId } = body;
     const pData = body.passengerData || {};
 
-    // دریافت دقیق اطلاعات با بررسی کامل خالی نبودن رشته‌ها
+    // استخراج دقیق مشخصات مسافر فرستاده شده از فرم
+    const fFullName = pData.fullName?.trim() || body.fullName?.trim() || 'مسافر گرامی';
     const fPhone = pData.phone?.trim() || pData.mobile?.trim() || '09120000000';
     const fNationalId = pData.nationalId?.trim() || '0000000000';
-    const fFullName = pData.fullName?.trim() ? pData.fullName.trim() : 'مسافر آنلاین';
     const fTourName = description || pData.tourName || 'تور گردشگری';
 
     const leader = await prisma.leader.findFirst({
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'لیدر مورد نظر یافت نشد' }, { status: 404 });
     }
 
-    // ۱. ثبت اولیه مسافر در دیتابیس با اطلاعات واقعی فرم
+    // ۱. ثبت اولیه با اطلاعات کاملاً واقعی کاربر در دیتابیس
     const amountInToman = Math.floor(amountInRial / 10);
     const newPassenger = await prisma.passenger.create({
       data: {
