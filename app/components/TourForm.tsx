@@ -27,12 +27,12 @@ interface TourFormProps {
   leader?: any;
 }
 
-export default function TourForm({ leader: initialLeader }: { leader?: any }) {
+export default function TourForm({ leader: initialLeader }: TourFormProps) {
   const [currentLider, setCurrentLider] = useState<any>(initialLeader || null);
-   const [selectedTour, setSelectedTour] = useState<string>(
+  const [selectedTour, setSelectedTour] = useState<string>(
     initialLeader?.tours?.[0]?.id ?? ''
   );
-const [isLoadingLeader, setIsLoadingLeader] = useState(!initialLeader);
+  const [isloadingLeader, setIsLoadingLeader] = useState(!initialLeader);
   const router = useRouter();
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
   const searchParams = useSearchParams();

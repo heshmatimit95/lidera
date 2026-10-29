@@ -40,6 +40,5 @@ const leader = await prisma.leader.findFirst({
     );
   }
 
-
-  return <TourForm leader={leader} />;
+ return <TourForm leader={leader} />;
 }
