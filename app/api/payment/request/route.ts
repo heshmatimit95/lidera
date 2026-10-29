@@ -4,6 +4,10 @@ import { NextResponse, NextRequest } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    
+    // چاپ بدنه دریافتی برای بررسی در کنسول سرور (پیشنهاد کلود)
+    console.log('BACKEND BODY RECEIVED:', JSON.stringify(body, null, 2));
+
     const { amountInRial, description, leaderId } = body;
     const pData = body.passengerData || {};
 

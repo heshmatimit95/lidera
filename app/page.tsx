@@ -307,18 +307,18 @@ const toPersianDigits = (num: string | number) => {
 };
 
 const handleOnlinePayment = async () => {
+    let rawPrice = currentTourDetails?.price ? p2e(String(currentTourDetails.price)).replace(/[^0-9]/g, '') : '0';
+    let amountInRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+
+    // خواندن امن اطلاعات فرم
+    const currentFullName = (typeof window !== 'undefined' && (document.getElementById('fullName') as HTMLInputElement)?.value) || fullName || '';
+    const currentMobile = (typeof window !== 'undefined' && (document.getElementById('mobile') as HTMLInputElement)?.value) || phone || '';
+    const currentNationalId = (typeof window !== 'undefined' && (document.getElementById('nationalId') as HTMLInputElement)?.value) || nationalId || '';
+
+    // لاگ صحیح متغیرها
+    console.log('FRONTEND FORM VALUES:', { currentFullName, currentMobile, currentNationalId, amountInRial });
+
     try {
-      setIsSubmitting(true);
-      
-      // محاسبه مبلغ ریالی
-      let rawPrice = currentTourDetails?.price ? p2e(String(currentTourDetails.price)).replace(/[^0-9]/g, '') : '0';
-      let amountInRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-
-      // خواندن امن اطلاعات فرم بدون ایجاد خطای عدم تعریف
-      const currentFullName = (typeof window !== 'undefined' && (document.getElementById('fullName') as HTMLInputElement)?.value) || "مسافر لیدرا";
-      const currentMobile = (typeof window !== 'undefined' && (document.getElementById('mobile') as HTMLInputElement)?.value) || "09120000000";
-      const currentNationalId = (typeof window !== 'undefined' && (document.getElementById('nationalId') as HTMLInputElement)?.value) || "0000000000";
-
       const res = await fetch('/api/payment/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -326,6 +326,10 @@ const handleOnlinePayment = async () => {
           amountInRial: amountInRial,
           description: `رزرو تور ${currentTourDetails?.title || ''}`,
           leaderId: currentLider?.id || currentLider?.slug || 'leader_1',
+          fullName: currentFullName,
+          mobile: currentMobile,
+          phone: currentMobile,
+          nationalId: currentNationalId,
           passengerData: {
             fullName: currentFullName,
             phone: currentMobile,
@@ -348,7 +352,6 @@ const handleOnlinePayment = async () => {
       setIsSubmitting(false);
     }
   };
-
 
 const handleRemoveReceipt = () => {
   setReceiptPreview(null);
