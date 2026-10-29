@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     const fNationalId = (pData.nationalId || body.nationalId || '').trim();
     const fTourName = description || pData.tourName || body.tourName || 'تور گردشگری';
     
-    // دریافت دقیق تعداد صندلی از بدنه ریکوئست یا passengerData
+    // دریافت دقیق تعداد صندلی از فرانت‌اند[cite: 38]
     const fSeatsCount = Number(pData.seatsCount || body.seatsCount || 1);
 
     if (!fFullName || !fPhone || !fNationalId) {
@@ -32,13 +32,13 @@ export async function POST(req: NextRequest) {
 
     const amountInToman = Math.floor(amountInRial / 10);
     
-    // ثبت رکورد مسافر با تعداد صندلی واقعی (مثلاً درج تعداد صندلی در متن یا فیلد مربوطه)
+    // ثبت رکورد مسافر با تعداد صندلی و مبلغ کل واقعی
     const newPassenger = await prisma.passenger.create({
       data: {
         fullName: fFullName,
         mobile: fPhone,
         nationalId: fNationalId,
-        tourName: `${fTourName} (${fSeatsCount} نفره)`, // درج تعداد صندلی در عنوان تور
+        tourName: `${fTourName} (${fSeatsCount} نفره)`,
         paymentStatus: "در انتظار پرداخت",
         amount: `${amountInToman.toLocaleString('fa-IR')} تومان`,
         receiptDate: new Date().toLocaleDateString('fa-IR'),
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
         merchant_id: merchant,
         amount: amountInRial,
         callback_url: callbackUrl,
-        description: `رزرو تور ${fTourName}`,
+        description: `رزرو تور ${fTourName} (${fSeatsCount} نفر)`,
         metadata: { mobile: fPhone }
       })
     });

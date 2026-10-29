@@ -308,9 +308,19 @@ const toPersianDigits = (num: string | number) => {
 
 const handleOnlinePayment = async () => {
     let rawPrice = currentTourDetails?.price ? p2e(String(currentTourDetails.price)).replace(/[^0-9]/g, '') : '0';
-    let amountInRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+    
+    // شکار امن تعداد صندلی از استیت یا المان‌های صفحه
+    let finalSeats = '1';
+    if (typeof seatsCount !== 'undefined' && seatsCount) {
+      finalSeats = String(seatsCount);
+    } else if (typeof window !== 'undefined') {
+      const seatInput = document.querySelector('input[name*="seat"], input[type="number"]') as HTMLInputElement;
+      if (seatInput && seatInput.value) finalSeats = seatInput.value;
+    }
 
-    // خواندن امن مقادیر از روی اینپوت‌های صفحه
+    let amountInRial = (parseInt(rawPrice, 10) * parseInt(finalSeats, 10)) * 10;
+
+    // شکار امن مشخصات مسافر
     let domName = '', domPhone = '', domNationalId = '';
     if (typeof window !== 'undefined') {
       const inputs = document.querySelectorAll('input');
@@ -330,13 +340,13 @@ const handleOnlinePayment = async () => {
     const finalPhone = domPhone || (typeof phone !== 'undefined' ? phone : '') || '09120000000';
     const finalNationalId = domNationalId || (typeof nationalId !== 'undefined' ? nationalId : '') || '0000000000';
 
-    console.log('FINAL CAPTURED VALUES:', { finalFullName, finalPhone, finalNationalId, amountInRial });
+    console.log('FINAL CAPTURED VALUES:', { finalFullName, finalPhone, finalNationalId, finalSeats, amountInRial });
 
     try {
       const res = await fetch('/api/payment/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({
+        body: JSON.stringify({
           amountInRial: amountInRial,
           description: `رزرو تور ${currentTourDetails?.title || ''}`,
           leaderId: currentLider?.id || currentLider?.slug || 'leader_1',
@@ -344,13 +354,13 @@ body: JSON.stringify({
           mobile: finalPhone,
           phone: finalPhone,
           nationalId: finalNationalId,
-          seatsCount: seatsCount, // ارسال تعداد صندلی
+          seatsCount: finalSeats, // ارسال تعداد صندلی در سطح اصلی body[cite: 38]
           passengerData: {
             fullName: finalFullName,
             phone: finalPhone,
             mobile: finalPhone,
             nationalId: finalNationalId,
-            seatsCount: seatsCount // ارسال تعداد صندلی
+            seatsCount: finalSeats // ارسال تعداد صندلی درون passengerData[cite: 38]
           }
         }),
       });
@@ -368,7 +378,7 @@ body: JSON.stringify({
       setIsSubmitting(false);
     }
   };
-
+  
 const handleRemoveReceipt = () => {
   setReceiptPreview(null);
   if (receiptInputRef.current) {
