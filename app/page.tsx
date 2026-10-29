@@ -124,6 +124,26 @@ const isNationalIdValid = nationalId.trim().length === 10;
     };
   }, [tenantSlug]);
 
+
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paymentStatus = urlParams.get('payment');
+
+      if (paymentStatus === 'success') {
+        alert('🎉 پرداخت و ثبت‌نام شما با موفقیت انجام شد!.');
+        // پاک کردن پارامتر از URL برای جلوگیری از نمایش مجدد هنگام رفرش
+        window.history.replaceState({}, document.title, window.location.pathname + (window.location.search.includes('slug=') ? `?slug=${urlParams.get('slug') || ''}` : ''));
+      } else if (paymentStatus === 'canceled') {
+        alert('⚠️ فرآیند پرداخت توسط شما لغو شد.');
+        window.history.replaceState({}, document.title, window.location.pathname + (window.location.search.includes('slug=') ? `?slug=${urlParams.get('slug') || ''}` : ''));
+      } else if (paymentStatus === 'failed' || paymentStatus === 'error') {
+        alert('❌ خطا در تراکنش یا تأیید پرداخت. لطفاً دوباره تلاش کنید.');
+        window.history.replaceState({}, document.title, window.location.pathname + (window.location.search.includes('slug=') ? `?slug=${urlParams.get('slug') || ''}` : ''));
+      }
+    }
+  }, []);
+
   const maxSize = 5 * 1024 * 1024;
 
  const handleIdCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -305,6 +325,7 @@ const toPersianDigits = (num: string | number) => {
   const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
   return String(num).replace(/\d/g, (d) => persianDigits[parseInt(d)]);
 };
+
 
 const handleOnlinePayment = async () => {
     let rawPrice = currentTourDetails?.price ? p2e(String(currentTourDetails.price)).replace(/[^0-9]/g, '') : '0';
