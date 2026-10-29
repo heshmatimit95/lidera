@@ -27,8 +27,11 @@ interface TourFormProps {
   leader?: any;
 }
 
-export default function TourForm({ leader: initialLeader }: TourFormProps) {
-const [currentLider, setCurrentLider] = useState<any>(initialLeader || null);
+export default function TourForm({ leader: initialLeader }: { leader?: any }) {
+  const [currentLider, setCurrentLider] = useState<any>(initialLeader || null);
+   const [selectedTour, setSelectedTour] = useState<string>(
+    initialLeader?.tours?.[0]?.id ?? ''
+  );
 const [isLoadingLeader, setIsLoadingLeader] = useState(!initialLeader);
   const router = useRouter();
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
@@ -44,8 +47,7 @@ const [isLoadingLeader, setIsLoadingLeader] = useState(!initialLeader);
   const [birthDate, setBirthDate] = useState('');
   const [phone, setPhone] = useState('');
   const [nationalId, setNationalId] = useState('');
-  const [selectedTour, setSelectedTour] = useState('');
-  const [seatsCount, setSeatsCount] = useState('1');
+   const [seatsCount, setSeatsCount] = useState('1');
   const [idCardImage, setIdCardImage] = useState<File | null>(null);
   const [idCardPreview, setIdCardPreview] = useState<string | null>(null);
   const [idCardError, setIdCardError] = useState<string | null>(null);

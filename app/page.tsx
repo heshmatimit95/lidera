@@ -1,6 +1,5 @@
 import { prisma } from './lib/db';
 import TourForm from './components/TourForm';
-
 export default async function Page({ 
   searchParams 
 }: { 
@@ -10,29 +9,29 @@ export default async function Page({
   const slug = resolvedParams.slug || resolvedParams.leader || 'leader_1';
 
 const leader = await prisma.leader.findFirst({
-    where: { 
-      OR: [
-        { slug: slug }, 
-        { id: slug }
-      ] 
-    },
-    select: { 
-      id: true, 
-      slug: true, 
-      name: true, 
-      phone: true, 
-      zarinpalMerchantId: true,
-      // فقط فیلدهای ضروری تور را می‌گیریم تا حجم HTML سنگین نشود
-      tours: {
-        select: {
-          id: true,
-          title: true,
-          price: true,
-          date: true,
-        }
-      } 
-    },
-  });
+  where: { 
+    OR: [
+      { slug: slug }, 
+      { id: slug }
+    ] 
+  },
+  select: { 
+    id: true, 
+    slug: true, 
+    name: true, 
+    phone: true, 
+    zarinpalMerchantId: true,
+    // فقط فیلدهای ضروری تور را می‌گیریم
+    tours: {
+      select: {
+        id: true,
+        title: true,
+        price: true,
+        date: true,
+      }
+    } 
+  },
+});
 
   if (!leader) {
     return (
