@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
 
   const fallbackSlug = leaderIdentifier || 'leader_1';
 
+  // اگر پرداخت لغو شد، برگرد به صفحه درست لیدر با پارامتر canceled
   if (status !== "OK" || !authority) {
     return NextResponse.redirect(`https://lidera.ir/leader?slug=${fallbackSlug}&payment=canceled`);
   }
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
 
     if (data.data && (data.data.code === 100 || data.data.code === 101)) {
-      // آپدیت وضعیت مسافر به پرداخت شده آنلاین بدون دستکاری صندلی و مبلغ
+      // آپدیت وضعیت مسافر به پرداخت شده آنلاین
       if (passengerId) {
         await prisma.passenger.update({
           where: { id: passengerId },
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
         }).catch(() => {});
       }
 
-      // اصلاح مسیر ریدایرکت به صفحه صحیح پنل لیدر
+      // هدایت دقیق به پنل لیدر با پارامتر success برای نمایش پیام موفقیت
       return NextResponse.redirect(`https://lidera.ir/leader?slug=${leader.slug || fallbackSlug}&payment=success`);
     }
 
