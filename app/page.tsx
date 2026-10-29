@@ -9,8 +9,7 @@ export default async function Page({
   const resolvedParams = await searchParams;
   const slug = resolvedParams.slug || resolvedParams.leader || 'leader_1';
 
-  // خواندن مستقیم اطلاعات لیدر از دیتابیس در سرور با سرعت فوق‌العاده
-  const leader = await prisma.leader.findFirst({
+const leader = await prisma.leader.findFirst({
     where: { 
       OR: [
         { slug: slug }, 
@@ -23,7 +22,15 @@ export default async function Page({
       name: true, 
       phone: true, 
       zarinpalMerchantId: true,
-      tours: true 
+      // فقط فیلدهای ضروری تور را می‌گیریم تا حجم HTML سنگین نشود
+      tours: {
+        select: {
+          id: true,
+          title: true,
+          price: true,
+          date: true,
+        }
+      } 
     },
   });
 

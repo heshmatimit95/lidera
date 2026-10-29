@@ -1,5 +1,4 @@
 "use client";
-export const dynamic = 'force-dynamic';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -92,42 +91,48 @@ const isNationalIdValid = nationalId.trim().length === 10;
   }, [searchParams]);
 
   useEffect(() => {
-    // اگر اسلاگ وجود نداشت، سریع لودینگ را بردار تا صفحه سیاه نماند
-    if (!tenantSlug) {
-      setIsLoadingLeader(false);
-      return;
-    }
+  // اگر اطلاعات لیدر قبلاً از سرور رسیده باشد، اصلاً نیازی به fetch مجدد نیست
+  if (initialLeader) {
+    setCurrentLider(initialLeader);
+    setIsLoadingLeader(false);
+    return;
+  }
 
-    let isMounted = true; // برای جلوگیری از پردازش‌های اضافی هنگام جابجایی سریع
+  if (!tenantSlug) {
+    setIsLoadingLeader(false);
+    return;
+  }
 
-    const fetchLeaderFromDb = async () => {
-      try {
-        const res = await fetch(`/api/leader-info?slug=${tenantSlug}`, {
-          cache: 'no-store' // جلوگیری از کش شدن ناقص جهت دریافت آنی اطلاعات جدید
-        });
-        const data = await res.json();
-        
-        if (isMounted && data && data.success && data.leader) {
-          setCurrentLider(data.leader);
-          if (data.leader.tours && data.leader.tours.length > 0) {
-            setSelectedTour(data.leader.tours[0].id || data.leader.tours[0]._id);
-          }
-        }
-      } catch (error) {
-        console.error("خطا در دریافت اطلاعات لیدر از دیتابیس", error);
-      } finally {
-        if (isMounted) {
-          setIsLoadingLeader(false);
+  let isMounted = true;
+
+  const fetchLeaderFromDb = async () => {
+    try {
+      const res = await fetch(`/api/leader-info?slug=${tenantSlug}`, {
+        cache: 'no-store'
+      });
+      const data = await res.json();
+
+      if (isMounted && data && data.success && data.leader) {
+        setCurrentLider(data.leader);
+        if (data.leader.tours && data.leader.tours.length > 0) {
+          setSelectedTour(data.leader.tours[0].id || data.leader.tours[0]._id);
         }
       }
-    };
+    } catch (error) {
+      console.error("خطا در دریافت اطلاعات لیدر از دیتابیس", error);
+    } finally {
+      if (isMounted) {
+        setIsLoadingLeader(false);
+      }
+    }
+  };
 
-    fetchLeaderFromDb();
+  fetchLeaderFromDb();
 
-    return () => {
-      isMounted = false;
-    };
-  }, [tenantSlug]);
+  return () => {
+    isMounted = false;
+  };
+}, [tenantSlug, initialLeader]);
 
 
 useEffect(() => {
