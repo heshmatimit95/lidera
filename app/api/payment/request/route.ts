@@ -32,9 +32,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'لیدر یافت نشد' }, { status: 404 });
     }
 
-    const amountInToman = Math.floor(amountInRial / 10);
+const amountInToman = Math.floor(amountInRial / 10);
     
-    // ثبت مسافر کاملاً بر اساس فیلدهای اسکیمای شما
+    // ثبت مسافر با مقدار عددی خالص برای فیلد amount
     const newPassenger = await prisma.passenger.create({
       data: {
         fullName: fFullName,
@@ -42,14 +42,13 @@ export async function POST(req: NextRequest) {
         nationalId: fNationalId,
         tourName: fTourName,
         paymentStatus: "در انتظار پرداخت",
-        amount: `${amountInToman.toLocaleString('fa-IR')} تومان`,
-        seatsCount: fSeatsCount, // ذخیره تعداد صندلی واقعی
+        amount: String(amountInToman), // ذخیره عدد خالص (مثلاً 10734000) برای سازگاری با پنل لیدر
+        seatsCount: fSeatsCount,
         receiptDate: new Date().toLocaleDateString('fa-IR'),
         leaderId: leader.id,
         tenantId: leader.id,
       },
     });
-
     const merchant =
       leader?.zarinpalMerchantId ||
       process.env.ZARINPAL_MERCHANT ||
