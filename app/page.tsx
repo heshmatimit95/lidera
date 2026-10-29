@@ -19,7 +19,8 @@ const leader = await prisma.leader.findFirst({
     id: true, 
     slug: true, 
     name: true, 
-    phone: true, 
+  // این خط رو پاک کن:
+// phone: true,
     zarinpalMerchantId: true,
     tours: {
       select: {
