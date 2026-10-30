@@ -472,39 +472,42 @@ return (
 
 
 {!isSuccess && (
-  <div className="px-2 pt-3 pb-2 flex items-center justify-between text-[11px] font-bold text-neutral-400 w-full max-w-sm sm:max-w-md mx-auto">
-    
-    {/* استپ ۱ */}
-    <div className="flex items-center gap-1 shrink-0">
-      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-400'}`}>1</span>
-      <span className={step >= 1 ? 'text-white' : 'text-neutral-500'}>انتخاب تور</span>
-    </div>_
+  <div className="px-2 pt-3 pb-2 flex items-center justify-center w-full max-w-300px] sm:max-w-sm mx-auto" dir="rtl">
+    {[
+      { n: 1, label: 'انتخاب تور' },
+      { n: 2, label: 'مشخصات' },
+      { n: 3, label: 'پرداخت' },
+    ].map((s, i, arr) => (
+      <React.Fragment key={s.n}>
+        {/* دایره مرحله و متن */}
+        <div className="flex items-center gap-1 shrink-0">
+          <span
+            className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+              step >= s.n ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-400'
+            }`}
+          >
+            {s.n}
+          </span>
+          <span className={step >= s.n ? 'text-white' : 'text-neutral-500'}>
+            {s.label}
+          </span>
+        </div>
 
- <div className="h-3px] flex-1 mx-1 sm:mx-1.5 bg-neutral-600 rounded-full overflow-hidden" dir="rtl">
-  <div 
-    className="h-full bg-[#F9704E] transition-all duration-300"
-    style={{ width: step > 1 ? '100%' : '35%' }}
-  ></div>
-</div>
-
-    {/* استپ ۲ */}
-    <div className="flex items-center gap-1 shrink-0">
-      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-400'}`}>2</span>
-     <span className={step >= 2 ? 'text-white' : 'text-neutral-500'}>مشخصات</span>
-    </div>
-<div className="h-3px] flex-1 mx-1 sm:mx-1.5 bg-neutral-600 rounded-full overflow-hidden" dir="rtl">
-  <div 
-    className="h-full bg-[#F9704E] transition-all duration-300"
-    style={{ width: step > 2 ? '100%' : '35%' }}
-  ></div>
-</div>
-
-    {/* استپ ۳ */}
-    <div className="flex items-center gap-1 shrink-0">
-      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 3 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-400'}`}>3</span>
-      <span className={step >= 3 ? 'text-white' : 'text-neutral-500'}>پرداخت</span>
-    </div>
-
+        {/* خط رابط بین مراحل (با استایل مستقیم و بدون خطای Tailwind) */}
+        {i < arr.length - 1 && (
+          <div
+            style={{
+              flex: 1,
+              height: '3px',
+              minWidth: '12px',
+              borderRadius: '9999px',
+              background: step > s.n ? '#F9704E' : '#525252',
+              transition: 'background 300ms',
+            }}
+          />
+        )}
+      </React.Fragment>
+    ))}
   </div>
 )}
 
