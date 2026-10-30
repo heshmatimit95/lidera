@@ -477,29 +477,32 @@ return (
     {/* استپ ۱ */}
     <div className="flex items-center gap-1 shrink-0">
       <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-400'}`}>1</span>
-      <span className={step >= 1 ? 'text-white' : ''}>انتخاب تور</span>
+      <span className={step >= 1 ? 'text-white' : 'text-neutral-500'}>انتخاب تور</span>
     </div>_
 
-    {/* خط رابط ۱ */}
-    <div className="h-2px] flex-1 mx-2 bg-neutral-800 rounded-full overflow-hidden">
-      <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 1 ? '100%' : '0%' }}></div>
-    </div>
+ <div className="h-3px] flex-1 mx-1 sm:mx-1.5 bg-neutral-600 rounded-full overflow-hidden" dir="rtl">
+  <div 
+    className="h-full bg-[#F9704E] transition-all duration-300"
+    style={{ width: step > 1 ? '100%' : '35%' }}
+  ></div>
+</div>
 
     {/* استپ ۲ */}
     <div className="flex items-center gap-1 shrink-0">
       <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-400'}`}>2</span>
-      <span className={step >= 2 ? 'text-white' : ''}>مشخصات</span>
+     <span className={step >= 2 ? 'text-white' : 'text-neutral-500'}>مشخصات</span>
     </div>
-
-    {/* خط رابط ۲ */}
-    <div className="h-2px] flex-1 mx-2 bg-neutral-800 rounded-full overflow-hidden">
-      <div className="h-full bg-[#F9704E] transition-all duration-300" style={{ width: step > 2 ? '100%' : '0%' }}></div>
-    </div>
+<div className="h-3px] flex-1 mx-1 sm:mx-1.5 bg-neutral-600 rounded-full overflow-hidden" dir="rtl">
+  <div 
+    className="h-full bg-[#F9704E] transition-all duration-300"
+    style={{ width: step > 2 ? '100%' : '35%' }}
+  ></div>
+</div>
 
     {/* استپ ۳ */}
     <div className="flex items-center gap-1 shrink-0">
       <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${step >= 3 ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-400'}`}>3</span>
-      <span className={step >= 3 ? 'text-white' : ''}>پرداخت</span>
+      <span className={step >= 3 ? 'text-white' : 'text-neutral-500'}>پرداخت</span>
     </div>
 
   </div>
