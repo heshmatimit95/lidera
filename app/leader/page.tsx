@@ -67,12 +67,13 @@ const [selectedReceiptPassenger, setSelectedReceiptPassenger] = useState<any>(nu
 const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
 const [rejectReason, setRejectReason] = useState('');
 const [showRejectInput, setShowRejectInput] = useState(false);
-  // --- استیت‌های تنظیمات مالی و بانکی لیدر ---
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+// --- استیت‌های تنظیمات مالی و بانکی لیدر ---
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'gateway' | 'both'>('card');
   const [leaderCards, setLeaderCards] = useState<BankCard[]>([
     { id: '1', cardNumber: '', bankName: '', cardHolder: '' }
   ]);
- // --- استیت‌های تغییر رمز ---
+   // --- استیت‌های تغییر رمز ---
   const [isChangePassModalOpen, setIsChangePassModalOpen] = useState<boolean>(false);
   const [oldPasswordInput, setOldPasswordInput] = useState<string>('');
   const [newPasswordInput, setNewPasswordInput] = useState<string>('');
@@ -136,6 +137,13 @@ const [promoData, setPromoData] = useState<string>('');         // مخصوص ت
   const [newTourPrice, setNewTourPrice] = useState('');
   const [editingTourDateValue, setEditingTourDateValue] = useState('');
   const [editingTourPriceValue, setEditingTourPriceValue] = useState('');
+
+  
+useEffect(() => {
+  const s = new URLSearchParams(window.location.search).get('slug');
+  router.prefetch(s ? `/?slug=${s}` : '/');
+}, [router]);
+
 
   // دریافت اطلاعات لیدر از دیتابیس
   useEffect(() => {
@@ -242,19 +250,25 @@ const [promoData, setPromoData] = useState<string>('');         // مخصوص ت
     setLeaderCards(updated);
   };
 
-const handleLogout = () => {
-    if (confirm('آیا می‌خواهید از حساب کاربری خارج شوید؟')) {
-      const currentSlug = new URLSearchParams(window.location.search).get('slug') || '';
-      
-      // پاک کردن کوکی‌ها
-      document.cookie = "leader_token=; path=/; max-age=0;";
-      document.cookie = "leader_slug=; path=/; max-age=0;";
 
-      // انتقال آنی و نرم به پنل مسافران بدون رفرش سنگین
-      const targetUrl = currentSlug ? `/?slug=${currentSlug}` : '/';
-      router.push(targetUrl);
-    }
+
+  const handleLogout = () => {
+    if (!confirm('آیا می‌خواهید از حساب کاربری خارج شوید؟')) return;
+    
+    setIsLoggingOut(true); // فعال کردن حالت لودینگ برای جلوگیری از حس هنگ
+
+    const currentSlug = new URLSearchParams(window.location.search).get('slug') || '';
+    
+    // پاک کردن کوکی‌ها
+    document.cookie = "leader_token=; path=/; max-age=0;";
+    document.cookie = "leader_slug=; path=/; max-age=0;";
+
+    // انتقال آنی با replace برای جلوگیری از بازگشت با دکمه Back مرورگر
+    const targetUrl = currentSlug ? `/?slug=${currentSlug}` : '/';
+    router.replace(targetUrl);
   };
+
+
 
 const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   setSearchTerm(e.target.value);
@@ -980,7 +994,9 @@ const toEnglishDigits = (str: string) => {
     />
     <div>
 <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
-  {leaderName ? `${leaderName} !عزیز، خوش آمدید` : 'پنل مدیریت تور لیدر'}
+<h1 dir="rtl">
+  {leaderName ? `${leaderName} عزیز، خوش آمدید!` : 'پنل مدیریت تور لیدر'}
+</h1>
 </h1>
 </div>
     </div>
@@ -1016,9 +1032,18 @@ const toEnglishDigits = (str: string) => {
     <FaShieldAlt size={16} />
   </button>
 
-            <button onClick={handleLogout} title="خروج از پنل" className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-rose-900/30 cursor-pointer flex-1 sm:flex-none">
-              <FaSignOutAlt size={14} />
-            </button>
+<button 
+  onClick={handleLogout} 
+  disabled={isLoggingOut}
+  title="خروج از پنل" 
+  className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-rose-800/40 disabled:opacity-50 cursor-pointer"
+>
+  {isLoggingOut ? (
+    <span className="text-[10px] animate-pulse">در حال خروج...</span>
+  ) : (
+    <FaSignOutAlt size={14} />
+  )}
+</button>
           </div>
         </div>
 
