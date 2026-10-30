@@ -957,19 +957,6 @@ const handleGenerateAi = async (tourId: string, tourName: string, days: number =
       setIsLoading(false);
     }
   };
-
-// تابع هوشمند برای اسلاش‌گذاری خودکار تاریخ (فرمت 1405/08/04)
-const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<any>>, fieldName: string) => {
-  let value = e.target.value.replace(/\D/g, ''); // فقط اعداد را نگه دار
-  
-  if (value.length > 4 && value.length <= 6) {
-    value = value.slice(0, 4) + '/' + value.slice(4);
-  } else if (value.length > 6) {
-    value = value.slice(0, 4) + '/' + value.slice(4, 6) + '/' + value.slice(6, 8);
-  }
-
-  setter((prev: any) => ({ ...prev, [fieldName]: value }));
-};
 // تبدیل اعداد انگلیسی به فارسی برای نمایش روان به کاربر
 const toPersianDigits = (num: string | number) => {
   if (num === null || num === undefined) return '';
@@ -983,7 +970,29 @@ const toEnglishDigits = (str: string) => {
                     .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString());
 };
 
+// تابع هوشمند برای اسلاش‌گذاری خودکار تاریخ (فرمت 1405/08/04)
+const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<any>>, fieldName: string) => {
+  let value = e.target.value.replace(/\D/g, ''); // فقط اعداد را نگه دار
+  
+  if (value.length > 4 && value.length <= 6) {
+    value = value.slice(0, 4) + '/' + value.slice(4);
+  } else if (value.length > 6) {
+    value = value.slice(0, 4) + '/' + value.slice(4, 6) + '/' + value.slice(6, 8);
+  }
 
+  setter((prev: any) => ({ ...prev, [fieldName]: value }));
+};
+
+if (isLoading) {
+  return (
+    <div className="min-h-screen bg-[#F9704E] flex items-center justify-center text-white font-bold text-lg" dir="rtl">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+        <p>در حال دریافت اطلاعات پنل لیدر...</p>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
@@ -1019,10 +1028,14 @@ const toEnglishDigits = (str: string) => {
           
 
           
-           <button onClick={() => openAddModal()} title="افزودن مسافر جدید" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-orange-500 p-2.5 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer flex-1 sm:flex-none">
-              <FaUserPlus size={18} />
-            </button>
-
+  {/* دکمه افزودن مسافر (تبدیل به آیکون مربعی یک‌دست) */}
+<button 
+  onClick={() => openAddModal()} 
+  title="افزودن مسافر جدید" 
+  className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-orange-500 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-zinc-800 cursor-pointer"
+>
+  <FaUserPlus size={16} />
+</button>
 
 
             <button onClick={() => setIsChangePassModalOpen(true)} title="تغییر رمز" className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-zinc-800 cursor-pointer flex-1 sm:flex-none">
