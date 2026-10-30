@@ -395,16 +395,16 @@ const filteredGuides = guides.filter(guide => {
     onChange={(e) => setSearchTerm(e.target.value)}
     placeholder="جستجو نام، کد ملی، موبایل..."
     dir="rtl"
-    className="h-9 sm:h-10 bg-[#1e1e1e] border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-150px] sm:w-220px]"
+    className="h-9 sm:h-8.5 bg-[#1e1e1e] border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-150px] sm:w-220px]"
   />
 
   {/* دکمه افزودن */}
   <button
     onClick={() => setIsAddLeaderModalOpen(true)}
     title="افزودن لیدر جدید"
-    className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-[#F9704E] hover:bg-[#e50b3a] text-black rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+    className="flex items-center justify-center h-9 w-9 sm:h-8.5 sm:w-8.5 bg-[#F9704E] hover:bg-[#e50b3a] text-black rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
   >
-    <FaPlus className="text-[18px] sm:text-[14px]" />
+    <FaPlus className="text-[16px] sm:text-[13px]" />
   </button>
 
   {/* دکمه ذخیره تغییرات (در صورت وجود) */}
@@ -412,9 +412,9 @@ const filteredGuides = guides.filter(guide => {
     <button
       onClick={handleSaveStatusChanges}
       title={`ذخیره تغییرات جدید (${Object.keys(hasPendingChanges).length})`}
-      className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-amber-500 hover:bg-amber-600 text-black rounded-xl transition-all shadow-md active:scale-95 cursor-pointer animate-pulse"
+      className="flex items-center justify-centerh-9 w-9 sm:h-8.5 sm:w-8.5 bg-amber-500 hover:bg-amber-600 text-black rounded-xl transition-all shadow-md active:scale-95 cursor-pointer animate-pulse"
     >
-      <FaSave className="text-[18px] sm:text-[14px]" />
+      <FaSave className="text-[16px] sm:text-[13px]" />
     </button>
   )}
 
@@ -422,27 +422,27 @@ const filteredGuides = guides.filter(guide => {
   <button
     onClick={exportToExcel}
     title="خروجی اکسل"
-    className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+    className="flex items-center justify-centerh-9 w-9 sm:h-8.5 sm:w-8.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
   >
-    <FaFileExcel className="text-[18px] sm:text-[14px]" />
+    <FaFileExcel className="text-[16px] sm:text-[13px]" />
   </button>
 
   {/* دکمه تغییر رمز */}
   <button
     onClick={() => setIsChangePassModalOpen(true)}
     title="تغییر رمز مدیریت"
-    className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer"
+    className="flex items-center justify-center h-9 w-9 sm:h-8.5 sm:w-8.5 bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer"
   >
-    <FaKey className="text-[18px] sm:text-[14px]" />
+    <FaKey className="text-[16px] sm:text-[13px]" />
   </button>
 
   {/* دکمه حذف کلیه رکوردها */}
   <button
     onClick={handleDeleteAll}
     title="حذف کلیه رکوردها"
-    className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-red-950/50 hover:bg-red-900/80 text-red-400 rounded-xl transition-all border border-red-900/40 active:scale-95 cursor-pointer"
+    className="flex items-center justify-center h-9 w-9 sm:h-8.5 sm:w-8.5 bg-red-950/50 hover:bg-red-900/80 text-red-400 rounded-xl transition-all border border-red-900/40 active:scale-95 cursor-pointer"
   >
-    <FaTrash className="text-[18px] sm:text-[14px]" />
+    <FaTrash className="text-[16px] sm:text-[13px]"/>
   </button>
 
   {/* دکمه خروج از پنل */}
@@ -450,12 +450,12 @@ const filteredGuides = guides.filter(guide => {
     onClick={handleLogout}
     disabled={isLoggingOut}
     title="خروج از پنل"
-    className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 rounded-xl transition-all border border-rose-800/40 active:scale-95 disabled:opacity-50 cursor-pointer"
+    className="flex items-center justify-center h-9 w-9 sm:h-8.5 sm:w-8.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 rounded-xl transition-all border border-rose-800/40 active:scale-95 disabled:opacity-50 cursor-pointer"
   >
     {isLoggingOut ? (
       <span className="text-[10px] animate-pulse">...</span>
     ) : (
-      <FaSignOutAlt className="text-[18px] sm:text-[14px]" />
+      <FaSignOutAlt className="text-[16px] sm:text-[13px]" />
     )}
   </button>
 
