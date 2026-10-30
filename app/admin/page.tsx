@@ -2,7 +2,6 @@
 export const dynamic = 'force-dynamic';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import * as XLSX from 'xlsx';
 import { 
   FaFileExcel, 
   FaTrash, 
@@ -51,7 +50,7 @@ interface Leader {
 
 export default function AdminDashboard() {
   const router = useRouter();
-
+const [searchTerm, setSearchTerm] = useState('');
   // 1. استیت‌های مودال تغییر پسورد ادمین
   const [isChangePassModalOpen, setIsChangePassModalOpen] = useState(false);
   const [oldPasswordInput, setOldPasswordInput] = useState('');
@@ -72,7 +71,7 @@ export default function AdminDashboard() {
     whatsapp: '',
     rubika: ''
   });
-
+const [isLoggingOut, setIsLoggingOut] = useState(false);
   // 3. استیت‌های مودال ویرایش لیدر
   const [isEditLeaderModalOpen, setIsEditLeaderModalOpen] = useState(false);
   const [editingLeader, setEditingLeader] = useState<Leader | null>(null);
@@ -109,14 +108,18 @@ export default function AdminDashboard() {
     fetchGuides();
   }, [router]);
 
-  const handleLogout = () => {
-    if (confirm('آیا می‌خواهید از پنل مدیریت خارج شوید؟')) {
-      localStorage.removeItem('admin_token'); 
-      document.cookie = "admin_token=; path=/; max-age=0";
-      document.cookie = "admin_status=; path=/; max-age=0";
-      router.push('/admin/login'); 
-    }
-  };
+const handleLogout = () => {
+  if (!confirm('آیا می‌خواهید از پنل مدیریت خارج شوید؟')) return;
+  
+  setIsLoggingOut(true); // نمایش وضعیت خروج
+
+  // پاک کردن کوکی‌های ادمین (یا ادمین توکن)
+  document.cookie = "admin_token=; path=/; max-age=0;";
+  document.cookie = "token=; path=/; max-age=0;";
+
+  // انتقال آنی به صفحه لاگین ادمین یا صفحه اصلی
+  router.replace('/admin/login'); // یا مسیری که برای ورود ادمین دارید
+};
 
   // افزودن لیدر جدید در دیتابیس
   const handleAddLeaderSubmit = async (e: React.FormEvent) => {
@@ -300,10 +303,22 @@ if (res.ok) {
     navigator.clipboard.writeText(leaderLink);
     alert(`🔗 لینک اختصاصی تورلیدر با موفقیت کپی شد:\n${leaderLink}`);
   };
-
+// فیلتر کردن لیدرها بر اساس جستجو (نام، نام کاربری، کد ملی، شماره تماس)
+const filteredGuides = guides.filter(guide => {
+  const term = searchTerm.toLowerCase();
+  return (
+    guide.fullName?.toLowerCase().includes(term) ||
+    guide.username?.toLowerCase().includes(term) ||
+    guide.nationalId?.toLowerCase().includes(term) ||
+    guide.mobile?.toLowerCase().includes(term)
+  );
+});
 
   // خروجی اکسل
-  const exportToExcel = () => {
+// خروجی اکسل لیست تورلیدرها (بهینه شده با Lazy-load و RTL)
+  const exportToExcel = async () => {
+    const XLSX = await import('xlsx'); // فقط موقع کلیک ادمین بارگذاری می‌شود
+    
     const dataToExport = guides.map((guide, index) => {
       const currentStatus = pendingStatusChanges[guide.id] ?? guide.status;
       return {
@@ -325,8 +340,11 @@ if (res.ok) {
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'لیست تورلیدرها');
+    
+    // تنظیم راست‌به‌چپ (RTL) برای نمایش عالی در اکسل
     if (!worksheet['!views']) worksheet['!views'] = [];
     worksheet['!views'].push({ RTL: true });
+
     XLSX.writeFile(workbook, 'Lidara_Tour_Guides.xlsx');
   };
 
@@ -365,7 +383,20 @@ if (res.ok) {
 {/* دکمه‌های ابزار بالای جدول - اصلاح شده شبیه پنل تورلیدر */}
 {/* دکمه‌های ابزار بالای جدول - با فاصله بیشتر */}
 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 w-full lg:w-auto">
-  
+  <div className="mb-6 flex items-center justify-between gap-4">
+  <div className="relative flex-1 max-w-md">
+    <input
+      type="text"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      placeholder="جستجو بر اساس نام، کد ملی، موبایل یا نام کاربری..."
+      className="w-full bg-[#1e1e1e] border border-neutral-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#F9704E] transition-colors dir-rtl text-right"
+    />
+  </div>
+  <div className="text-neutral-400 text-sm">
+    تعداد کل: <span className="text-[#F9704E] font-bold">{filteredGuides.length}</span> لیدر
+  </div>
+</div>
   {/* دکمه افزودن */}
   <button
     onClick={() => setIsAddLeaderModalOpen(true)}
@@ -414,13 +445,21 @@ if (res.ok) {
   </button>
 
   {/* دکمه خروج از پنل (داخل همان کانتینر کنار بقیه) */}
-  <button
-    onClick={handleLogout}
-    title="خروج از پنل"
-    className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-1.5 sm:px-2  rounded-xl transition-all border border-rose-900/30 active:scale-95 cursor-pointer"
-  >
-    <FaSignOutAlt size={18} />
-  </button>
+<button 
+  onClick={handleLogout} 
+  disabled={isLoggingOut}
+  title="خروج از پنل" 
+  className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2 sm:px-2 rounded-xl transition-all shadow-md active:scale-95 border border-rose-800/40 disabled:opacity-50 cursor-pointer"
+>
+  {isLoggingOut ? (
+    <span className="text-[10px] animate-pulse">در حال خروج...</span>
+  ) : (
+    <>
+      <FaSignOutAlt size={18} />
+      <span className="text-xs mr-1.5 hidden sm:inline">خروج از پنل</span>
+    </>
+  )}
+</button>
 
 </div>
 
