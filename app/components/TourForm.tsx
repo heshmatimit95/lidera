@@ -494,18 +494,20 @@ return (
         </div>
 
         {/* خط رابط بین مراحل (با استایل مستقیم و بدون خطای Tailwind) */}
-        {i < arr.length - 1 && (
-          <div
-            style={{
-              flex: 1,
-              height: '3px',
-              minWidth: '12px',
-              borderRadius: '9999px',
-              background: step > s.n ? '#F9704E' : '#525252',
-              transition: 'background 300ms',
-            }}
-          />
-        )}
+{/* خط رابط بین مراحل (با فاصله از دایره‌ها) */}
+{i < arr.length - 1 && (
+  <div
+    className="mx-2 sm:mx-3"
+    style={{
+      flex: 1,
+      height: '3px',
+      minWidth: '12px',
+      borderRadius: '9999px',
+      background: step > s.n ? '#F9704E' : '#525252',
+      transition: 'background 300ms',
+    }}
+  />
+)}
       </React.Fragment>
     ))}
   </div>
