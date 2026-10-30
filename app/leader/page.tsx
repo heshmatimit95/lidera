@@ -145,6 +145,13 @@ useEffect(() => {
 }, [router]);
 
 
+const getShareText = () => {
+  return aiTab === 'dayByDay' ? (tourPlanData || '')
+    : aiTab === 'packingList' ? (consultData || '')
+    : (promoData || '');
+};
+
+
   // دریافت اطلاعات لیدر از دیتابیس
   useEffect(() => {
     const getCookie = (name: string) => {
@@ -2191,66 +2198,59 @@ onChange={(e) => {
   <FaTelegramPlane size={16} />
 </a>
 
-{/* روبیکا */}
-<a
-  href="#"
-  onClick={(e) => {
-    e.preventDefault();
-    const textToCopy =
-      aiTab === 'dayByDay'
-        ? (tourPlanData || '')
-        : aiTab === 'packingList'
-        ? (tourPlanData || '')
-        : (aiTab as string) === 'consultData'
-        ? (consultData || '')
-        : (promoData || '');
-
-    if (textToCopy) {
-      navigator.clipboard.writeText(textToCopy);
-      alert('متن برنامه سفر کپی شد! در روبیکا می‌توانید آن را پیست کنید.');
-    }
-
-    // باز کردن مستقیم اپلیکیشن روبیکا روی موبایل با دیپ‌لینک
+<button
+  type="button"
+  onClick={async () => {
+    const text = getShareText();
+    if (!text) { alert('متنی برای کپی وجود ندارد'); return; }
+    await navigator.clipboard.writeText(text);
+    alert('✅ متن کپی شد! حالا روبیکا را باز کنید و پیست کنید.');
+    
+    // باز کردن روبیکا روی موبایل بدون بستن صفحه اصلی
     const rubikaAppUrl = 'rubika://';
-    const rubikaWebFallback = 'https://m.rubika.ir';
-
-    // تلاش برای باز کردن اپلیکیشن
+    const rubikaWebFallback = 'https://m.rubika.ir/';
     window.location.href = rubikaAppUrl;
-
-    // اگر اپلیکیشن نصب نبود یا باز نشد، نسخه وب در تب جدید به عنوان پشتیبان باز شود
     setTimeout(() => {
-      window.open(rubikaWebFallback, '_blank', 'noopener,noreferrer');
+      window.open(rubikaWebFallback, '_blank');
     }, 500);
   }}
-  title="ارسال در روبیکا"
-  className="flex items-center justify-center bg-purple-950/40 hover:bg-purple-900/60 text-purple-400 border border-purple-800/50 p-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer"
+  title="کپی برای روبیکا"
+  className="flex items-center justify-center bg-purple-950/40 hover:bg-purple-900/60 text-purple-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-purple-800/40 cursor-pointer"
 >
-  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-    <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.8 13.7c-.4.4-1.1.4-1.5 0l-2.3-2.3 2.3-2.3c.4-.4 1.1-.4 1.5 0s.4 1.1 0 1.5l-1.5 1.5 1.5 1.5c.4.4.4 1.1 0 1.5z" />
-  </svg>
-</a>
+  {/* آیکون روبیکا یا SVG */}
+<FaInstagram size={16} />
+</button>
 
-          {/* اینستاگرام (کپی متن) */}
-{/* اینستاگرام (کپی متن) */}
-        <button
-          onClick={() => {
-            const textToCopy =
-              aiTab === 'dayByDay' ? tourPlanData :
-              aiTab === 'packingList' ? consultData :
-              promoData;
 
-            if (!textToCopy) {
-              alert("متنی برای کپی در این تب وجود ندارد!");
-              return;
-            }
-            navigator.clipboard.writeText(textToCopy);
-            alert("متن این تب با موفقیت کپی شد! 📸");
-          }}
-          title="کپی متن جهت پیست در اینستاگرام"
-          className="flex items-center gap-1.5 bg-pink-950/40 hover:bg-pink-900/60 text-pink-400 border border-pink-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
-        >
-          <FaInstagram size={16} />
-        </button>
+
+<button
+  type="button"
+  onClick={async () => {
+    const text = getShareText();
+    if (!text) { alert('متنی برای اشتراک‌گذاری وجود ندارد'); return; }
+    
+    // کپی کردن متن به کلیپ‌بورد برای استفاده در اینستاگرام
+    await navigator.clipboard.writeText(text);
+    
+    // استفاده از Web Share API اگر در موبایل پشتیبانی شود
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ text });
+        return;
+      } catch (err) {
+        // اگر کاربر منوی اشتراک‌گذاری را بست، مشکلی نیست
+      }
+    }
+    
+    // Fallback: پیام راهنما و باز کردن اینستاگرام
+    alert('✅ متن کپی شد! حالا می‌توانید آن را در اینستاگرام (استوری یا دایرکت) پیست کنید.');
+    window.open('https://www.instagram.com', '_blank');
+  }}
+  title="اشتراک‌گذاری در اینستاگرام"
+  className="flex items-center justify-center bg-pink-950/40 hover:bg-pink-900/60 text-pink-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-pink-800/40 cursor-pointer"
+>
+  <FaInstagram size={16} />
+</button>
         
         </div>
 {/* دکمه بستن */}
