@@ -2042,7 +2042,10 @@ onChange={(e) => {
       
       {/* هدر مودال */}
       <div className="p-4 border-b border-[#E5C060] flex items-center justify-between bg-zinc-900/50">
-       <h3 className="text-white font-bold text-base text-center">گزارش و چت هوشمند تور</h3>
+      <div className="flex flex-col items-center justify-center w-full">
+  <h3 className="text-white font-bold text-base text-center">گزارش و چت هوشمند تور</h3>
+</div>
+
         <button
           onClick={() => setIsAiModalOpen(false)}
           className="text-zinc-400 hover:text-white transition-colors cursor-pointer text-lg font-bold"
@@ -2191,7 +2194,7 @@ onChange={(e) => {
   className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
 >
   <FaTelegramPlane size={16} />
-  <span className="hidden sm:inline">تلگرام</span>
+  <span className="hidden sm:inline"></span>
 </a>
 
 {/* روبیکا */}
@@ -2214,7 +2217,7 @@ onChange={(e) => {
   className="flex items-center gap-1.5 bg-purple-950/40 hover:bg-purple-900/60 text-purple-400 border border-purple-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
 >
  <FaInstagram size={16} />
-  <span className="hidden sm:inline">روبیکا</span>
+  <span className="hidden sm:inline"></span>
 </button>
 
 <button
