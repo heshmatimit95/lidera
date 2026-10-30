@@ -19,7 +19,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
       id: true, 
       slug: true, 
       name: true, 
-      phone: true, 
+     mobile: true, 
       zarinpalMerchantId: true, 
       tours: { select: { id: true, title: true, price: true, date: true } } 
     }
