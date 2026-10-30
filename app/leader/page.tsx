@@ -12,15 +12,15 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
     );
   }
 
-  // خواندن اطلاعات لیدر مستقیماً از دیتابیس
-  const leader = await prisma.leader.findFirst({
+const leader = await prisma.leader.findFirst({
     where: { OR: [{ slug }, { id: slug }] },
     select: { 
       id: true, 
       slug: true, 
       name: true, 
-     mobile: true, 
+      mobile: true, 
       zarinpalMerchantId: true, 
+      bankCards: true, // اضافه کردن کارت‌های بانکی برای لود آنی
       tours: { select: { id: true, title: true, price: true, date: true } } 
     }
   });
