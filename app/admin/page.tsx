@@ -380,34 +380,29 @@ const filteredGuides = guides.filter(guide => {
 
 </div>
 
-{/* دکمه‌های ابزار بالای جدول - اصلاح شده شبیه پنل تورلیدر */}
-{/* دکمه‌های ابزار بالای جدول - با فاصله بیشتر */}
-<div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 w-full lg:w-auto">
-  <div className="mb-6 flex items-center justify-between gap-4">
-  <div className="text-neutral-400 text-sm">
+{/* دکمه‌های ابزار بالای جدول - همه در یک ردیف */}
+<div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 w-full lg:w-auto">
+
+  {/* تعداد کل */}
+  <div className="text-neutral-400 text-xs sm:text-sm whitespace-nowrap">
     تعداد کل: <span className="text-[#F9704E] font-bold">{filteredGuides.length}</span> لیدر
   </div>
 
-{/* نوار جستجوی اصلاح‌شده و هماهنگ با دکمه‌ها */}
-    <div className="relative">
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="جستجو نام، کد ملی، موبایل..."
-        className="bg-[#1e1e1e] border border-neutral-700 hover:border-neutral-600 rounded-xl px-3.5 py-2.5 text-white text-xs sm:text-sm focus:outline-none focus:border-[#F9704E] transition-colors dir-rtl text-right w-180px] sm:w-220px]"
-      />
-    </div>
-
-</div>
-
-
+  {/* نوار جستجو */}
+  <input
+    type="text"
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    placeholder="جستجو نام، کد ملی، موبایل..."
+    dir="rtl"
+    className="h-9 sm:h-10 bg-[#1e1e1e] border border-neutral-700 hover:border-neutral-600 rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none focus:border-[#F9704E] transition-colors text-right w-150px] sm:w-220px]"
+  />
 
   {/* دکمه افزودن */}
   <button
     onClick={() => setIsAddLeaderModalOpen(true)}
     title="افزودن لیدر جدید"
-    className="flex items-center justify-center bg-[#F9704E] hover:bg-[#e50b3a] text-black p-1.5 sm:p-2 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+    className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-[#F9704E] hover:bg-[#e50b3a] text-black rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
   >
     <FaPlus size={18} />
   </button>
@@ -417,7 +412,7 @@ const filteredGuides = guides.filter(guide => {
     <button
       onClick={handleSaveStatusChanges}
       title={`ذخیره تغییرات جدید (${Object.keys(hasPendingChanges).length})`}
-      className="flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-black p-1.5 sm:px-2  rounded-xl transition-all shadow-md active:scale-95 cursor-pointer animate-pulse"
+      className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-amber-500 hover:bg-amber-600 text-black rounded-xl transition-all shadow-md active:scale-95 cursor-pointer animate-pulse"
     >
       <FaSave size={18} />
     </button>
@@ -427,7 +422,7 @@ const filteredGuides = guides.filter(guide => {
   <button
     onClick={exportToExcel}
     title="خروجی اکسل"
-    className="flex items-center justify-center bg-emerald-600 hover:bg-emerald-500 text-white p-1.5 sm:px-2  rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+    className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
   >
     <FaFileExcel size={18} />
   </button>
@@ -436,35 +431,33 @@ const filteredGuides = guides.filter(guide => {
   <button
     onClick={() => setIsChangePassModalOpen(true)}
     title="تغییر رمز مدیریت"
-    className="flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] p-1.5 sm:px-2  rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer"
+    className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer"
   >
     <FaKey size={18} />
   </button>
 
-  {/* دکمه حذف کلیه رکوردها */}
+  {/* دکمه حذف کنیه رکوردها */}
   <button
     onClick={handleDeleteAll}
-    title="حذف کلیه رکوردها"
-    className="flex items-center justify-center bg-red-950/50 hover:bg-red-900/80 text-red-400 p-1.5 sm:px-2  rounded-xl transition-all border border-red-900/40 active:scale-95 cursor-pointer"
+    title="حذف کنیه رکوردها"
+    className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-red-950/50 hover:bg-red-900/80 text-red-400 rounded-xl transition-all border border-red-900/40 active:scale-95 cursor-pointer"
   >
     <FaTrash size={18} />
   </button>
 
-  {/* دکمه خروج از پنل (داخل همان کانتینر کنار بقیه) */}
-<button 
-  onClick={handleLogout} 
-  disabled={isLoggingOut}
-  title="خروج از پنل" 
-  className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2 sm:px-2 rounded-xl transition-all shadow-md active:scale-95 border border-rose-800/40 disabled:opacity-50 cursor-pointer"
->
-  {isLoggingOut ? (
-    <span className="text-[10px] animate-pulse"></span>
-  ) : (
-    <>
+  {/* دکمه خروج از پنل */}
+  <button
+    onClick={handleLogout}
+    disabled={isLoggingOut}
+    title="خروج از پنل"
+    className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 rounded-xl transition-all border border-rose-800/40 active:scale-95 disabled:opacity-50 cursor-pointer"
+  >
+    {isLoggingOut ? (
+      <span className="text-[10px] animate-pulse">...</span>
+    ) : (
       <FaSignOutAlt size={18} />
-        </>
-  )}
-</button>
+    )}
+  </button>
 
 </div>
 
