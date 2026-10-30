@@ -983,16 +983,7 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
   setter((prev: any) => ({ ...prev, [fieldName]: value }));
 };
 
-if (isLoading) {
-  return (
-    <div className="min-h-screen bg-[#F9704E] flex items-center justify-center text-white font-bold text-lg" dir="rtl">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-        <p>در حال دریافت اطلاعات پنل لیدر...</p>
-      </div>
-    </div>
-  );
-}
+
 
   return (
     <div className="min-h-screen bg-[#F9704E] p-3 sm:p-6 md:p-12 text-white font-sans" dir="rtl">
@@ -2167,100 +2158,95 @@ onChange={(e) => {
           </button>
         </form>
       </div>
+{/* فوتر و دکمه‌های اشتراک‌گذاری */}
+<div className="p-4 border-t border-zinc-800 bg-zinc-900/50 flex items-center justify-between flex-wrap gap-3">
+  
+  {/* آیکون‌ها و شبکه ارتباطی هکیل */}
+  <div className="flex items-center gap-2 dir-ltr">
 
-      {/* Footer مدال */}
-      <div className="p-4 border-t border-zinc-800 bg-zinc-900/50 flex items-center justify-between">
-        
-        {/* آیکون‌ها و شبکه ارتباطی شکیل */}
-<div className="flex items-center gap-2 dir-ltr">
-          {/* واتساپ */}
-          <a
-            href={`https://wa.me/?text=${encodeURIComponent(
-              aiTab === 'dayByDay' 
-                ? (tourPlanData || '') 
-                : aiTab === 'packingList' 
-                ? (consultData || '') 
-                : (promoData || '')
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="واتساپ"
-            className="flex items-center gap-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
-          >
-            <FaWhatsapp size={16} />
-          </a>
+    {/* واتساپ */}
+    <a
+      href={`https://wa.me/?text=${encodeURIComponent(getShareText())}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="واتساپ"
+      className="flex items-center gap-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-emerald-900/50 cursor-pointer"
+    >
+      <FaWhatsapp size={16} />
+    </a>
 
-{/* تلگرام */}
-<a
-  href="#"
-  onClick={(e) => {
-    e.preventDefault();
-    const text = getShareText(); // استفاده از تابع واحد برای گرفتن متن همان تب
-    if (!text) { alert('متنی برای اشتراک‌گذاری وجود ندارد'); return; }
-    
-    // لینک رسمی اشتراک‌گذاری تلگرام به همراه متن و آدرس سایت
-    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent('https://lidera.ir')}&text=${encodeURIComponent(text)}`;
-    
-    window.open(telegramUrl, '_blank', 'noopener,noreferrer');
-  }}
-  title="ارسال به تلگرام"
-  className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
->
-  <FaTelegramPlane size={16} />
-  <span className="hidden sm:inline"></span>
-</a>
+    {/* تلگرام */}
+    <a
+      href={`https://t.me/share/url?url=${encodeURIComponent('https://lidera.ir')}&text=${encodeURIComponent(getShareText())}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="ارسال به تلگرام"
+      className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-sky-900/50 cursor-pointer"
+    >
+      <FaTelegramPlane size={16} />
+    </a>
 
-{/* روبیکا */}
-<button
-  type="button"
-  onClick={async () => {
-    const text = getShareText();
-    if (!text) { alert('متنی برای اشتراک‌گذاری وجود ندارد'); return; }
-    
-    // ۱. کپی کردن متن به کلیپ‌بورد
-    await navigator.clipboard.writeText(text);
-    
-    // ۲. پیام راهنما به کاربر
-    alert('✅ متن کپی شد! نسخه‌ وب روبیکا باز می‌شود تا متن را پیست کنید.');
-    
-    // ۳. باز کردن نسخه وب روبیکا در تب جدید (بدون بستن صفحه اصلی سایت)
-    window.open('https://m.rubika.ir/', '_blank', 'noopener,noreferrer');
-  }}
-  title="ارسال به روبیکا"
-  className="flex items-center gap-1.5 bg-purple-950/40 hover:bg-purple-900/60 text-purple-400 border border-purple-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
->
- <FaInstagram size={16} />
-  <span className="hidden sm:inline"></span>
-</button>
+    {/* روبیکا (فقط کپی متن؛ بدون بستن صفحه) */}
+    <button
+      type="button"
+      onClick={async () => {
+        const text = getShareText();
+        if (!text) { alert('متنی برای اشتراک‌گذاری وجود ندارد'); return; }
+        try {
+          await navigator.clipboard.writeText(text);
+          alert('✅ متن کپی شد! حالا روبیکا را باز کنید و پیست کنید.');
+        } catch {
+          alert('❌ کپی انجام نشد. متن را دستی انتخاب و کپی کنید.');
+        }
+      }}
+      title="کپی برای روبیکا"
+      className="flex items-center gap-1.5 bg-purple-950/40 hover:bg-purple-900/60 text-purple-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-purple-900/50 cursor-pointer"
+    >
+      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+      </svg>
+    </button>
 
-<button
-  type="button"
-  onClick={async () => {
-    const text = getShareText();
-    if (!text) { alert('متنی برای اشتراک‌گذاری وجود ندارد'); return; }
-    
-    // کپی کردن متن به کلیپ‌بورد برای استفاده در اینستاگرام
-    await navigator.clipboard.writeText(text);
-    
-    // استفاده از Web Share API اگر در موبایل پشتیبانی شود
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share({ text });
-        return;
-      } catch (err) {
-        // اگر کاربر منوی اشتراک‌گذاری را بست، مشکلی نیست
-      }
-    }
-    
-    // Fallback: پیام راهنما و باز کردن اینستاگرام
-    alert('✅ متن کپی شد! حالا می‌توانید آن را در اینستاگرام (استوری یا دایرکت) پیست کنید.');
-    window.open('https://www.instagram.com', '_blank');
-  }}
-  title="اشتراک‌گذاری در اینستاگرام"
-  className="flex items-center justify-center bg-pink-950/40 hover:bg-pink-900/60 text-pink-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-pink-800/40 cursor-pointer"
->
-  <FaInstagram size={16} />
-</button>
+    {/* اینستاگرام (کپی متن؛ بدون بستن صفحه) */}
+    <button
+      type="button"
+      onClick={async () => {
+        const text = getShareText();
+        if (!text) { alert('متنی برای اشتراک‌گذاری وجود ندارد'); return; }
+        try {
+          await navigator.clipboard.writeText(text);
+          alert('✅ متن کپی شد! اینستاگرام را باز کنید و پیست کنید.');
+        } catch {
+          alert('❌ کپی انجام نشد.');
+        }
+      }}
+      title="کپی برای اینستاگرام"
+      className="flex items-center gap-1.5 bg-pink-950/40 hover:bg-pink-900/60 text-pink-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-pink-900/50 cursor-pointer"
+    >
+      <FaInstagram size={16} />
+    </button>
+
+    {/* اشتراک‌گذاری موبایل (فقط موبایل) */}
+    <button
+      type="button"
+      onClick={async () => {
+        const text = getShareText();
+        if (!text) { alert('متنی برای اشتراک‌گذاری وجود ندارد'); return; }
+        if (typeof navigator !== 'undefined' && navigator.share) {
+          try { await navigator.share({ text }); } catch {}
+        } else {
+          try {
+            await navigator.clipboard.writeText(text);
+            alert('✅ متن کپی شد! در شبکه اجتماعی دلخواه پیست کنید.');
+          } catch {}
+        }
+      }}
+      title="اشتراک‌گذاری"
+      className="flex sm:hidden items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-zinc-700 cursor-pointer text-xs font-medium"
+    >
+      <span>اشتراک‌گذاری</span>
+    </button>
+
         
         </div>
 {/* دکمه بستن */}
