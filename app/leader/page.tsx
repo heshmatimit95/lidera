@@ -14,13 +14,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
 
 const leader = await prisma.leader.findFirst({
     where: { OR: [{ slug }, { id: slug }] },
-    select: { 
+select: { 
       id: true, 
       slug: true, 
       name: true, 
       mobile: true, 
       zarinpalMerchantId: true, 
-      cards: true, // حتماً این خط را اینجا اضافه کن تا کارت‌ها هم از سرور بیایند
+      cards: true, 
       tours: { select: { id: true, title: true, price: true, date: true } } 
     }
   });

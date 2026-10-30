@@ -50,7 +50,7 @@ export default function LeaderDashboard({ initialLeader, initialPassengers }: { 
   const [leaderName, setLeaderName] = useState(initialLeader?.name || '');
 
   const [passengers, setPassengers] = useState(initialPassengers || []);
-  
+  const [cards, setCards] = useState(initialLeader?.cards || []);
 
   const [activeTours, setActiveTours] = useState(initialLeader?.tours || []);
 
@@ -80,6 +80,10 @@ const [showRejectInput, setShowRejectInput] = useState(false);
   const [leaderCards, setLeaderCards] = useState<BankCard[]>([
     { id: '1', cardNumber: '', bankName: '', cardHolder: '' }
   ]);
+
+
+
+
    // --- استیت‌های تغییر رمز ---
   const [isChangePassModalOpen, setIsChangePassModalOpen] = useState<boolean>(false);
   const [oldPasswordInput, setOldPasswordInput] = useState<string>('');
@@ -156,7 +160,10 @@ const getShareText = () => {
 
 
   // دریافت اطلاعات لیدر از دیتابیس
+// دریافت اطلاعات لیدر از دیتابیس
   useEffect(() => {
+    if (initialLeader) return; // اگر اطلاعات از سرور آمده، درخواست اضافی نزن
+
     const getCookie = (name: string) => {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);
@@ -164,16 +171,15 @@ const getShareText = () => {
     };
 
     const slugFromCookie = getCookie('leader_slug') || new URLSearchParams(window.location.search).get('slug');
-    
+
     if (!slugFromCookie) {
       router.push('/login-leader');
       return;
     }
 
-    setCurrentTenantSlug(slugFromCookie);
+    setCurrentTenantsSlug(slugFromCookie);
     fetchLeaderData(slugFromCookie);
   }, [router]);
-
   
 
   const fetchLeaderData = async (slug: string) => {
