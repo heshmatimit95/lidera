@@ -458,7 +458,7 @@ const filteredGuides = guides.filter(guide => {
   className="flex items-center justify-center bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 p-2 sm:px-2 rounded-xl transition-all shadow-md active:scale-95 border border-rose-800/40 disabled:opacity-50 cursor-pointer"
 >
   {isLoggingOut ? (
-    <span className="text-[10px] animate-pulse">در حال خروج...</span>
+    <span className="text-[10px] animate-pulse"></span>
   ) : (
     <>
       <FaSignOutAlt size={18} />
