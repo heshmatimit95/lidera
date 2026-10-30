@@ -8,8 +8,29 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const tenantKey = searchParams.get('tenantId') || searchParams.get('slug') || searchParams.get('leaderId');
     
+    // خواندن شماره صفحه برای صفحه‌بندی (پیش‌فرض صفحه ۱)
+    const page = Number(searchParams.get('page')) || 1;
+
     if (!tenantKey) {
-      const allPassengers = await prisma.passenger.findMany({ orderBy: { createdAt: 'desc' } });
+      const allPassengers = await prisma.passenger.findMany({ 
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+        skip: (page - 1) * 20,
+        select: {
+          id: true,
+          fullName: true,
+          mobile: true,
+          nationalId: true,
+          tourName: true,
+          paymentStatus: true,
+          insurance: true,
+          receiptDate: true,
+          amount: true,
+          seatsCount: true,
+          createdAt: true,
+          // عکس‌های سنگین حذف شدند تا سرعت بالا برود
+        }
+      });
       const mapped = allPassengers.map((p: any) => ({
         ...p,
         phone: p.phone || p.mobile,
@@ -32,7 +53,23 @@ export async function GET(request: Request) {
           { tenantId: leader.slug }
         ]
       }, 
-      orderBy: { createdAt: 'desc' } 
+      orderBy: { createdAt: 'desc' },
+      take: 20, // فقط ۲۰ مسافر در هر صفحه
+      skip: (page - 1) * 20,
+      select: {
+        id: true,
+        fullName: true,
+        mobile: true,
+        nationalId: true,
+        tourName: true,
+        paymentStatus: true,
+        insurance: true,
+        receiptDate: true,
+        amount: true,
+        seatsCount: true,
+        createdAt: true,
+        // عمداً receiptImage و idCardImage اینجا نیستند تا حجم دیتابیس و سرعت لود سبک شود!
+      }
     });
     
     const mapped = passengers.map((p: any) => ({
@@ -121,7 +158,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Passenger ID required' }, { status: 400 });
     }
 
-const updated = await prisma.passenger.update({
+    const updated = await prisma.passenger.update({
       where: { id: String(id) },
       data: {
         ...(fullName !== undefined && { fullName }),
@@ -132,7 +169,7 @@ const updated = await prisma.passenger.update({
         ...(paymentStatus !== undefined && { paymentStatus }),
         ...(insurance !== undefined && { insurance: Boolean(insurance) }),
         ...(receiptDate !== undefined && { receiptDate: receiptDate || '' }),
-       ...(amount !== undefined && amount !== null && amount !== '' && String(amount) !== '0' && String(amount) !== 'NaN' && { amount: String(amount) }),
+        ...(amount !== undefined && amount !== null && amount !== '' && String(amount) !== '0' && String(amount) !== 'NaN' && { amount: String(amount) }),
         ...(receiptImage !== undefined && { receiptImage })
       },
     });
@@ -161,7 +198,7 @@ export async function DELETE(request: Request) {
         where: { OR: [{ id: tenantKey }, { slug: tenantKey }, { username: tenantKey }] }
       });
 
-      // حذف تمام مسافرانی که به این لیدر مرتبط هستند (چه با tenantId و چه با leaderId)
+      // حذف تمام مسافرانی که به این لیدر مرتبط هستند
       await prisma.passenger.deleteMany({
         where: {
           OR: [

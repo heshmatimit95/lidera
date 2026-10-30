@@ -7,8 +7,8 @@ export function middleware(request: NextRequest) {
   const adminToken = request.cookies.get('admin_token')?.value || request.cookies.get('adminToken')?.value;
   const leaderToken = request.cookies.get('leader_token')?.value || request.cookies.get('leaderToken')?.value;
 
-  // ۱. بررسی دسترسی ادمین
-  if (pathname.startsWith('/admin')) {
+  // ۱. بررسی دسترسی ادمین (اصلاح‌شده برای تطابق دقیق مسیر)
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
     if (pathname === '/admin/login') {
       return NextResponse.next();
     }
@@ -19,8 +19,8 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // ۲. بررسی دسترسی لیدر
-  if (pathname.startsWith('/leader')) {
+  // ۲. بررسی دسترسی لیدر (اصلاح‌شده تا با لیدربورد یا مسیرهای دیگر تداخل نکند)
+  if (pathname === '/leader' || pathname.startsWith('/leader/')) {
     if (!leaderToken) {
       const url = request.nextUrl.clone();
       url.pathname = '/';
@@ -48,5 +48,6 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/leader/:path*', '/((?!_next/static|_next/image|favicon.ico|.*\\.).*)'],
+  // اصلاح پترن matcher برای جلوگیری از اجرای ناخواسته روی مسیرهای API و فایل‌های استاتیک
+  matcher: ['/admin/:path*', '/leader/:path*', '/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
