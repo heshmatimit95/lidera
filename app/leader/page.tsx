@@ -2042,7 +2042,7 @@ onChange={(e) => {
       
       {/* هدر مودال */}
       <div className="p-4 border-b border-[#E5C060] flex items-center justify-between bg-zinc-900/50">
-        <h3 className="text-white font-bold text-base">گزارش و چت هوشمند تور </h3>
+       <h3 className="text-white font-bold text-base text-center">گزارش و چت هوشمند تور</h3>
         <button
           onClick={() => setIsAiModalOpen(false)}
           className="text-zinc-400 hover:text-white transition-colors cursor-pointer text-lg font-bold"
@@ -2178,50 +2178,44 @@ onChange={(e) => {
 <a
   href="#"
   onClick={(e) => {
-    e.preventDefault(); // جلوگیری از تغییر صفحه جاری
-    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent('https://lidra.ir')}&text=${encodeURIComponent(
-      aiTab === 'dayByDay'
-        ? (tourPlanData || '')
-        : aiTab === 'packingList'
-        ? (tourPlanData || '')
-        : (aiTab as string) === 'consultData'
-        ? (consultData || '')
-        : (promoData || '')
-    )}`;
+    e.preventDefault();
+    const text = getShareText(); // استفاده از تابع واحد برای گرفتن متن همان تب
+    if (!text) { alert('متنی برای اشتراک‌گذاری وجود ندارد'); return; }
     
-    // باز کردن اجباری با جاوااسکریپت
+    // لینک رسمی اشتراک‌گذاری تلگرام به همراه متن و آدرس سایت
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent('https://lidera.ir')}&text=${encodeURIComponent(text)}`;
+    
     window.open(telegramUrl, '_blank', 'noopener,noreferrer');
   }}
   title="ارسال به تلگرام"
   className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 border border-sky-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
 >
   <FaTelegramPlane size={16} />
+  <span className="hidden sm:inline">تلگرام</span>
 </a>
 
+{/* روبیکا */}
 <button
   type="button"
   onClick={async () => {
     const text = getShareText();
-    if (!text) { alert('متنی برای کپی وجود ندارد'); return; }
-    await navigator.clipboard.writeText(text);
-    alert('✅ متن کپی شد! حالا روبیکا را باز کنید و پیست کنید.');
+    if (!text) { alert('متنی برای اشتراک‌گذاری وجود ندارد'); return; }
     
-    // باز کردن روبیکا روی موبایل بدون بستن صفحه اصلی
-    const rubikaAppUrl = 'rubika://';
-    const rubikaWebFallback = 'https://m.rubika.ir/';
-    window.location.href = rubikaAppUrl;
-    setTimeout(() => {
-      window.open(rubikaWebFallback, '_blank');
-    }, 500);
+    // ۱. کپی کردن متن به کلیپ‌بورد
+    await navigator.clipboard.writeText(text);
+    
+    // ۲. پیام راهنما به کاربر
+    alert('✅ متن کپی شد! نسخه‌ وب روبیکا باز می‌شود تا متن را پیست کنید.');
+    
+    // ۳. باز کردن نسخه وب روبیکا در تب جدید (بدون بستن صفحه اصلی سایت)
+    window.open('https://m.rubika.ir/', '_blank', 'noopener,noreferrer');
   }}
-  title="کپی برای روبیکا"
-  className="flex items-center justify-center bg-purple-950/40 hover:bg-purple-900/60 text-purple-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-purple-800/40 cursor-pointer"
+  title="ارسال به روبیکا"
+  className="flex items-center gap-1.5 bg-purple-950/40 hover:bg-purple-900/60 text-purple-400 border border-purple-800/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
 >
-  {/* آیکون روبیکا یا SVG */}
-<FaInstagram size={16} />
+ <FaInstagram size={16} />
+  <span className="hidden sm:inline">روبیکا</span>
 </button>
-
-
 
 <button
   type="button"
