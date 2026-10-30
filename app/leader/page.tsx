@@ -980,7 +980,7 @@ const toEnglishDigits = (str: string) => {
     />
     <div>
 <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
-  {leaderName ? `${leaderName} عزیز،به پنل مدیریت تور لیدر خوش آمدید` : 'پنل مدیریت تور لیدر'}
+  {leaderName ? `${leaderName} !عزیز، خوش آمدید` : 'پنل مدیریت تور لیدر'}
 </h1>
 </div>
     </div>

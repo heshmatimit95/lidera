@@ -35,7 +35,7 @@ const leader = await prisma.leader.findFirst({
 
   if (!leader) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1a1a1a', color: '#ff4d4d', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '[#F9704E]', color: '#ff4d4d', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
         <h2>❌ لیدر یا تور مورد نظر یافت نشد.</h2>
       </div>
     );
