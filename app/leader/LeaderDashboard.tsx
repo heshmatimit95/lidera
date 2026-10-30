@@ -76,13 +76,14 @@ const [rejectReason, setRejectReason] = useState('');
 const [showRejectInput, setShowRejectInput] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 // --- استیت‌های تنظیمات مالی و بانکی لیدر ---
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'gateway' | 'both'>('card');
-  const [leaderCards, setLeaderCards] = useState<BankCard[]>([
-    { id: '1', cardNumber: '', bankName: '', cardHolder: '' }
-  ]);
-
-
-
+const [paymentMethod, setPaymentMethod] = useState<'card' | 'gateway' | 'both'>(
+    initialLeader?.paymentMethod || 'card'
+  );
+  const [leaderCards, setLeaderCards] = useState<BankCard[]>(
+    initialLeader?.cards && initialLeader.cards.length > 0
+      ? initialLeader.cards
+      : [{ id: '1', cardNumber: '', bankName: '', cardHolder: '' }]
+  );
 
    // --- استیت‌های تغییر رمز ---
   const [isChangePassModalOpen, setIsChangePassModalOpen] = useState<boolean>(false);
@@ -2253,7 +2254,7 @@ onChange={(e) => {
       title="اشتراک‌گذاری"
       className="flex sm:hidden items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-zinc-700 cursor-pointer text-xs font-medium"
     >
-      <span>اشتراک‌گذاری</span>
+     
     </button>
 
         
