@@ -47,10 +47,10 @@ interface BankCard {
   cardHolder: string;
 }
 export default function LeaderDashboard({ initialLeader, initialPassengers }: { initialLeader: any; initialPassengers: any }) {
- const [leaderName, setLeaderName] = useState(initialLeader?.name || '');
- const [passengers, setPassengers] = useState(initialPassengers || []);
-const [cards, setCards] = useState(initialLeader?.cards || []);
- const [activeTours, setActiveTours] = useState(initialLeader?.tours || []);
+const [leaderName, setLeaderName] = useState<string>(initialLeader?.name || '');
+  const [passengers, setPassengers] = useState(initialPassengers || []);
+  const [cards, setCards] = useState(initialLeader?.cards || []);
+  const [activeTours, setActiveTours] = useState(initialLeader?.tours || []);
 const [loadingMessage, setLoadingMessage] = useState('در حال ارتباط با هوش مصنوعی...');
 const [currentTenantsSlug, setCurrentTenantsSlug] = useState(initialLeader?.slug || '');
 const [aiTab, setAiTab] = useState<"dayByDay" | "packingList" | "promoText">("dayByDay");
@@ -1007,9 +1007,8 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
     />
     <div>
 <h1 className="text-base sm:text-xl font-bold text-white tracking-tight" dir="rtl">
-  {initialLeader?.name || leaderName ? `${initialLeader?.name || leaderName} عزیز، خوش آمدید!` : 'خوش آمدید!'}
+  {initialLeader?.fullName || initialLeader?.name || leaderName ? `${initialLeader?.fullName || initialLeader?.name || leaderName} عزیز، خوش آمدید!` : 'خوش آمدید!'}
 </h1>
-
 </div>
     </div>
           </div>
