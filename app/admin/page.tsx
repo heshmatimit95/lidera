@@ -384,19 +384,25 @@ const filteredGuides = guides.filter(guide => {
 {/* دکمه‌های ابزار بالای جدول - با فاصله بیشتر */}
 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 w-full lg:w-auto">
   <div className="mb-6 flex items-center justify-between gap-4">
-  <div className="relative flex-1 max-w-md">
-    <input
-      type="text"
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      placeholder="جستجو بر اساس نام، کد ملی، موبایل یا نام کاربری..."
-      className="w-full bg-[#1e1e1e] border border-neutral-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#F9704E] transition-colors dir-rtl text-right"
-    />
-  </div>
   <div className="text-neutral-400 text-sm">
     تعداد کل: <span className="text-[#F9704E] font-bold">{filteredGuides.length}</span> لیدر
   </div>
+
+{/* نوار جستجوی اصلاح‌شده و هماهنگ با دکمه‌ها */}
+    <div className="relative">
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="جستجو نام، کد ملی، موبایل..."
+        className="bg-[#1e1e1e] border border-neutral-700 hover:border-neutral-600 rounded-xl px-3.5 py-2.5 text-white text-xs sm:text-sm focus:outline-none focus:border-[#F9704E] transition-colors dir-rtl text-right w-180px] sm:w-220px]"
+      />
+    </div>
+
 </div>
+
+
+
   {/* دکمه افزودن */}
   <button
     onClick={() => setIsAddLeaderModalOpen(true)}
@@ -456,8 +462,7 @@ const filteredGuides = guides.filter(guide => {
   ) : (
     <>
       <FaSignOutAlt size={18} />
-      <span className="text-xs mr-1.5 hidden sm:inline">خروج از پنل</span>
-    </>
+        </>
   )}
 </button>
 
