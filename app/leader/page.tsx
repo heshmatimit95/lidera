@@ -20,7 +20,7 @@ const leader = await prisma.leader.findFirst({
       name: true, 
       mobile: true, 
       zarinpalMerchantId: true, 
-      cards: true, // نام صحیح در اسکیما برای لود آنی کارت‌ها
+      cards: true, // حتماً این خط را اینجا اضافه کن تا کارت‌ها هم از سرور بیایند
       tours: { select: { id: true, title: true, price: true, date: true } } 
     }
   });
