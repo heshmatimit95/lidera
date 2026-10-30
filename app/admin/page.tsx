@@ -388,14 +388,14 @@ const filteredGuides = guides.filter(guide => {
     تعداد کل: <span className="text-[#F9704E] font-bold">{filteredGuides.length}</span> لیدر
   </div>
 
-  {/* نوار جستجو */}
+  {/* نوار جستجو - کادر نارنجی ثابت */}
   <input
     type="text"
     value={searchTerm}
     onChange={(e) => setSearchTerm(e.target.value)}
     placeholder="جستجو نام، کد ملی، موبایل..."
     dir="rtl"
-    className="h-9 sm:h-10 bg-[#1e1e1e] border border-neutral-700 hover:border-neutral-600 rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none focus:border-[#F9704E] transition-colors text-right w-150px] sm:w-220px]"
+    className="h-9 sm:h-10 bg-[#1e1e1e] border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-150px] sm:w-220px]"
   />
 
   {/* دکمه افزودن */}
@@ -404,7 +404,7 @@ const filteredGuides = guides.filter(guide => {
     title="افزودن لیدر جدید"
     className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-[#F9704E] hover:bg-[#e50b3a] text-black rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
   >
-    <FaPlus size={18} />
+    <FaPlus className="text-[18px] sm:text-[14px]" />
   </button>
 
   {/* دکمه ذخیره تغییرات (در صورت وجود) */}
@@ -414,7 +414,7 @@ const filteredGuides = guides.filter(guide => {
       title={`ذخیره تغییرات جدید (${Object.keys(hasPendingChanges).length})`}
       className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-amber-500 hover:bg-amber-600 text-black rounded-xl transition-all shadow-md active:scale-95 cursor-pointer animate-pulse"
     >
-      <FaSave size={18} />
+      <FaSave className="text-[18px] sm:text-[14px]" />
     </button>
   )}
 
@@ -424,7 +424,7 @@ const filteredGuides = guides.filter(guide => {
     title="خروجی اکسل"
     className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
   >
-    <FaFileExcel size={18} />
+    <FaFileExcel className="text-[18px] sm:text-[14px]" />
   </button>
 
   {/* دکمه تغییر رمز */}
@@ -433,16 +433,16 @@ const filteredGuides = guides.filter(guide => {
     title="تغییر رمز مدیریت"
     className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-zinc-900 hover:bg-zinc-800 text-[#E5C060] rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer"
   >
-    <FaKey size={18} />
+    <FaKey className="text-[18px] sm:text-[14px]" />
   </button>
 
-  {/* دکمه حذف کنیه رکوردها */}
+  {/* دکمه حذف کلیه رکوردها */}
   <button
     onClick={handleDeleteAll}
-    title="حذف کنیه رکوردها"
+    title="حذف کلیه رکوردها"
     className="flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 bg-red-950/50 hover:bg-red-900/80 text-red-400 rounded-xl transition-all border border-red-900/40 active:scale-95 cursor-pointer"
   >
-    <FaTrash size={18} />
+    <FaTrash className="text-[18px] sm:text-[14px]" />
   </button>
 
   {/* دکمه خروج از پنل */}
@@ -455,7 +455,7 @@ const filteredGuides = guides.filter(guide => {
     {isLoggingOut ? (
       <span className="text-[10px] animate-pulse">...</span>
     ) : (
-      <FaSignOutAlt size={18} />
+      <FaSignOutAlt className="text-[18px] sm:text-[14px]" />
     )}
   </button>
 
