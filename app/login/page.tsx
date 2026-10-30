@@ -3,6 +3,7 @@ import Image from 'next/image';
 import React, { useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 function LoginFormContent() {
   const router = useRouter();
@@ -50,6 +51,10 @@ function LoginFormContent() {
       setLoading(false);
     }
   };
+
+useEffect(() => {
+  router.prefetch('/leader');
+}, [router]);
 
 return (
     <div className="min-h-screen bg-[#F9704E] flex items-center justify-center p-3 sm:p-6" dir="rtl">

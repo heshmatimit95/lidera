@@ -5,7 +5,6 @@ import { FaWhatsapp, FaTelegramPlane, FaInstagram, FaCopy, } from 'react-icons/f
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import * as XLSX from 'xlsx';
 import { 
   FaFileExcel, FaTrash, FaUserPlus, FaEdit, FaCheck, FaTimes, 
   FaMapMarkedAlt, FaPlus, FaKey, FaSignOutAlt, FaSearch, FaFilter,
@@ -757,68 +756,73 @@ const handleAddTour = async (e: React.FormEvent) => {
     }
   };
 
-const exportToExcel = () => {
-    const dataToExport = filteredPassengers.map((p, index) => ({
+const handleCopyText = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+
+// خروجی اکسل لیست مسافران (بهینه شده با Lazy-load و RTL)
+  const exportToExcel = async () => {
+    const XLSX = await import('xlsx');
+    const dataToExcel = filteredPassengers.map((p, index) => ({
       'ردیف': index + 1,
       'نام مسافر': p.fullName,
       'کد ملی': p.nationalId,
       'تلفن تماس': p.mobile,
       'نوع تور': p.tourName,
       'تعداد نفرات': p.seatsCount || p.seats || 1,
-      'تاریخ پرداخت': p.receiptDate || '-',
-    'تاریخ و ساعت ثبت': p.createdAt 
-        ? new Date(p.createdAt).toLocaleString('fa-IR', { 
-            year: 'numeric', 
-            month: '2-digit', 
-            day: '2-digit', 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          }) 
-        : '-',
-      'مبلغ واریزی': p.amount || '-',
+      'تاریخ پرداخت': p.receiptDate || '',
+      'تاریخ و ساعت ثبت': p.createdAt 
+        ? new Date(p.createdAt).toLocaleString('fa-IR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        : '',
+      'مبلغ واریزی': p.amount || '',
       'وضعیت مالی': p.paymentStatus,
       'بیمه': p.insurance ? 'دارد' : 'ندارد',
     }));
 
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const worksheet = XLSX.utils.json_to_sheet(dataToExcel);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'لیست مسافران');
+    
+    // تنظیم راست‌به‌چپ (RTL) برای نمایش عالی در اکسل
     if (!worksheet['!views']) worksheet['!views'] = [];
     worksheet['!views'].push({ RTL: true });
-    XLSX.writeFile(workbook, `Passengers_List.xlsx`);
+
+    XLSX.writeFile(workbook, 'Passengers_List.xlsx');
   };
-
-  if (isLoading || !isAuthorized) {
-    return <div className="min-h-screen bg-[#351913]" />;
-  }
-
-const handleCopyText = (text: string) => {
-  navigator.clipboard.writeText(text);
-  setCopied(true);
-  setTimeout(() => setCopied(false), 2000);
-};
   
-const exportInsuranceToExcel = () => {
-  const insurancePassengers = filteredPassengers.filter(p => p.insurance === true);
+// خروجی اکسل لیست بیمه (بهینه شده با Lazy-load و RTL)
+  const exportInsuranceToExcel = async () => {
+    const XLSX = await import('xlsx');
+    const insurancePassengers = filteredPassengers.filter(p => p.insurance === true);
+    const dataToExcel = insurancePassengers.map((p, index) => ({
+      'ردیف': index + 1,
+      'نام و نام خانوادگی': p.fullName,
+      'کد ملی': p.nationalId,
+      'تاریخ تولد': (p as any).birthDate || '',
+      'شماره تماس': p.mobile,
+      'عنوان تور': p.tourName,
+      'تعداد نفرات': p.seatsCount || p.seats || 1
+    }));
 
-  const dataToExport = insurancePassengers.map((p, index) => ({
-    'ردیف': index + 1,
-    'نام و نام خانوادگی': p.fullName,
-    'کد ملی': p.nationalId,
-   'تاریخ تولد': (p as any).birthDate, 
-    'شماره تماس': p.mobile,
-    'عنوان تور': p.tourName,
-    'تعداد نفرات': p.seatsCount || p.seats || 1
-  }));
+    const worksheet = XLSX.utils.json_to_sheet(dataToExcel);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'لیست بیمه');
 
-  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'لیست بیمه');
-  if (!worksheet['!views']) worksheet['!views'] = [];
-  worksheet['!views'].push({ RTL: true });
-  XLSX.writeFile(workbook, `Insurance_List.xlsx`);
-};
+    // تنظیم راست‌به‌چپ (RTL) برای لیست بیمه
+    if (!worksheet['!views']) worksheet['!views'] = [];
+    worksheet['!views'].push({ RTL: true });
 
+    XLSX.writeFile(workbook, 'Insurance_list.xlsx');
+  };
 
 
 // تابع کمکی برای فراخوانی API پیامک
