@@ -22,6 +22,8 @@ const leader = await prisma.leader.findFirst({
     fullName: true,
     mobile: true, 
     zarinpalMerchantId: true,
+      paymentMethod: true,
+      cards: true,
  tours: {
   select: {
     id: true,
