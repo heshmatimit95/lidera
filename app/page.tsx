@@ -22,14 +22,21 @@ const leader = await prisma.leader.findFirst({
     fullName: true,
     mobile: true, 
     zarinpalMerchantId: true,
-    tours: {
-      select: {
-        id: true,
-        title: true,
-        price: true,
-        date: true,
-      }
-    }
+ tours: {
+  select: {
+    id: true,
+    name: true,
+    title: true,
+    price: true,
+    date: true,
+    images: true,
+    image1: true,
+    image2: true,
+    image3: true,
+    image4: true,
+    tourImages: { select: { url: true } },
+  },
+},
   }
 });
 
