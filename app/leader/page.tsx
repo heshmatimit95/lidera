@@ -36,22 +36,23 @@ const leader = await prisma.leader.findFirst({
   }
 
   // خواندن مسافران مستقیماً از دیتابیس
-  const passengers = await prisma.passenger.findMany({
+const passengers = await prisma.passenger.findMany({
     where: { leaderId: leader.id },
     orderBy: { createdAt: 'desc' },
     take: 50,
-    select: { 
-      id: true, 
-      fullName: true, 
-      mobile: true, 
-      nationalId: true, 
-      tourName: true, 
-      paymentStatus: true, 
-      insurance: true, 
-      receiptDate: true, 
-      amount: true, 
-      seatsCount: true, 
-      createdAt: true 
+    select: {
+      id: true,
+      fullName: true,
+      mobile: true,
+      nationalId: true,
+      tourName: true,
+      paymentStatus: true,
+      insurance: true,
+      receiptDate: true,
+      amount: true,
+      seatsCount: true,
+      receiptImage: true,
+      createdAt: true
     }
   });
 
