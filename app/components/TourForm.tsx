@@ -310,6 +310,15 @@ const handleSubmit = async (e: React.FormEvent) => {
     setPhone('');
     setNationalId('');
     setSeatsCount('1');
+setStep(1);
+  setSelectedTour(currentLider?.tours?.[0]?.id || currentLider?.tours?.[0]?._id || '');
+     setFullName('');
+  setNationalId('');
+  setBirthDate('');
+   setPaymentMethod('online');
+  setReceiptImage(null);
+  setReceiptPreview(null);
+  setIsSuccess(false);
     if (idCardPreview) URL.revokeObjectURL(idCardPreview);
     if (receiptPreview) URL.revokeObjectURL(receiptPreview);
     setIdCardImage(null);

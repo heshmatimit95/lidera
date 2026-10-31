@@ -50,6 +50,9 @@ export default function LeaderDashboard({ initialLeader, initialPassengers }: { 
 const [leaderName, setLeaderName] = useState<string>(
   initialLeader?.fullName || initialLeader?.name || ''
 );
+// بررسی اینکه آیا وضعیت این مسافر تغییر کرده است یا خیر
+const [modifiedStatuses, setModifiedStatuses] = useState<{ [key: string]: string }>({});
+const [statusChanges, setStatusChanges] = useState<{ [key: string]: string }>({});
   const [passengers, setPassengers] = useState(initialPassengers || []);
   const [cards, setCards] = useState(initialLeader?.cards || []);
   const [activeTours, setActiveTours] = useState(initialLeader?.tours || []);
@@ -1302,20 +1305,35 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
                 {/* ستون ۶: وضعیت مالی */}
                 <td className="p-3 sm:p-4 text-center">
                   <div className="flex flex-col items-center gap-1.5">
-                    <select 
-                      value={p.paymentStatus} 
-                      onChange={(e) => handleInlineStatusChange(p.id, e.target.value)}
-                      className="bg-zinc-900 border border-[#F9704E] rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer"
-                    >
-                      <option value="پرداخت شده">پرداخت شده</option>
-                      <option value="بیعانه">بیعانه</option>
-                      <option value="در انتظار پرداخت">در انتظار پرداخت</option>
-                    </select>
-                    {isChanged && (
-                      <button onClick={() => handleSaveSingleStatus(p.id, p.paymentStatus)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded text-[10px] flex items-center gap-1 shadow transition-all cursor-pointer">
-                        <FaCheck size={9} /> ثبت
-                      </button>
-                    )}
+<select
+  value={modifiedStatuses[p.id] !== undefined ? modifiedStatuses[p.id] : p.paymentStatus}
+  onChange={(e) => {
+    const newVal = e.target.value;
+    setModifiedStatuses(prev => ({ ...prev, [p.id]: newVal }));
+  }}
+  className="bg-neutral-900 border border-[#F9704E] rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer"
+>
+  <option value="پرداخت شده">پرداخت شده</option>
+  <option value="بیعانه">بیعانه</option>
+  <option value="در انتظار پرداخت">در انتظار پرداخت</option>
+</select>
+
+{modifiedStatuses[p.id] && modifiedStatuses[p.id] !== p.paymentStatus && (
+  <button 
+    onClick={() => {
+      handleSaveSingleStatus(p.id, modifiedStatuses[p.id]);
+      // پاک کردن حالت تغییر پس از ثبت موفق
+      setModifiedStatuses(prev => {
+        const copy = { ...prev };
+        delete copy[p.id];
+        return copy;
+      });
+    }} 
+    className="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded-lg text-xs flex items-center gap-1 transition-all"
+  >
+    <FaCheck size={9} /> ثبت
+  </button>
+)}
                   </div>
                 </td>
 
