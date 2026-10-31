@@ -1,5 +1,5 @@
 "use client";
-import { savePassengerPayment } from "@/app/actions/leader-actions"; // یا مسیری که فایل اکشن‌های لیدر قرار دارد
+import { savePassengerPayment } from "@/app/actions/leader-actions"; 
 import { generateTourAiItinerary } from "../actions/ai-actions";
 import { FaWhatsapp, FaTelegramPlane, FaInstagram, FaCopy, } from 'react-icons/fa';
 import React, { useState, useEffect, useMemo } from 'react';
@@ -47,7 +47,9 @@ interface BankCard {
   cardHolder: string;
 }
 export default function LeaderDashboard({ initialLeader, initialPassengers }: { initialLeader: any; initialPassengers: any }) {
-const [leaderName, setLeaderName] = useState<string>(initialLeader?.name || '');
+const [leaderName, setLeaderName] = useState<string>(
+  initialLeader?.fullName || initialLeader?.name || initialLeader?.leaderName || ''
+);
   const [passengers, setPassengers] = useState(initialPassengers || []);
   const [cards, setCards] = useState(initialLeader?.cards || []);
   const [activeTours, setActiveTours] = useState(initialLeader?.tours || []);
@@ -157,26 +159,23 @@ const getShareText = () => {
 
 
   // دریافت اطلاعات لیدر از دیتابیس
-// دریافت اطلاعات لیدر از دیتابیس
-  useEffect(() => {
-    if (initialLeader) return; // اگر اطلاعات از سرور آمده، درخواست اضافی نزن
+useEffect(() => {
+  const getCookie = (name: string) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift();
+  };
 
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(';').shift();
-    };
+  const slugFromCookie = getCookie('leader_slug') || new URLSearchParams(window.location.search).get('slug');
 
-    const slugFromCookie = getCookie('leader_slug') || new URLSearchParams(window.location.search).get('slug');
+  if (!slugFromCookie) {
+    router.push('/login-leader');
+    return;
+  }
 
-    if (!slugFromCookie) {
-      router.push('/login-leader');
-      return;
-    }
-
-    setCurrentTenantsSlug(slugFromCookie);
-    fetchLeaderData(slugFromCookie);
-  }, [router]);
+  setCurrentTenantsSlug(slugFromCookie);
+  fetchLeaderData(slugFromCookie);
+}, [router]);
   
 
   const fetchLeaderData = async (slug: string) => {
@@ -280,8 +279,6 @@ const getShareText = () => {
     const targetUrl = currentSlug ? `/?slug=${currentSlug}` : '/';
     router.replace(targetUrl);
   };
-
-
 
 const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   setSearchTerm(e.target.value);
@@ -668,6 +665,7 @@ const handleAddTour = async (e: React.FormEvent) => {
     }
   };
 
+
   const handleDeleteTour = async (tourId?: string, tourName?: string) => {
     if (!tourId) return;
     if (confirm(`آیا تور "${tourName}" از دیتابیس حذف شود؟`)) {
@@ -1007,7 +1005,7 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
     />
     <div>
 <h1 className="text-base sm:text-xl font-bold text-white tracking-tight" dir="rtl">
-  {initialLeader?.fullName || initialLeader?.name || leaderName ? `${initialLeader?.fullName || initialLeader?.name || leaderName} عزیز، خوش آمدید!` : 'خوش آمدید!'}
+  {leaderName || initialLeader?.fullName || initialLeader?.name ? `${leaderName || initialLeader?.fullName || initialLeader?.name} عزیز، خوش آمدید!` : 'خوش آمدید!'}
 </h1>
 </div>
     </div>
