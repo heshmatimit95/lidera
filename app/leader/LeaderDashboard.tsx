@@ -185,7 +185,7 @@ useEffect(() => {
 
       if (data.success && data.leader) {
         const l = data.leader;
-        setLeaderName(data.leader.fullName || data.leader.name || '');
+        setLeaderName((prev) => prev || data.leader.fullName || data.leader.name || '');
         setPaymentMethod(l.paymentMethod || 'card');
         setLeaderCards(l.cards || l.leaderCards || [{ id: '1', cardNumber: '', bankName: '', cardHolder: '' }]);
         setActiveTours(l.tours || []);
