@@ -315,6 +315,11 @@ const payRes = await fetch('/api/payment/request', {
   const currentTourDetails = currentLider?.tours?.find(
   (t: any) => String(t.id) === String(selectedTour) || String(t._id) === String(selectedTour)
 );
+console.log("Current Tour Object:", currentTourDetails);
+console.log("Images Array:", currentTourDetails?.images);
+console.log("Image 1 to 4:", currentTourDetails?.image1, currentTourDetails?.image2);
+
+
 
   const calculateTotalPrice = () => {
     if (!currentTourDetails) return "۰ تومان";
@@ -571,7 +576,6 @@ return (
       ].filter(Boolean);
 
   if (allImages.length === 0) return null;
-console.log("Selected Tour Details:", currentTourDetails);
   return (
     <div className="mt-4 p-4 bg-neutral-900/60 border border-[#F9704E] rounded-2xl flex flex-col items-center">
       <span className="block text-xs text-neutral-300 mb-3 font-semibold text-center">
