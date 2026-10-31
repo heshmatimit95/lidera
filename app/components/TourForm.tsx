@@ -544,7 +544,7 @@ return (
                         const tourId = tour.id || tour._id || idx;
                         return (
                           <option key={tourId} value={tourId}>
-                            {tour.title || tour.name} - تاریخ: {tour.date || 'تعیین نشده'} ({tour.price || '۰'} تومان)
+                            {tour.name || tour.title || 'بدون عنوان'} - تاریخ: {tour.date || 'تعیین نشده'} {tour.price || ''} تومان
                           </option>
                         );
                       })}
