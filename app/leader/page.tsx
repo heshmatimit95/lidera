@@ -13,17 +13,19 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
   }
 
 const leader = await prisma.leader.findFirst({
-    where: { OR: [{ slug }, { id: slug }] },
-select: { 
-      id: true, 
-      slug: true, 
-      name: true, 
-      mobile: true, 
-      zarinpalMerchantId: true, 
-      cards: true, 
-      tours: { select: { id: true, title: true, price: true, date: true } } 
-    }
-  });
+  where: { OR: [{ slug }, { id: slug }] },
+  select: {
+    id: true,
+    slug: true,
+    name: true,
+    fullName: true, // اضافه شد
+    mobile: true,
+    zarinpalMerchantId: true,
+    paymentMethod: true, // اضافه شد
+    cards: true,
+    tours: { select: { id: true, title: true, price: true, date: true } }
+  }
+});
 
   if (!leader) {
     return (

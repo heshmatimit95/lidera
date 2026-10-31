@@ -48,7 +48,7 @@ interface BankCard {
 }
 export default function LeaderDashboard({ initialLeader, initialPassengers }: { initialLeader: any; initialPassengers: any }) {
 const [leaderName, setLeaderName] = useState<string>(
-  initialLeader?.fullName || initialLeader?.name || initialLeader?.leaderName || ''
+  initialLeader?.fullName || initialLeader?.name || ''
 );
   const [passengers, setPassengers] = useState(initialPassengers || []);
   const [cards, setCards] = useState(initialLeader?.cards || []);
@@ -168,15 +168,15 @@ useEffect(() => {
 
   const slugFromCookie = getCookie('leader_slug') || new URLSearchParams(window.location.search).get('slug');
 
-  if (!slugFromCookie) {
+  if (!slugFromCookie && !initialLeader) {
     router.push('/login-leader');
     return;
   }
 
-  setCurrentTenantsSlug(slugFromCookie);
-  fetchLeaderData(slugFromCookie);
-}, [router]);
-  
+  setCurrentTenantsSlug(slugFromCookie || initialLeader?.slug || '');
+  setIsAuthorized(true);
+  setIsLoading(false);
+}, [router, initialLeader]);
 
   const fetchLeaderData = async (slug: string) => {
     try {
