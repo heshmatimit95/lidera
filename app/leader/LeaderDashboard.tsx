@@ -389,23 +389,36 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolea
     return filteredPassengers.slice(start, start + itemsPerPage);
   }, [filteredPassengers, currentPage, itemsPerPage]);
 
-  const handleDeleteAllRecords = async () => {
-    if (passengers.length === 0) {
-      alert('⚠ رکوردی وجود ندارد!');
-      return;
-    }
-    if (confirm('🚨 آیا مطمئن هستید که می‌خواهید تمام رکوردهای مسافران را پاک کنید؟')) {
-      try {
-        const res = await fetch(`/api/passengers?tenantId=${currentTenantSlug}&all=true`, { method: 'DELETE' });
-        if (res.ok) {
-          setPassengers([]);
-          alert('🗑️ تمام رکوردها پاک شدند.');
-        }
-      } catch (e) {
-        console.error(e);
+
+const handleDeleteAllRecords = async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const activeSlug = urlParams.get('slug') || currentTenantsSlug || initialLeader?.slug;
+
+  if (!activeSlug) {
+    alert('⚠️ اسلایگ لیدر یافت نشد!');
+    return;
+  }
+
+  if (passengers.length === 0) {
+    alert('رکوردی وجود ندارد!');
+    return;
+  }
+
+ if (confirm('🚨 آیا مطمئن هستید که می‌خواهید تمام رکوردهای مسافران را پاک کنید؟')) {
+    try {
+      const res = await fetch(`/api/passengers?tenantId=${activeSlug}&all=true`, { method: 'DELETE' });
+      if (res.ok) {
+        setPassengers([]);
+        alert('🗑️ تمام رکوردها پاک شدند.');
+      } else {
+        alert('خطا در پاک کردن رکوردها');
       }
+    } catch (e) {
+      console.error(e);
+      alert('خطا در ارتباط با سرور');
     }
-  };
+  }
+};
 
 
 const handleTourImageUpload = (tourIndex: number, e: React.ChangeEvent<HTMLInputElement>) => {
