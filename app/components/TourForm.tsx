@@ -557,29 +557,47 @@ return (
                 </div>
 
                 {/* گالری تصاویر تورِ انتخاب‌شده (طراحی مدرن، مرکزچین، زیبا با قابلیت زوم عالی) */}
-                {currentTourDetails && currentTourDetails.images && currentTourDetails.images.length > 0 && (
-                  <div className="mt-4 p-4 bg-neutral-900/60 border border-[#F9704E] rounded-2xl flex flex-col items-center">
-                    <span className="block text-xs text-neutral-300 mb-3 font-semibold text-center">📷 گالری تصاویر تور (برای بزرگنمایی کلیک کنید):</span>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full justify-items-center">
-                      {currentTourDetails.images.map((imgUrl: string, imgIdx: number) => (
-                        <div 
-                          key={imgIdx} 
-                          onClick={() => setActiveImageModal(imgUrl)}
-                          className="w-full aspect-square rounded-2xl overflow-hidden border border-[#F9704E] bg-neutral-950 cursor-pointer group relative shadow-lg hover:border-[#F9704E] transition-all duration-300"
-                        >
-                          <img
-                            src={imgUrl}
-                            alt={`تصویر ${imgIdx + 1}`}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                         <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                            <span className="text-white text-xs bg-black/70 px-2.5 py-1.5 rounded-lg backdrop-blur-sm shadow-md">🔍 بزرگنمایی</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+{/* گالری تصاویر تور انتخابی (طراحی مدرن با قابلیت بزرگنمایی) */}
+{currentTourDetails && (() => {
+  const allImages = currentTourDetails.images?.length > 0 
+    ? currentTourDetails.images 
+    : [
+        currentTourDetails.image1, 
+        currentTourDetails.image2, 
+        currentTourDetails.image3, 
+        currentTourDetails.image4
+      ].filter(Boolean);
+
+  if (allImages.length === 0) return null;
+
+  return (
+    <div className="mt-4 p-4 bg-neutral-900/60 border border-[#F9704E] rounded-2xl flex flex-col items-center">
+      <span className="block text-xs text-neutral-300 mb-3 font-semibold text-center">
+        📷 (برای بزرگنمایی کلیک کنید) گالری تصاویر تور
+      </span>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full justify-items-center">
+        {allImages.map((imgUrl: string, imgIdx: number) => (
+          <div
+            key={imgIdx}
+            onClick={() => setActiveImageModal(imgUrl)}
+            className="w-full aspect-square rounded-2xl overflow-hidden border border-[#F9704E] bg-neutral-950 cursor-pointer group relative shadow-lg hover:border-white transition-all"
+          >
+            <img
+              src={imgUrl}
+              alt={`تصویر ${imgIdx + 1}`}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 ' bg-gradient-to-t' from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-2">
+              <span className="text-white text-xs bg-black/70 px-2.5 py-1.5 rounded-lg backdrop-blur-sm shadow-md">
+                🔍 بزرگنمایی
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+})()}
 
                  {/* مودال بزرگنمایی تصویر گالری (باید داخل return باشد) */}
           {activeImageModal && (
