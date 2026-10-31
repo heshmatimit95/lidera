@@ -23,20 +23,21 @@ const leader = await prisma.leader.findFirst({
       zarinpalMerchantId: true,
       paymentMethod: true,
       cards: true,
-tours: {
-  select: {
-    id: true,
-    name: true,
-    title: true,
-    price: true,
+tours: { 
+  select: { 
+    id: true, 
+    name: true, 
+    title: true, 
+    price: true, 
     date: true,
-    images: true,   
-    image1: true,   
+    images: true,
+    image1: true,
     image2: true,
     image3: true,
-    image4: true
-        } 
-      }
+    image4: true,
+    tourImages: { select: { url: true } } // واکشی از جدول رابطه TourImage
+  } 
+}
     }
   });
 

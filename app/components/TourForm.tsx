@@ -566,14 +566,15 @@ return (
                
 {/* گالری تصاویر تور انتخابی (طراحی مدرن با قابلیت بزرگنمایی) */}
 {currentTourDetails && (() => {
-  const allImages = currentTourDetails.images?.length > 0 
-    ? currentTourDetails.images 
-    : [
-        currentTourDetails.image1, 
-        currentTourDetails.image2, 
-        currentTourDetails.image3, 
-        currentTourDetails.image4
-      ].filter(Boolean);
+const allImages = currentTourDetails?.images?.length > 0
+  ? currentTourDetails.images
+  : [
+      currentTourDetails?.image1,
+      currentTourDetails?.image2,
+      currentTourDetails?.image3,
+      currentTourDetails?.image4,
+      ...(currentTourDetails?.tourImages?.map((img: any) => img.url) || [])
+    ].filter(Boolean);
 
   if (allImages.length === 0) return null;
   return (
