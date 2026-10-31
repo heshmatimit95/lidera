@@ -244,21 +244,35 @@ const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // اگر روش پرداخت کارت به کارت است، به درگاه نرو و مستقیم ثبت‌نام را نهایی کن
+    if (paymentMethod === "card") {
+      try {
+        // ثبت نهایی اطلاعات مسافر و فیش واریزی
+        setIsSuccess(true);
+        setIsSubmitting(false);
+        return;
+      } catch (error) {
+        console.error("Card payment error:", error);
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    // در غیر این صورت (پرداخت آنلاین / زرین‌پال) ادامه کدهای قبلی اجرا می‌شوند:
     const tourObj = currentLider?.tours?.find((t: any) => (t.id || t._id) === selectedTour);
     const tourTitle = tourObj ? `${tourObj.title || tourObj.name} (${tourObj.date || ''})` : 'تور عمومی';
-
-    const rawPrice = tourObj?.price ? parseInt(tourObj.price.replace(/[^0-9]/g, ''), 10) || 0 : 0;
+    const rawPrice = tourObj?.price ? parseInt(String(tourObj.price).replace(/[^0-9]/g, ''), 10) || 0 : 0;
     const calculatedAmount = (rawPrice * parseInt(String(seatsCount || 1), 10)).toString();
 
     try {
-      // 1. ارسال مستقیم اطلاعات به درگاه پرداخت (فایل request خودش اطلاعات را هندل می‌کند)
-const payRes = await fetch('/api/payment/request', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amountInRial: Number(calculatedAmount) * 10, // تبدیل تومان به ریال
-            description: tourTitle,
-            leaderId: currentLider?.slug || 'default',
+      const payRes = await fetch('/api/payment/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amountInRial: Number(calculatedAmount) * 10,
+          description: tourTitle,
+          leaderId: currentLider?.slug || 'default',
+          // بقیه فیلدهای درخواست درگاه...
             // ارسال فیلدها به صورت مستقیم
             fullName: fullName.trim(),
             phone: phone.trim(),

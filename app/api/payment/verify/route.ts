@@ -9,20 +9,22 @@ export async function GET(request: NextRequest) {
   const passengerId = url.searchParams.get("passengerId");
   const amountInRial = Number(url.searchParams.get("amount") || 0);
 
-  const fallbackSlug = leaderIdentifier || 'leader_1';
+  // تغییر آدرس بازگشت (CallbackURL) در درخواست زرین‌پال
+// در درخواست زرین‌پال تغییر آدرس بازگشت
+    const callbackUrl = `https://lidera.ir/leader?slug=${leaderIdentifier}&step=form&payment=success`;
 
-  // اگر پرداخت لغو شد، برگرد به صفحه درست لیدر با پارامتر canceled
-  if (status !== "OK" || !authority) {
-    return NextResponse.redirect(`https://lidera.ir/leader?slug=${fallbackSlug}&payment=canceled`);
-  }
+    // اگر پرداخت لغو شد، برگرد به صفحه لیدر با پارامتر canceled
+    if (status !== "OK" || !authority) {
+      return NextResponse.redirect(`https://lidera.ir/leader?slug=${leaderIdentifier}&payment=canceled`);
+    }
 
   try {
     const leader = await prisma.leader.findFirst({
       where: { OR: [{ id: leaderIdentifier || "" }, { slug: leaderIdentifier || "" }] },
     });
 
-    if (!leader) {
-      return NextResponse.redirect(`https://lidera.ir/leader?slug=${fallbackSlug}&payment=error`);
+   if (!leader) {
+      return NextResponse.redirect(`https://lidera.ir/leader?slug=${leaderIdentifier}&payment=error`);
     }
 
     const ZARINPAL_MERCHANT =
@@ -52,12 +54,12 @@ export async function GET(request: NextRequest) {
       }
 
       // هدایت دقیق به پنل لیدر با پارامتر success برای نمایش پیام موفقیت
-      return NextResponse.redirect(`https://lidera.ir/leader?slug=${leader.slug || fallbackSlug}&payment=success`);
+      return NextResponse.redirect(`https://lidera.ir/leader?slug=${leader.slug || leaderIdentifier}&payment=success`);
     }
 
-    return NextResponse.redirect(`https://lidera.ir/leader?slug=${fallbackSlug}&payment=failed`);
+    return NextResponse.redirect(`https://lidera.ir/leader?slug=${leaderIdentifier}&payment=failed`);
   } catch (error) {
     console.error("Verification Error:", error);
-    return NextResponse.redirect(`https://lidera.ir/leader?slug=${fallbackSlug}&payment=error`);
+    return NextResponse.redirect(`https://lidera.ir/leader?slug=${leaderIdentifier}&payment=error`);
   }
 }
