@@ -556,7 +556,7 @@ return (
                   )}
                 </div>
 
-                {/* گالری تصاویر تورِ انتخاب‌شده (طراحی مدرن، مرکزچین، زیبا با قابلیت زوم عالی) */}
+               
 {/* گالری تصاویر تور انتخابی (طراحی مدرن با قابلیت بزرگنمایی) */}
 {currentTourDetails && (() => {
   const allImages = currentTourDetails.images?.length > 0 
@@ -569,7 +569,7 @@ return (
       ].filter(Boolean);
 
   if (allImages.length === 0) return null;
-
+console.log("Selected Tour Details:", currentTourDetails);
   return (
     <div className="mt-4 p-4 bg-neutral-900/60 border border-[#F9704E] rounded-2xl flex flex-col items-center">
       <span className="block text-xs text-neutral-300 mb-3 font-semibold text-center">
