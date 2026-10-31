@@ -66,6 +66,8 @@ const passengers = await prisma.passenger.findMany({
       seatsCount: true,
       receiptImage: true,
       createdAt: true
+
+      
     }
   });
 

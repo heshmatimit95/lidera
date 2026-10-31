@@ -312,7 +312,9 @@ const payRes = await fetch('/api/payment/request', {
   };
 
   const activeColor = currentLider?.primaryColor || '#e60a0ad8';
-  const currentTourDetails = currentLider?.tours?.find((t: any) => (t.id || t._id) === selectedTour);
+  const currentTourDetails = currentLider?.tours?.find(
+  (t: any) => String(t.id) === String(selectedTour) || String(t._id) === String(selectedTour)
+);
 
   const calculateTotalPrice = () => {
     if (!currentTourDetails) return "۰ تومان";
