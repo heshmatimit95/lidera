@@ -4,50 +4,24 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const adminToken = request.cookies.get('admin_token')?.value || request.cookies.get('adminToken')?.value;
-  const leaderToken = request.cookies.get('leader_token')?.value || request.cookies.get('leaderToken')?.value;
+  // ۱. حذف مسیرهای استثنا و فایل‌های استاتیک
+  const reservedRoutes = ['admin', 'api', 'leader', 'login', 'landing', 'passengers', 'payment', 'tours', 'favicon.ico'];
+  
+  const segments = pathname.split('/').filter(Boolean);
 
-  // ۱. بررسی دسترسی ادمین (اصلاح‌شده برای تطابق دقیق مسیر)
-  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
-    if (pathname === '/admin/login') {
-      return NextResponse.next();
-    }
-    if (!adminToken) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/admin/login';
-      return NextResponse.redirect(url);
-    }
-  }
+  if (segments.length === 1) {
+    const potentialLeader = segments[0];
 
-  // ۲. بررسی دسترسی لیدر (اصلاح‌شده تا با لیدربورد یا مسیرهای دیگر تداخل نکند)
-  if (pathname === '/leader' || pathname.startsWith('/leader/')) {
-    if (!leaderToken) {
+    if (!reservedRoutes.includes(potentialLeader) && !potentialLeader.includes('.')) {
       const url = request.nextUrl.clone();
       url.pathname = '/';
-      // حفظ کامل پارامترهای query هنگام ریدایرکت
-      return NextResponse.redirect(url);
+      url.searchParams.set('leader', potentialLeader);
+      url.searchParams.set('slug', potentialLeader);
+
+      // 🚀 به جای NextResponse.redirect از NextResponse.rewrite استفاده کن!
+      return NextResponse.rewrite(url);
     }
   }
-
-  // ۳. مدیریت لینک‌های اختصاصی لیدرها (مثل /leader1 یا /leader2)
-  const segments = pathname.split('/').filter(Boolean);
-if (segments.length === 1) {
-  const potentialLeader = segments[0];
-
-  const reservedRoutes = ['admin', 'api', 'leader', 'login', 'landing', 'passengers', 'payment', 'tours', 'favicon.ico'];
-  if (!reservedRoutes.includes(potentialLeader) && !potentialLeader.includes('.')) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/';
-    url.searchParams.set('leader', potentialLeader);
-    url.searchParams.set('slug', potentialLeader); // برای هماهنگی کامل
-    return NextResponse.redirect(url);
-  }
-}
 
   return NextResponse.next();
 }
-
-export const config = {
-  // اصلاح پترن matcher برای جلوگیری از اجرای ناخواسته روی مسیرهای API و فایل‌های استاتیک
-  matcher: ['/admin/:path*', '/leader/:path*', '/((?!api|_next/static|_next/image|favicon.ico).*)'],
-};
