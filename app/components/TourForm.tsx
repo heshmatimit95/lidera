@@ -244,26 +244,50 @@ const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // اگر روش پرداخت کارت به کارت است، به درگاه نرو و مستقیم ثبت‌نام را نهایی کن
-    if (paymentMethod === "card") {
-      try {
-        // ثبت نهایی اطلاعات مسافر و فیش واریزی
-        setIsSuccess(true);
-        setIsSubmitting(false);
-        return;
-      } catch (error) {
-        console.error("Card payment error:", error);
-        setIsSubmitting(false);
-      }
-      return;
-    }
-
-    // در غیر این صورت (پرداخت آنلاین / زرین‌پال) ادامه کدهای قبلی اجرا می‌شوند:
+    // ۱. ابتدا تمام متغیرهای محاسباتی رو در بالاترین نقطه تعریف می‌کنیم تا در کل تابع قابل دسترس باشند
     const tourObj = currentLider?.tours?.find((t: any) => (t.id || t._id) === selectedTour);
     const tourTitle = tourObj ? `${tourObj.title || tourObj.name} (${tourObj.date || ''})` : 'تور عمومی';
     const rawPrice = tourObj?.price ? parseInt(String(tourObj.price).replace(/[^0-9]/g, ''), 10) || 0 : 0;
     const calculatedAmount = (rawPrice * parseInt(String(seatsCount || 1), 10)).toString();
 
+    // ۲. اگر روش پرداخت کارت به کارت بود، مستقیم اطلاعات را ثبت کن و به درگاه نرو
+    if (paymentMethod === "card") {
+      try {
+        const payload = {
+          leaderId: currentLider?.id || currentLider?.slug,
+          tourName: tourTitle,
+          fullName: fullName.trim(),
+          nationalId: nationalId.trim(),
+          mobile: phone.trim(),
+          seats: seatsCount,
+          amount: calculatedAmount,
+          paymentMethod: "card",
+          receiptImage: receiptImage,
+          paymentStatus: "در انتظار تایید فیش",
+        };
+
+        const res = await fetch('/api/passengers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          setIsSuccess(true);
+        } else {
+          alert('خطا در ثبت اطلاعات: ' + (data.error || 'لطفاً دوباره تلاش کنید'));
+        }
+      } catch (error) {
+        console.error("Card payment save error:", error);
+        alert('خطا در ارتباط با سرور');
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    // ۳. در غیر این صورت (پرداخت آنلاین / زرین‌پال) ادامه کدهای قبلی اجرا می‌شوند:
     try {
       const payRes = await fetch('/api/payment/request', {
         method: 'POST',
@@ -272,26 +296,23 @@ const handleSubmit = async (e: React.FormEvent) => {
           amountInRial: Number(calculatedAmount) * 10,
           description: tourTitle,
           leaderId: currentLider?.slug || 'default',
-          // بقیه فیلدهای درخواست درگاه...
-            // ارسال فیلدها به صورت مستقیم
+          fullName: fullName.trim(),
+          phone: phone.trim(),
+          nationalId: nationalId.trim(),
+          tourName: tourTitle,
+          passengerData: {
             fullName: fullName.trim(),
             phone: phone.trim(),
             nationalId: nationalId.trim(),
             tourName: tourTitle,
-            // و به صورت تو در تو برای اطمینان کامل
-            passengerData: {
-              fullName: fullName.trim(),
-              phone: phone.trim(),
-              nationalId: nationalId.trim(),
-              tourName: tourTitle,
-              seatsCount: seatsCount,
-              birthDate: birthDate
-            }
-          })
-        });
+            seatsCount: seatsCount,
+            birthDate: birthDate,
+          }
+        }),
+      });
+
       const payData = await payRes.json();
       if (payData.success && payData.url) {
-        // 2. انتقال کاربر به درگاه بانکی زرین‌پال
         window.location.href = payData.url;
         return;
       } else {
