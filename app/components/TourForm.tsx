@@ -721,7 +721,7 @@ const allImages = currentTourDetails?.images?.length > 0
                 <div className="space-y-5">
                   <div>
                     <label className="block text-sm  text-white mb-2 font-medium">نام و نام خانوادگی نماینده مسافران</label>
-                    <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="مثال: رضا کیهانی" className="w-full bg-[#1c1c21]  border border-[#F9704E] focus:border-[#F9704E] p-4 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-medium" />
+                    <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="مثال: آنیسا کیهانی" className="w-full bg-[#1c1c21]  border border-[#F9704E] focus:border-[#F9704E] p-4 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-medium" />
                   </div>
 
                   <div>

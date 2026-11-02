@@ -782,13 +782,16 @@ const handleRejectReceipt = async (passengerId: string) => {
     return;
   }
   try {
-    const statusWithReason = `فیش رد شد (مغایرت) - ${rejectReason.trim()}`;
-    await handleSaveSingleStatus(passengerId, statusWithReason);
+    // دقیقا وضعیت اصلی را تغییر می‌دهیم
+    const newStatus = "فیش رد شد (مغایرت)";
     
+    // اگر در کدت از savePassengerPayment یا handleSaveSingleStatus استفاده می‌کنی:
+    await handleSaveSingleStatus(passengerId, newStatus);
+
     setIsReceiptModalOpen(false);
     setSelectedReceiptPassenger(null);
     setRejectReason('');
-    alert('❌ فیش با موفقیت رد شد.');
+    alert('❌ فیش رد شد و وضعیت مالی تغییر یافت.');
     window.location.reload();
   } catch (error) {
     console.error(error);
@@ -1315,11 +1318,13 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
     const newVal = e.target.value;
     setModifiedStatuses(prev => ({ ...prev, [p.id]: newVal }));
   }}
-  className={`border rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer ${
-    (modifiedStatuses[p.id] || p.paymentStatus)?.includes('رد') 
-      ? 'bg-rose-950 border-rose-600' 
-      : 'bg-neutral-900 border-[#F9704E]'
-  }`}
+className={`border rounded-lg px-2 py-1 text-[11px] font-medium focus:outline-none cursor-pointer transition-colors ${
+  (modifiedStatuses[p.id] !== undefined ? modifiedStatuses[p.id] : p.paymentStatus) === 'پرداخت شده'
+    ? 'bg-emerald-950 text-emerald-400 border-emerald-600'
+    : (modifiedStatuses[p.id] !== undefined ? modifiedStatuses[p.id] : p.paymentStatus)?.includes('رد')
+    ? 'bg-rose-950 text-rose-400 border-rose-600'
+    : 'bg-neutral-900 text-zinc-300 border-[#F9704E]'
+}`}
 >
   <option value="پرداخت شده">پرداخت شده</option>
   <option value="بیعانه">بیعانه</option>
@@ -1479,11 +1484,17 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs text-zinc-300 mb-1.5 font-medium">وضعیت مالی:</label>
-                    <select value={addFormData.paymentStatus} onChange={(e) => setAddFormData({ ...addFormData, paymentStatus: e.target.value })} className="w-full  bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black">
-                      <option value="پرداخت شده" className="bg-zinc-300 text-black">پرداخت شده</option>
-                      <option value="بیعانه" className="bg-zinc-300 text-black">بیعانه</option>
-                      <option value="در انتظار پرداخت" className="bg-zinc-300 text-black">در انتظار پرداخت</option>
-                    </select>
+<select
+  value={addFormData.paymentStatus}
+  onChange={(e) => setAddFormData({ ...addFormData, paymentStatus: e.target.value })}
+  className="w-full bg-zinc-300 border border-zinc-400 text-black rounded-lg px-3 py-2 text-xs focus:outline-none"
+>
+  <option value="پرداخت شده">پرداخت شده</option>
+  <option value="بیعانه">بیعانه</option>
+  <option value="در انتظار پرداخت">در انتظار پرداخت</option>
+  <option value="در انتظار تایید فیش">در انتظار تایید فیش</option>
+  <option value="فیش رد شد (مغایرت)">فیش رد شد (مغایرت)</option>
+</select>
                   </div>
                   <div>
                     <label className="block text-xs text-zinc-300 mb-1.5 font-medium">مبلغ واریزی (تومان):</label>
@@ -1652,15 +1663,17 @@ onChange={(e) => {
   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
     <div>
       <label className="block text-xs text-zinc-300 mb-1.5 font-medium">وضعیت مالی:</label>
-      <select 
-        value={editFormData.paymentStatus || 'در انتظار پرداخت'} 
-        onChange={(e) => setEditFormData({ ...editFormData, paymentStatus: e.target.value })} 
-        className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black font-bold"
-      >
-        <option value="پرداخت شده">پرداخت شده ✓</option>
-        <option value="در انتظار پرداخت">در انتظار پرداخت ⏳</option>
-        <option value="رد شده">رد شده ✕</option>
-      </select>
+<select
+  value={editFormData.paymentStatus || 'در انتظار پرداخت'}
+  onChange={(e) => setEditFormData({ ...editFormData, paymentStatus: e.target.value })}
+  className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black font-bold"
+>
+  <option value="پرداخت شده">پرداخت شده</option>
+  <option value="بیعانه">بیعانه</option>
+  <option value="در انتظار پرداخت">در انتظار پرداخت</option>
+  <option value="در انتظار تایید فیش">در انتظار تایید فیش</option>
+  <option value="فیش رد شد (مغایرت)">فیش رد شد (مغایرت)</option>
+</select>
     </div>
 
    {/* محاسبه پویا و قابلیت ویرایش مبلغ بر اساس تعداد صندلی و تور */}
