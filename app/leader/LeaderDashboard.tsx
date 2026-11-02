@@ -2238,16 +2238,16 @@ onChange={(e) => {
       <FaWhatsapp size={16} />
     </a>
 
-    {/* تلگرام */}
-    <a
-      href={`https://t.me/share/url?url=${encodeURIComponent('https://lidera.ir')}&text=${encodeURIComponent(getShareText())}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      title="ارسال به تلگرام"
-      className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-sky-900/50 cursor-pointer"
-    >
-      <FaTelegramPlane size={16} />
-    </a>
+{/* تلگرام */}
+<a
+  href={`tg://msg?text=${encodeURIComponent(getShareText())}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  title="ارسال به تلگرام"
+  className="flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/60 text-sky-400 p-2.5 rounded-xl transition-all shadow-md active:scale-95 border border-sky-900/50"
+>
+  <FaTelegramPlane size={16} />
+</a>
 
     {/* روبیکا (فقط کپی متن؛ بدون بستن صفحه) */}
     <button
