@@ -776,26 +776,25 @@ const handleAddTour = async (e: React.FormEvent) => {
     }
   };
 
-  // تابع رد فیش
-  const handleRejectReceipt = async (passengerId: string) => {
-    if (!rejectReason.trim()) {
-      alert('لطفاً علت رد فیش را وارد کنید');
-      return;
-    }
-    try {
-      const statusWithReason = `فیش رد شد (مغایرت مبلغ) - ${rejectReason.trim()}`;
-      await handleSaveSingleStatus(passengerId, statusWithReason);
-      setIsReceiptModalOpen(false);
-      setSelectedReceiptPassenger(null);
-      setShowRejectInput(false);
-      setRejectReason('');
-      alert('فیش با موفقیت رد شد ❌');
-      window.location.reload();
-    } catch (error) {
-      console.error(error);
-      alert('خطا در ثبت رد فیش');
-    }
-  };
+const handleRejectReceipt = async (passengerId: string) => {
+  if (!rejectReason.trim()) {
+    alert('لطفاً علت رد فیش را وارد کنید');
+    return;
+  }
+  try {
+    const statusWithReason = `فیش رد شد (مغایرت) - ${rejectReason.trim()}`;
+    await handleSaveSingleStatus(passengerId, statusWithReason);
+    
+    setIsReceiptModalOpen(false);
+    setSelectedReceiptPassenger(null);
+    setRejectReason('');
+    alert('❌ فیش با موفقیت رد شد.');
+    window.location.reload();
+  } catch (error) {
+    console.error(error);
+    alert('خطا در ثبت رد فیش');
+  }
+};
 
 const handleCopyText = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -815,7 +814,8 @@ const handleCopyText = (text: string) => {
       'نوع تور': p.tourName,
       'تعداد نفرات': p.seatsCount || p.seats || 1,
       'تاریخ پرداخت': p.receiptDate || '',
-      'تاریخ و ساعت ثبت': p.createdAt 
+      'تاریخ و ساعت ثبت': p.createdAt, 
+      'وضعیت پرداخت': p.paymentStatus
         ? new Date(p.createdAt).toLocaleString('fa-IR', {
             year: 'numeric',
             month: '2-digit',
@@ -1315,7 +1315,11 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
     const newVal = e.target.value;
     setModifiedStatuses(prev => ({ ...prev, [p.id]: newVal }));
   }}
-  className="bg-neutral-900 border border-[#F9704E] rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer"
+  className={`border rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer ${
+    (modifiedStatuses[p.id] || p.paymentStatus)?.includes('رد') 
+      ? 'bg-rose-950 border-rose-600' 
+      : 'bg-neutral-900 border-[#F9704E]'
+  }`}
 >
   <option value="پرداخت شده">پرداخت شده</option>
   <option value="بیعانه">بیعانه</option>
