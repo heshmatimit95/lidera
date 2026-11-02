@@ -1,9 +1,19 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "لیدرا | اتوماسیون هوشمند تور لیدرها",
-  description: "پلتفرم مدیریت و ثبت‌نام هوشمند ویژه تور لیدرهای شاهو",
+  description: "پلتفرم مدیریت و ثبت‌نام هوشمند ویژه تور لیدرها",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "لیدرا",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f97316",
 };
 
 export default function RootLayout({
@@ -13,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col font-sans">
         {children}
       </body>
     </html>

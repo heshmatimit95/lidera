@@ -1,0 +1,21 @@
+{
+  "name": "پلتفرم هوشمند لیدرا",
+  "short_name": "لیدرا",
+  "description": "اتوماسیون هوشمند تورلیدرها و مدیریت فیش‌های واریزی",
+  "start_url": "/landing",
+  "display": "standalone",
+  "background_color": "#070709",
+  "theme_color": "#f97316",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
