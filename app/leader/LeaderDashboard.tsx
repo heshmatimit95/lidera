@@ -727,6 +727,17 @@ const handleAddTour = async (e: React.FormEvent) => {
     }
   };
 
+const getStatusColorClass = (status: string) => {
+  if (status === 'پرداخت شده') {
+    return 'bg-emerald-950 text-emerald-400 border-emerald-600'; // سبز برای پرداخت شده
+  }
+  if (status && (status.includes('رد') || status.includes('مغایرت'))) {
+    return 'bg-rose-950 text-rose-400 border-rose-600'; // قرمز فقط برای رد شده / مغایرت
+  }
+  return 'bg-neutral-900 text-zinc-300 border-[#F9704E]'; // مشکی / نارنجی برای در انتظارها و بقیه
+};
+
+
 
 // تابع تایید فیش
   const handleApproveReceipt = async (passengerId: string) => {
@@ -1318,13 +1329,9 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
     const newVal = e.target.value;
     setModifiedStatuses(prev => ({ ...prev, [p.id]: newVal }));
   }}
-className={`border rounded-lg px-2 py-1 text-[11px] font-medium focus:outline-none cursor-pointer transition-colors ${
-  (modifiedStatuses[p.id] !== undefined ? modifiedStatuses[p.id] : p.paymentStatus) === 'پرداخت شده'
-    ? 'bg-emerald-950 text-emerald-400 border-emerald-600'
-    : (modifiedStatuses[p.id] !== undefined ? modifiedStatuses[p.id] : p.paymentStatus)?.includes('رد')
-    ? 'bg-rose-950 text-rose-400 border-rose-600'
-    : 'bg-neutral-900 text-zinc-300 border-[#F9704E]'
-}`}
+  className={`border rounded-lg px-2 py-1 text-[11px] font-medium focus:outline-none cursor-pointer transition-colors ${
+    getStatusColorClass(modifiedStatuses[p.id] !== undefined ? modifiedStatuses[p.id] : p.paymentStatus)
+  }`}
 >
   <option value="پرداخت شده">پرداخت شده</option>
   <option value="بیعانه">بیعانه</option>
