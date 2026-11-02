@@ -775,9 +775,6 @@ const allImages = currentTourDetails?.images?.length > 0
                         />
                       </div>
 
-
-
-
 {/* ۵. بخش تعهدنامه کشویی و اجباری (ظهور پس از ۱۰ رقمی شدن کد ملی) */}
       {isNationalIdValid && (
         <div className="bg-[#1c1c21] border border-[#F9704E] rounded-2xl p-4 space-y-3 animate-fadeIn transition-all duration-300">

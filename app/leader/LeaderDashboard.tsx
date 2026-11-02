@@ -783,7 +783,7 @@ const handleAddTour = async (e: React.FormEvent) => {
       return;
     }
     try {
-      const statusWithReason = `رد شده (${rejectReason.trim()})`;
+      const statusWithReason = `فیش رد شد (مغایرت مبلغ) - ${rejectReason.trim()}`;
       await handleSaveSingleStatus(passengerId, statusWithReason);
       setIsReceiptModalOpen(false);
       setSelectedReceiptPassenger(null);
@@ -851,7 +851,9 @@ const handleCopyText = (text: string) => {
       'تاریخ تولد': (p as any).birthDate || '',
       'شماره تماس': p.mobile,
       'عنوان تور': p.tourName,
-      'تعداد نفرات': p.seatsCount || p.seats || 1
+      'تعداد نفرات': p.seatsCount || p.seats || 1,
+      'وضعیت پرداخت': p.paymentStatus,
+      'مبلغ (تومان)': p.amount,
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExcel);
@@ -1167,16 +1169,18 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
             {/* فیلتر وضعیت پرداخت */}
             <div className="flex items-center gap-2">
               <FaFilter className="text-zinc-500 text-xs" />
-              <select 
-                value={statusFilter} 
-                onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }} 
-                className="bg-zinc-900 border border-[#F9704E] rounded-xl px-3 py-2 text-xs text-zinc-300 focus:outline-none cursor-pointer"
-              >
-                <option value="all">همه وضعیت‌ها</option>
-                <option value="پرداخت شده">پرداخت شده</option>
-                <option value="بیعانه">بیعانه</option>
-                <option value="در انتظار پرداخت">در انتظار پرداخت</option>
-              </select>
+<select
+  value={statusFilter}
+  onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+  className="bg-zinc-900 border border-[#F9704E] rounded-xl px-3 py-2 text-xs text-zinc-300 focus:outline-none cursor-pointer"
+>
+  <option value="all">همه وضعیت‌ها</option>
+  <option value="پرداخت شده">پرداخت شده</option>
+  <option value="بیعانه">بیعانه</option>
+  <option value="در انتظار پرداخت">در انتظار پرداخت</option>
+  <option value="در انتظار تایید فیش">در انتظار تایید فیش</option>
+  <option value="فیش رد شد (مغایرت)">فیش رد شد (مغایرت)</option>
+</select>
             </div>
 
             
@@ -1316,6 +1320,8 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
   <option value="پرداخت شده">پرداخت شده</option>
   <option value="بیعانه">بیعانه</option>
   <option value="در انتظار پرداخت">در انتظار پرداخت</option>
+  <option value="در انتظار تایید فیش">در انتظار تایید فیش</option>
+  <option value="فیش رد شد (مغایرت)">فیش رد شد (مغایرت)</option>
 </select>
 
 {modifiedStatuses[p.id] && modifiedStatuses[p.id] !== p.paymentStatus && (
