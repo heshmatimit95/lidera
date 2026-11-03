@@ -650,9 +650,9 @@ return (
                       {currentLider.tours.map((tour: any, idx: number) => {
                         const tourId = tour.id || tour._id || idx;
                         return (
-                          <option key={tourId} value={tourId}>
-                            {tour.name || tour.title || 'بدون عنوان'} - تاریخ: {tour.date || 'تعیین نشده'} {tour.price || ''} تومان
-                          </option>
+<option key={tourId} value={tourId} className="text-sm font-sans">
+  {tour.name || tour.title || 'بدون عنوان'} | تاریخ: {tour.date || 'تعیین نشده'} | {tour.price ? Number(tour.price).toLocaleString('fa-IR') : ''} تومان
+</option>
                         );
                       })}
                     </select>
