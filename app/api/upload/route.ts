@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 // @ts-ignore
-import cloudinary from '../../../lib/cloudinary';
+import cloudinary from '../../lib/cloudinary';
 
 export async function POST(req: NextRequest) {
   try {
