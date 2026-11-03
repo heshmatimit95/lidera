@@ -4,8 +4,15 @@ import RegisterSW from "./components/RegisterSW";
 
 export const metadata: Metadata = {
   title: "lidera",
-  description: "اتوماسیون هوشمند تورلیدرها و مدیریت فیش‌های واریزی",
+description: "اتوماسیون هوشمند تورلیدرها و مدیریت فیش‌های واریزی",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/logo-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/logo-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/logo-192.png",
+  },
 };
 
 export const viewport: Viewport = {
