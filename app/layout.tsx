@@ -2,20 +2,14 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "لیدرا | اتوماسیون هوشمند تور لیدرها",
-  description: "پلتفرم مدیریت و ثبت‌نام هوشمند ویژه تور لیدرها",
+  title: "lidera",
+  description: "اتوماسیون هوشمند تورلیدرها و مدیریت فیش‌های واریزی",
   manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "لیدرا",
-  },
 };
 
 export const viewport: Viewport = {
   themeColor: "#f97316",
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
