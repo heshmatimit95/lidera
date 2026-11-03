@@ -1,5 +1,5 @@
 {
-  "name": "پلتفرم هوشمند تورلیدرها و مدیریت فیش‌های واریزی",
+  "name": "اتوماسیون هوشمند تورلیدرها و مدیریت فیش‌های واریزی",
   "short_name": "lidera",
   "description": "پلتفرم مدیریت و ثبت‌نام هوشمند ویژه تور لیدرها",
   "start_url": "/landing",
@@ -8,13 +8,13 @@
   "theme_color": "#f97316",
   "icons": [
     {
-      "src": "/logo (3).png",
+      "src": "/logo-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/logo (2).png",
+      "src": "/logo-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
