@@ -493,20 +493,20 @@ return (
 <div className="flex items-center justify-start shrink-0 mr-0 sm:mr-0">
   <img 
     src="/logo.png" 
-    className="h-10 sm:h-12 md:h-14 w-auto object-contain" 
+    className="h-9 sm:h-12 md:h-14 w-auto object-contain" 
     alt="Lidera Logo" 
   />
 </div>
 
   {/* ۲. وسط: نام و عنوان لیدر */}
-<div className="text-right flex-1 min-w-0 px-1 pl-6 ">
-    <h1 className="text-xs sm:text-base md:text-lg font-bold text-white tracking-tight ">
-      {currentLider.fullName || currentLider.name}
-    </h1>
-    <p className="text-[8px] sm:text-xs font-xs text-neutral-400 mt-0.5 truncate ">
-      {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
-    </p>
-  </div>
+<div className="text-right flex-1 min-w-0 px-1">
+  <h1 className="text-sm sm:text-base md:text-lg font-bold text-white tracking-tight truncate">
+    {currentLider.fullName || currentLider.name}
+  </h1>
+  <p className="text-[8px] sm:text-xs font-xs text-neutral-400 mt-0.5 truncate">
+    {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
+  </p>
+</div>
 
   {/* ۳. سمت چپ: دکمه ورود لیدر */}
   <div className="flex items-center justify-end shrink-0 ml-0 sm:ml-0 ">
