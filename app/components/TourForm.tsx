@@ -158,42 +158,66 @@ useEffect(() => {
 
   const maxSize = 5 * 1024 * 1024;
 
- const handleIdCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIdCardError(null);
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (file.size > maxSize) {
-        setIdCardError("❌ حجم عکس کارت ملی بیش از ۵ مگابایت است.");
-        setIdCardImage(null);
-        if (idCardPreview) URL.revokeObjectURL(idCardPreview);
-        setIdCardPreview(null);
-        return;
-      }
-      if (idCardPreview) URL.revokeObjectURL(idCardPreview);
-      setIdCardImage(file);
-      setIdCardPreview(URL.createObjectURL(file));
+const handleIdCardChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  setIdCardError(null);
+  if (e.target.files && e.target.files[0]) {
+    const file = e.target.files[0];
+    if (file.size > maxSize) {
+      setIdCardError("❌ حجم عکس کارت ملی بیش از ۵ مگابایت است.");
+      return;
     }
-  };
 
-const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setIdCardImage(data.url); // ذخیره لینک ابری Cloudinary
+        setIdCardPreview(URL.createObjectURL(file)); // نمایش پیش‌نمایش محلی
+      } else {
+        setIdCardError(data.message || 'خطا در آپلود عکس');
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      setIdCardError('خطا در ارتباط با سرور برای آپلود');
+    }
+  }
+};
+const handleReceiptChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   setReceiptError(null);
   if (e.target.files && e.target.files[0]) {
     const file = e.target.files[0];
     if (file.size > maxSize) {
-      setReceiptError("حجم عکس فیش بیش از ۵ مگابایت است ❌");
-      setReceiptImage(null);
-      setReceiptPreview(null);
+      setReceiptError("❌ حجم عکس فیش بیش از ۵ مگابایت است.");
       return;
     }
-    
-    // تبدیل فایل به Base64 برای ذخیره قطعی در دیتابیس و نمایش در پنل لیدر
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setReceiptImage(base64String);
-      setReceiptPreview(base64String);
-    };
-    reader.readAsDataURL(file);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setReceiptImage(data.url); // ذخیره لینک ابری Cloudinary
+        setReceiptPreview(URL.createObjectURL(file)); // نمایش پیش‌نمایش محلی
+      } else {
+        setReceiptError(data.message || 'خطا در آپلود عکس فیش');
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      setReceiptError('خطا در ارتباط با سرور برای آپلود');
+    }
   }
 };
 
@@ -469,6 +493,38 @@ const handleRemoveReceipt = () => {
     receiptInputRef.current.value = "";
   }
 };
+
+async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      console.log('لینک تصویر در فضای ابری:', data.url);
+      // حالا می‌توانید این لینک را در استیت فرم ذخیره کرده و به همراه بقیه اطلاعات بفرستید
+    } else {
+      alert(data.message || 'خطا در آپلود عکس');
+    }
+  } catch (error) {
+    console.error('Upload failed:', error);
+  }
+}
+
+
+
+
+
+
 
 
   // ۲. اگر لودینگ تمام شد اما لیدر یافت نشد

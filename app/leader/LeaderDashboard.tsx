@@ -424,28 +424,43 @@ const handleDeleteAllRecords = async () => {
 };
 
 
-const handleTourImageUpload = (tourIndex: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('⚠️ حجم تصویر نباید بیشتر از ۵ مگابایت باشد!');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const result = reader.result as string;
-        const updated = [...activeTours];
-        if (updated[tourIndex].images.length >= 4) {
-          alert('⚠️ برای هر تور حداکثر می‌توانید ۴ عکس ثبت کنید!');
-          return;
-        }
-        updated[tourIndex].images.push(result);
-        setActiveTours(updated);
-        await syncTourToDb(updated[tourIndex]);
-      };
-      reader.readAsDataURL(file);
+const handleTourImageUpload = async (tourIndex: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert("⚠️ حجم تصویر نباید بیشتر از ۵ مگابایت باشد!");
+    return;
+  }
+
+  const updated = [...activeTours];
+  if (updated[tourIndex].images.length >= 4) {
+    alert("⚠️ برای هر تور حداکثر می‌توانید ۴ عکس ثبت کنید!");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      updated[tourIndex].images.push(data.url); // اضافه کردن لینک کلودینری به لیست عکس‌ها
+      setActiveTours(updated);
+      await syncTourToDb(updated[tourIndex]); // سینک کردن تغییرات با دیتابیس
+    } else {
+      alert(data.message || 'خطا در آپلود عکس تور');
     }
-  };
+  } catch (err) {
+    console.error('Upload error:', err);
+    alert('خطا در ارتباط با سرور برای آپلود عکس تور');
+  }
+};
 
   const handleDeleteTourImage = async (tourIndex: number, imgIndex: number) => {
     const updated = [...activeTours];
@@ -1873,7 +1888,7 @@ onChange={(e) => {
                             <label className="w-12 h-12 rounded-lg border border-dashed border-zinc-700 hover:border-[#F9704E] flex flex-col items-center justify-center text-zinc-400 hover:text-[#F9704E] cursor-pointer transition-all bg-zinc-800/40">
                               <FaUpload size={12} />
                               <span className="text-[9px] mt-0.5">افزودن</span>
-                              <input type="file" accept="image/*" onChange={(e) => handleTourImageUpload(idx, e)} className="hidden" />
+                            <input type="file" accept="image/*" onChange={(e) => handleTourImageUpload(idx, e)} className="hidden" />
                            </label>
 
                          )}

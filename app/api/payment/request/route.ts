@@ -1,16 +1,16 @@
 import { prisma } from '../../../lib/db';
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse, NextRequest } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { amountInRial, description, leaderId } = body;
+    const { amountInRial: bodyAmount, description, leaderId, tourId } = body;
     const pData = body.passengerData || {};
 
     const fFullName = (pData.fullName || body.fullName || '').trim();
     const fPhone = (pData.phone || pData.mobile || body.phone || body.mobile || '').trim();
     const fNationalId = (pData.nationalId || body.nationalId || '').trim();
-    const fTourName = description || pData.tourName || body.tourName || 'تور گردشگری';
+    const fTourname = description || pData.tourName || body.tourName || 'تور گردشگری';
     const fSeatsCount = Number(pData.seatsCount || body.seatsCount || 1);
 
     if (!fFullName || !fPhone || !fNationalId) {
@@ -25,15 +25,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'لیدر یافت نشد' }, { status: 404 });
     }
 
+    // تأیید و محاسبه امن مبلغ سمت سرور از روی دیتابیس (جلوگیری از دستکاری قیمت در کلاینت)
+    let amountInRial = Number(bodyAmount || 0);
+    if (tourId) {
+      const tour = await prisma.tour.findUnique({ where: { id: tourId } });
+      if (tour && tour.price) {
+        amountInRial = Number(tour.price) * fSeatsCount;
+      }
+    }
+
     const amountInToman = Math.floor(amountInRial / 10);
-    
+
     const newPassenger = await prisma.passenger.create({
       data: {
         fullName: fFullName,
         mobile: fPhone,
         nationalId: fNationalId,
-        tourName: fTourName,
-        paymentStatus: "در انتظار پرداخت",
+        tourName: fTourname,
+        paymentStatus: 'در انتظار پرداخت',
         amount: String(amountInToman),
         seatsCount: fSeatsCount,
         receiptDate: new Date().toLocaleDateString('fa-IR'),
@@ -53,17 +62,17 @@ export async function POST(req: NextRequest) {
         merchant_id: merchant,
         amount: amountInRial,
         callback_url: callbackUrl,
-        description: `رزرو تور ${fTourName} (${fSeatsCount} نفر)`,
-        metadata: { mobile: fPhone }
-      })
+        description: `رزرو تور ${fTourname} (${fSeatsCount} نفر)`,
+        metadata: { mobile: fPhone },
+      }),
     });
 
     const data = await response.json();
 
-    if (data.data && data.data.code === 100) {
+    if (data && data.data && data.data.code === 100) {
       return NextResponse.json({
         success: true,
-        url: `https://sandbox.zarinpal.com/pg/StartPay/${data.data.authority}`
+        url: `https://sandbox.zarinpal.com/pg/StartPay/${data.data.authority}`,
       });
     } else {
       await prisma.passenger.update({
@@ -73,7 +82,7 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         success: false,
-        message: data.errors?.message || 'خطا در ارتباط با درگاه زرین‌پال'
+        message: data.errors?.message || 'خطا در ارتباط با درگاه زرین‌پال',
       }, { status: 400 });
     }
   } catch (error) {
