@@ -1,5 +1,4 @@
 import { NextResponse, NextRequest } from 'next/server';
-// @ts-ignore
 import cloudinary from '../../lib/cloudinary';
 
 export async function POST(req: NextRequest) {
@@ -13,26 +12,21 @@ export async function POST(req: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    
+    // تبدیل بافر به Data URI برای ارسال امن و آسان به کلودینری
+    const fileBase64 = `data:${file.type};base64,${buffer.toString('base64')}`;
 
-    // آپلود مستقیم به کلودینری به صورت استریم
-    const uploadResult: any = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: 'lidera_uploads' }, // نام پوشه در فضای ابری شما
-        (error: any, result: any) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
-      uploadStream.end(buffer);
+    const uploadResult: any = await cloudinary.uploader.upload(fileBase64, {
+      folder: 'lidera_uploads',
     });
 
     return NextResponse.json({
       success: true,
-      url: uploadResult.secure_url, // لینک مستقیم و امن تصویر
+      url: uploadResult.secure_url,
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Cloudinary Upload Error:', error);
-    return NextResponse.json({ success: false, message: 'خطا در آپلود تصویر' }, { status: 500 });
+    return NextResponse.json({ success: false, message: 'خطا در آپلود تصویر: ' + (error.message || '') }, { status: 500 });
   }
 }
