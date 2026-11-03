@@ -11,6 +11,7 @@
   "dir": "rtl",
   "background_color": "#070709",
   "theme_color": "#f97316",
+  "categories": ["travel", "productivity", "business"],
   "icons": [
     {
       "src": "/logo-192.png",
