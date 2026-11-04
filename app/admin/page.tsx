@@ -395,7 +395,7 @@ const filteredGuides = guides.filter(guide => {
     onChange={(e) => setSearchTerm(e.target.value)}
     placeholder="جستجو نام، کد ملی، موبایل..."
     dir="rtl"
-    className="h-8 sm:h-7 bg-[#1e1e1e] border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-150px] sm:w-220px]"
+    className="h-6 sm:h-8 bg-[#1e1e1e] border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-150px] sm:w-220px]"
   />
 {/* دکمه افزودن */}
 <button
