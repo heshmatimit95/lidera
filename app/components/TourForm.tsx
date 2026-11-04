@@ -552,22 +552,33 @@ return (
 <div className="p-2.5 sm:p-4 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-row items-center justify-between bg-neutral-900/20 gap-2 sm:gap-4 w-full overflow-hidden">
   
   {/* ۱. سمت راست: لوگو */}
-<div className="flex items-center justify-start shrink-0 mr-0 sm:mr-0">
-<img 
-  src="/logo.png" 
-  alt="Lidera Logo" 
-  className="h-10 sm:h-12 w-auto object-contain mx-auto" 
-/>
+{/* ۱. سمت راست: لوگو کوچک‌تر */}
+<div className="flex items-center justify-start shrink-0">
+  <img 
+    src="/logo.png" 
+    alt="Lidera Logo" 
+    className="h-8 sm:h-10 w-auto object-contain" 
+  />
 </div>
 
-  {/* ۲. وسط: نام و عنوان لیدر */}
-<div className="text-right flex-1 min-w-0 px-1">
+{/* ۲. وسط: نام و عنوان لیدر با تراز وسط یا انعطاف‌پذیر */}
+<div className="flex-1 text-center px-2">
   <h1 className="text-sm sm:text-base md:text-lg font-bold text-white tracking-tight truncate">
     {currentLider.fullName || currentLider.name}
   </h1>
-  <p className="text-[8px] sm:text-xs font-xs text-neutral-400 mt-0.5 truncate">
+  <p className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 truncate">
     {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
   </p>
+</div>
+
+{/* ۳. سمت چپ: دکمه ورود لیدر */}
+<div className="flex items-center justify-end shrink-0">
+  <a 
+    href={`/login${window.location.search}`}
+    className="flex items-center justify-center px-2 sm:px-3 py-1 sm:py-1.5 bg-[#F9704E] text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 hover:bg-[#e05f3e]"
+  >
+    ورود لیدر
+  </a>
 </div>
 
   {/* ۳. سمت چپ: دکمه ورود لیدر */}

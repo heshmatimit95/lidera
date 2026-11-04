@@ -78,7 +78,7 @@ return (
 <img 
   src="/logo.png" 
   alt="Lidera Logo" 
-  className="h-10 sm:h-12 w-auto object-contain mx-auto" 
+  className="h-8 sm:h-10 w-auto object-contain mx-auto" 
 />
   </div>
   <h1 className="text-base sm:text-lg font-bold text-white text-center tracking-tight">

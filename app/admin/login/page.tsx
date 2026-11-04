@@ -50,7 +50,7 @@ if (res && res.success) {
 <img 
   src="/logo.png" 
   alt="Lidera Logo" 
-  className="h-10 sm:h-12 w-auto object-contain mx-auto" 
+  className="h-8 sm:h-10 w-auto object-contain mx-auto" 
 />
   </div>
   <span className="inline-block px-3.5 py-1 bg-red-500/10 text-red-500 border border-red-500/20 rounded-full text-xs font-bold mb-3 tracking-wide">

@@ -368,7 +368,7 @@ const filteredGuides = guides.filter(guide => {
 <img 
   src="/logo.png" 
   alt="Lidera Logo" 
-  className="h-10 sm:h-12 w-auto object-contain mx-auto" 
+  className="h-8 sm:h-10 w-auto object-contain mx-auto" 
 />
     <div>
       <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
