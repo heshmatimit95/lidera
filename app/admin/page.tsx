@@ -361,10 +361,10 @@ const filteredGuides = guides.filter(guide => {
    
        {/* هدر اصلی */}
 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl text-center md:text-right">
-<div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-4 mb-4">
+<div className="flex flex-col sm:flex-row items-center justify-between gap-1 sm:gap-4 mb-4">
   
   {/* لوگو و عنوان در موبایل با فاصله بسیار کم */}
-  <div className="flex items-center gap-3 sm:gap-3">
+  <div className="flex items-center gap-1 sm:gap-3">
 <img 
   src="/logo.png" 
   alt="Lidera Logo" 
@@ -395,7 +395,7 @@ const filteredGuides = guides.filter(guide => {
     onChange={(e) => setSearchTerm(e.target.value)}
     placeholder="جستجو نام، کد ملی، موبایل..."
     dir="rtl"
-    className="h-6 sm:h-8 bg-[#1e1e1e] border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-150px] sm:w-220px]"
+    className="h-6 sm:h-8 bg-[#1e1e1e] border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-32 sm:w-48"
   />
 {/* دکمه افزودن */}
 <button
