@@ -1,10 +1,17 @@
 import { NextResponse, NextRequest } from 'next/server';
-import cloudinary from '../../lib/cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 
+// این خط مانع از تلاش نکست‌جی‌اس برای بیلد استاتیک این مسیر می‌شود
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
+    // تنظیم لحظه‌ای کلودینری با متغیر محیطی
+    cloudinary.config({
+      url: process.env.CLOUDINARY_URL,
+    });
+
     const formData = await req.formData();
     const file = formData.get('file') as File;
 
