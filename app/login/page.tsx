@@ -61,17 +61,16 @@ return (
       
      <div className="w-full max-w-md bg-[#121214] border-2 border-[#E5C060] rounded-2xl sm:rounded-[28px] p-6 sm:p-8 shadow-2xl text-center relative overflow-hidden">
         {/* دکمه بازگشت به صفحه ثبت نام اختصاصی تورلیدر با سرعت بالا */}
-        <button
-          type="button"
-          onClick={() => {
-            const currentSlug = new URLSearchParams(window.location.search).get('slug');
-            router.push(currentSlug ? `/?slug=${currentSlug}` : '/');
-          }}
-          className="absolute top-4 left-4 bg-[#F9704E] hover:bg-[#e05f3d] text-white text-xs font-medium px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer"
-        >
-          ← پنل مسافران
-        </button>
-
+ <button
+  type="button"
+  onClick={() => {
+    const currentSlug = new URLSearchParams(window.location.search).get('slug');
+    router.push(currentSlug ? `/?slug=${currentSlug}` : '/');
+  }}
+  className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#F9704E] hover:bg-[#e05f3d] text-white text-[10px] sm:text-xs font-medium px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full transition-all duration-200 cursor-pointer"
+>
+  ← پنل مسافران
+</button>
 {/* هدر و لوگو */}
 <div className="flex flex-col items-center justify-center mb-6">
   <div className="flex items-center justify-center mb-3">
