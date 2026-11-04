@@ -657,7 +657,7 @@ return (
                         const tourId = tour.id || tour._id || idx;
                         return (
 <option key={tourId} value={tourId}>
-  {tour.name || tour.title || 'بدون عنوان'} | تاریخ: {toPersianNumbers(tour.date || 'تعیین نشده')} | {tour.price ? Number(tour.price).toLocaleString('fa-IR') : ''} تومان
+  {toPersianNumbers(tour.name || tour.title || 'بدون عنوان')} | تاریخ: {toPersianNumbers(tour.date || 'تعیین نشده')} | {tour.price ? Number(tour.price).toLocaleString('fa-IR') : ''} تومان
 </option>
                         );
                       })}
