@@ -651,7 +651,7 @@ return (
                     <select 
                       value={selectedTour} 
                       onChange={(e) => setSelectedTour(e.target.value)}
-                      className="w-full bg-[#1c1c21] border border-[#F9704E] focus:border-[#F9704E] p-4 rounded-xl text-sm text-white focus:outline-none transition-all duration-200 font-sm"
+                      className="w-full bg-[#1c1c21] border border-[#F9704E] focus:border-[#F9704E] p-4 rounded-xl text-sm text-white focus:outline-none transition-all duration-200 font-ABeeZee font-sm"
                     >
                       {currentLider.tours.map((tour: any, idx: number) => {
                         const tourId = tour.id || tour._id || idx;
