@@ -381,7 +381,7 @@ const filteredGuides = guides.filter(guide => {
 </div>
 
 {/* دکمه‌های ابزار بالای جدول - همه در یک ردیف */}
-<div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-3 w-full lg:w-auto">
+<div className="flex flex-wrap items-center justify-center sm:justify-start gap-1 sm:gap-3 w-full lg:w-auto">
 
   {/* تعداد کل */}
   <div className="text-neutral-400 text-xs sm:text-sm whitespace-nowrap">
