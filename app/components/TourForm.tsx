@@ -62,6 +62,12 @@ const [paymentMethod, setPaymentMethod] = useState<'card' | 'online'>('card');
 const isBirthDateValid = birthDate.trim().length >= 8; // مثلاً 1370/01/01
 const isNationalIdValid = nationalId.trim().length === 10;
 
+
+const toPersianNumbers = (str: string | number) => {
+  if (!str) return '';
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return String(str).replace(/\d/g, (digit) => persianDigits[parseInt(digit)]);
+};
 // تابع تبدیل اعداد فارسی/عربی به انگلیسی
   const toEnglishDigits = (str: string) => {
     if (!str) return "";
@@ -650,8 +656,8 @@ return (
                       {currentLider.tours.map((tour: any, idx: number) => {
                         const tourId = tour.id || tour._id || idx;
                         return (
-<option key={tourId} value={tourId} className="text-sm font-sans">
-  {tour.name || tour.title || 'بدون عنوان'} | تاریخ: {tour.date || 'تعیین نشده'} | {tour.price ? Number(tour.price).toLocaleString('fa-IR') : ''} تومان
+<option key={tourId} value={tourId}>
+  {tour.name || tour.title || 'بدون عنوان'} | تاریخ: {toPersianNumbers(tour.date || 'تعیین نشده')} | {tour.price ? Number(tour.price).toLocaleString('fa-IR') : ''} تومان
 </option>
                         );
                       })}
