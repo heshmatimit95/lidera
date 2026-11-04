@@ -21,25 +21,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'حجم تصویر نباید بیشتر از ۵ مگابایت باشد' }, { status: 400 });
     }
 
-    const { v2: cloudinary } = await import('cloudinary');
-    
-    // تنظیمات فقط با کلودنیم (نیازی به Secret نیست)
-    cloudinary.config({
-      cloud_name: 'vkuhspb3',
-    });
-
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileBase64 = `data:${file.type};base64,${buffer.toString('base64')}`;
 
-    // استفاده از preset بدون نیاز به احراز هویت پیچیده
-    const uploadResult: any = await cloudinary.uploader.upload(fileBase64, {
-      upload_preset: 'lidera_preset', // نام presite که ساختی
-      folder: 'lidera_uploads',
-    });
+    // ارسال مستقیم به API عمومی کلودینری با فچ (بدون نیاز به کتابخانه و Secret)
+    const cloudinaryData = new URLSearchParams();
+    cloudinaryData.append('file', fileBase64);
+    cloudinaryData.append('upload_preset', 'lidera_preset'); // همان پریستی که ساختی
+    cloudinaryData.append('folder', 'lidera_uploads');
+
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/vkuhspb3/image/upload`,
+      {
+        method: 'POST',
+        body: cloudinaryData,
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'خطا در ارتباط با کلودینری');
+    }
 
     return NextResponse.json({
       success: true,
-      url: uploadResult.secure_url,
+      url: data.secure_url,
     });
   } catch (error: any) {
     console.error('Cloudinary Upload Error Details:', error);
