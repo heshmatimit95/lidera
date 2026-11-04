@@ -1,8 +1,10 @@
 import { v2 as cloudinary } from 'cloudinary';
 
-const url = process.env.CLOUDINARY_URL;
-if (url && url.startsWith('cloudinary://')) {
-  cloudinary.config({ url: url.trim() });
-}
+// تنظیم امن کلودینری با متغیرهای محیطی
+cloudinary.config({
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export default cloudinary;

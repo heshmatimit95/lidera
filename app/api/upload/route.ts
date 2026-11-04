@@ -21,11 +21,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'حجم تصویر نباید بیشتر از ۵ مگابایت باشد' }, { status: 400 });
     }
 
-    const url = process.env.CLOUDINARY_URL?.trim();
-    if (!url || !url.startsWith('cloudinary://')) {
-      console.error('CLOUDINARY_URL نامعتبر یا تعریف‌نشده است');
-      return NextResponse.json({ success: false, message: 'پیکربندی آپلود سمت سرور ناقص است' }, { status: 500 });
-    }
+   const url = process.env.CLOUDINARY_URL?.trim();
+if (!url || !url.startsWith('cloudinary://')) {
+  console.error('نامعتبر یا تعریف‌نشده است CLOUDINARY_URL');
+  return NextResponse.json({ success: false, message: 'پیکربندی آپلود سمت سرور ناقص است' }, { status: 500 });
+}
 
     const { v2: cloudinary } = await import('cloudinary');
     cloudinary.config({ url });
