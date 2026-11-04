@@ -12,8 +12,7 @@ export async function POST(req: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    
-    // تبدیل بافر به Data URI برای ارسال امن و آسان به کلودینری
+
     const fileBase64 = `data:${file.type};base64,${buffer.toString('base64')}`;
 
     const uploadResult: any = await cloudinary.uploader.upload(fileBase64, {
@@ -24,7 +23,6 @@ export async function POST(req: NextRequest) {
       success: true,
       url: uploadResult.secure_url,
     });
-
   } catch (error: any) {
     console.error('Cloudinary Upload Error:', error);
     return NextResponse.json({ success: false, message: 'خطا در آپلود تصویر: ' + (error.message || '') }, { status: 500 });
