@@ -364,7 +364,7 @@ const filteredGuides = guides.filter(guide => {
 <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 mb-4">
   
   {/* لوگو و عنوان در موبایل با فاصله بسیار کم */}
-  <div className="flex items-center gap-2 sm:gap-3">
+  <div className="flex items-center gap-1 sm:gap-3">
 <img 
   src="/logo.png" 
   alt="Lidera Logo" 
@@ -381,7 +381,7 @@ const filteredGuides = guides.filter(guide => {
 </div>
 
 {/* دکمه‌های ابزار بالای جدول - همه در یک ردیف */}
-<div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 w-full lg:w-auto">
+<div className="flex flex-wrap items-center justify-center sm:justify-start gap-1 sm:gap-3 w-full lg:w-auto">
 
   {/* تعداد کل */}
   <div className="text-neutral-400 text-xs sm:text-sm whitespace-nowrap">
