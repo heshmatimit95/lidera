@@ -571,15 +571,6 @@ return (
   </p>
 </div>
 
-{/* ۳. سمت چپ: دکمه ورود لیدر */}
-<div className="flex items-center justify-end shrink-0">
-  <a 
-    href={`/login${window.location.search}`}
-    className="flex items-center justify-center px-2 sm:px-3 py-1 sm:py-1.5 bg-[#F9704E] text-white rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 hover:bg-[#e05f3e]"
-  >
-    ورود لیدر
-  </a>
-</div>
 
   {/* ۳. سمت چپ: دکمه ورود لیدر */}
   <div className="flex items-center justify-end shrink-0 ml-0 sm:ml-0 ">
