@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800;900&display=swap');
+
 @import "tailwindcss";
 
 :root {
@@ -8,8 +10,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,13 +22,22 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Yekan Bakh", 'Vazirmatn', sans-serif, "Segoe UI", Tahoma, Geneva;
+  font-family: 'Vazirmatn', sans-serif !important;
 }
 
 @layer base {
   body {
-    background: var(--background);
-    color: var(--foreground);
-    font-family: "Yekan Bakh", 'Vazirmatn', sans-serif, "Segoe UI", Tahoma, Geneva;
+    font-family: 'Vazirmatn', sans-serif !important;
+  }
+  
+  /* تنظیم فونت و اندازه لیبل‌ها و اینپوت‌های فرم برای موبایل و دسکتاپ */
+  label {
+    font-family: 'Vazirmatn', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 0.875rem !important; /* سایز ریزتر و شیک‌تر */
+  }
+
+  input, select, button, textarea {
+    font-family: 'Vazirmatn', sans-serif !important;
   }
 }
