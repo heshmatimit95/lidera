@@ -1,6 +1,8 @@
 import { NextResponse, NextRequest } from 'next/server';
 import cloudinary from '../../lib/cloudinary';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
