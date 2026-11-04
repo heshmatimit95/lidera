@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 const prisma = globalForPrisma.prisma || new PrismaClient();
@@ -15,20 +16,27 @@ export async function POST(request: Request) {
     const cleanUsername = String(username).trim();
     const cleanPassword = String(password).trim();
 
+    const secretKey = process.env.JWT_SECRET || 'your_super_secret_key';
+
     // بررسی ادمین کل
-    if ((cleanUsername === 'admin56' || cleanUsername === 'admin') && cleanPassword === 'admin5656') {
-      // ساخت ریسپانس موفقیت
+    if ((cleanUsername === 'admin' || cleanUsername === 'admin') && cleanPassword === 'Anisa56') {
+      
+      // ساخت توکن JWT برای ادمین
+      const token = jwt.sign({ username: cleanUsername, role: 'admin' }, secretKey, { expiresIn: '1d' });
+
       const response = NextResponse.json({ 
         success: true, 
         message: 'ورود موفقیت‌آمیز ادمین کل',
         role: 'admin' 
       });
 
-      // ست کردن کوکیِ مورد انتظار میدلور برای ادمین
+      // ست کردن کوکی امن با نام token (که میدلور چک می‌کند)
       response.cookies.set({
-        name: 'admin_token',
-        value: 'active_admin_session_token',
+        name: 'token',
+        value: token,
         httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
         path: '/',
         maxAge: 60 * 60 * 24, // 24 ساعت
       });
@@ -43,6 +51,10 @@ export async function POST(request: Request) {
       });
 
       if (leader && leader.password === cleanPassword) {
+        
+        // ساخت توکن JWT برای لیدر
+        const token = jwt.sign({ username: leader.username, role: 'leader', slug: leader.slug }, secretKey, { expiresIn: '1d' });
+
         const response = NextResponse.json({ 
           success: true, 
           message: 'ورود موفقیت‌آمیز لیدر',
@@ -50,13 +62,15 @@ export async function POST(request: Request) {
           slug: leader.slug 
         });
 
-        // ست کردن کوکیِ مورد انتظار میدلور برای لیدر
+        // ست کردن کوکی امن با نام token
         response.cookies.set({
-          name: 'leader_token',
-          value: leader.slug,
+          name: 'token',
+          value: token,
           httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
           path: '/',
-          maxAge: 60 * 60 * 24,
+          maxAge: 60 * 60 * 24, // 24 ساعت
         });
 
         return response;

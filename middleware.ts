@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ۱. محافظت از مسیرهای حساس (مانند ادمین یا داشبورد) با بررسی کوکی HttpOnly
- const protectedPaths = ['/dashboard'];
+ const protectedPaths = ['/admin', '/leader'];
   if (protectedPaths.some((path) => pathname.startsWith(path))) {
     const token = request.cookies.get('token')?.value;
 

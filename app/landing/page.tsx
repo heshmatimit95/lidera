@@ -10,33 +10,31 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#070709] text-zinc-100 font-sans dir-rtl selection:bg-[#F9704E] selection:text-black overflow-x-hidden">
       
       {/* زمینه مشبک نئونی */}
-      <div className="fixed inset-0 bg-[radial-gradient(#1f1f2e_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none z-0"></div>
+      <div className="fixed inset-0 bg-[radial-gradient(#1f1f2e_1px,transparent_1px)] background-size:24px_24px] opacity-20 pointer-events-none z-0"></div>
 
       {/* هدر سایت */}
-      <header className="border-b border-zinc-800/80 bg-[#070709]/90 backdrop-blur-xl sticky top-0 z-50">
+      <header className="border-b border-[#F9704E]  bg-zinc-100  backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-[#F9704E]/40 shadow-lg shadow-[#F9704E]/20">
-              <Image 
-                src="/logo.png" 
-                alt="لوگوی لیدرا" 
-                width={40} 
-                height={40} 
-                className="object-cover"
-              />
+          <img 
+  src="/logo.png" 
+  alt="Lidera Logo" 
+  className="h-8 sm:h-10 w-auto object-contain mx-auto" 
+/>
             </div>
             <div className="flex flex-col">
               <span className="font-black text-xl tracking-tight text-white flex items-center gap-1.5">
-                لیدرا <span className="text-[#F9704E] text-[10px] font-bold bg-[#F9704E]/10 px-2 py-0.5 rounded-full border border-[#F9704E]/30">اتوماسیون تور</span>
+               lidera<span className="text-[#F9704E] text-[10px] font-bold bg-[#F9704E]/10 px-2 py-0.5 rounded-full border border-[#F9704E]/30"></span>
               </span>
-              <span className="text-[10px] text-zinc-400 font-mono">lidera.ir</span>
+              <span className="text-[10px] text-zinc-400 font-medium">lidera.ir</span>
             </div>
           </div>
           
           <div className="flex items-center gap-3">
             <a 
               href="/login" 
-              className="text-xs sm:text-sm font-semibold text-zinc-300 hover:text-white transition-colors px-4 py-2.5 rounded-xl hover:bg-zinc-900"
+              className="text-xs sm:text-sm font-semibold  bg-[#e0a394]  text-zinc-300 hover:text-white transition-colors px-4 py-2.5 rounded-xl hover:bg-[#F9704E]"
             >
               ورود لیدرها
             </a>
@@ -52,7 +50,7 @@ export default function LandingPage() {
 
       {/* بخش هیرو (Hero Section) */}
       <section className="relative pt-16 pb-24 px-4 z-10">
-        <div className="absolute top-10 right-1/2 translate-x-1/2 w-[500px] h-[300px] bg-[#F9704E]/15 rounded-full blur-[140px] pointer-events-none"></div>
+        <div className="absolute top-10 right-1/2 translate-x-1/2 w-500px] h-300px] bg-[#F9704E]/15 rounded-full blur-[140px] pointer-events-none"></div>
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center gap-2 bg-[#F9704E]/10 border border-[#F9704E]/30 text-[#F9704E] px-4 py-1.5 rounded-full text-xs font-bold mb-8 shadow-xl">
@@ -74,12 +72,12 @@ export default function LandingPage() {
               href="/register" 
               className="w-full sm:w-auto flex items-center justify-center gap-3 bg-[#F9704E] hover:bg-[#e05f3d] text-white font-black text-sm px-8 py-4 rounded-2xl transition-all shadow-xl shadow-[#F9704E]/25 hover:scale-[1.03]"
             >
-              <span>شروع رایگان و ساخت لینک تور</span>
+              <span>دمو لیدرا</span>
               <FaArrowLeft />
             </a>
             <a 
               href="#pricing" 
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 font-bold text-sm px-7 py-4 rounded-2xl transition-all"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-zinc-300 hover:bg-zinc-300 border border-zinc-700/80 text-zinc-900 font-bold text-sm px-7 py-4 rounded-2xl transition-all"
             >
               مشاهده تعرفه‌ها
             </a>
@@ -201,7 +199,7 @@ export default function LandingPage() {
 
           {/* جدول مقایسه در دسکتاپ و کارت‌ها در موبایل */}
           <div className="overflow-x-auto">
-            <table className="w-full text-right border-collapse min-w-[700px]">
+            <table className="w-full text-right border-collapse min-w-700px]">
               <thead>
                 <tr className="border-b border-zinc-800">
                   <th className="p-4 text-sm font-black text-zinc-300">امکانات</th>
