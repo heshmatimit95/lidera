@@ -23,17 +23,17 @@ export async function POST(req: NextRequest) {
 
     const { v2: cloudinary } = await import('cloudinary');
     
-    // تنظیم مستقیم بدون وابستگی به متغیرهای سردرگم‌کننده
+    // تنظیمات فقط با کلودنیم (نیازی به Secret نیست)
     cloudinary.config({
       cloud_name: 'vkuhspb3',
-      api_key: '113913565293999',
-      api_secret: process.env.CLOUDINARY_API_SECRET, // این یکی حتماً از سرور خوانده می‌شود
     });
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileBase64 = `data:${file.type};base64,${buffer.toString('base64')}`;
 
+    // استفاده از preset بدون نیاز به احراز هویت پیچیده
     const uploadResult: any = await cloudinary.uploader.upload(fileBase64, {
+      upload_preset: 'lidera_preset', // نام presite که ساختی
       folder: 'lidera_uploads',
     });
 
