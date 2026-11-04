@@ -553,11 +553,11 @@ return (
   
   {/* ۱. سمت راست: لوگو */}
 <div className="flex items-center justify-start shrink-0 mr-0 sm:mr-0">
-  <img 
-    src="/logo.png" 
-    className="h-9 sm:h-12 md:h-14 w-auto object-contain" 
-    alt="Lidera Logo" 
-  />
+<img 
+  src="/logo.png" 
+  alt="Lidera Logo" 
+  className="w-36 h-36 sm:w-44 sm:h-44 object-contain mx-auto" 
+/>
 </div>
 
   {/* ۲. وسط: نام و عنوان لیدر */}

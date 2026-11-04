@@ -47,10 +47,11 @@ if (res && res.success) {
         
 <div className="flex flex-col items-center text-center mb-6 sm:mb-8">
 <div className="relative w-52 sm:w-56 h-18 sm:h-16 mb-3">
-  <img
-    src="/logo.png"
-      className="w-full h-full object-contain"
-  />
+<img 
+  src="/logo.png" 
+  alt="Lidera Logo" 
+  className="w-36 h-36 sm:w-44 sm:h-44 object-contain mx-auto" 
+/>
   </div>
   <span className="inline-block px-3.5 py-1 bg-red-500/10 text-red-500 border border-red-500/20 rounded-full text-xs font-bold mb-3 tracking-wide">
     بخش محرمانه / پنل ارشد

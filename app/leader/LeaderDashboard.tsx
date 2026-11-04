@@ -1046,11 +1046,11 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
   
   {/* لوگو و عنوان در موبایل با فاصله بسیار کم */}
   <div className="flex items-center gap-2 sm:gap-3">
-    <img 
-      src="/logo.png" 
-      className="h-12 sm:h-16 w-auto object-contain" 
-      alt="Lidera Logo" 
-    />
+<img 
+  src="/logo.png" 
+  alt="Lidera Logo" 
+  className="w-36 h-36 sm:w-44 sm:h-44 object-contain mx-auto" 
+/>
     <div>
 <h1 className="text-base sm:text-xl font-bold text-white tracking-tight" dir="rtl">
   {leaderName || initialLeader?.fullName || initialLeader?.name ? `${leaderName || initialLeader?.fullName || initialLeader?.name} عزیز، خوش آمدید!` : 'خوش آمدید!'}
