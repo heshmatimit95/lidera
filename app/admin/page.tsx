@@ -361,7 +361,7 @@ const filteredGuides = guides.filter(guide => {
    
        {/* هدر اصلی */}
 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#1e1e1e] p-4 sm:p-6 rounded-2xl border-2 border-[#E5C060] shadow-xl text-center md:text-right">
-<div className="flex flex-col sm:flex-row items-center justify-between gap-1.5 sm:gap-4 mb-4">
+<div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-4 mb-4">
   
   {/* لوگو و عنوان در موبایل با فاصله بسیار کم */}
   <div className="flex items-center gap-3 sm:gap-3">
