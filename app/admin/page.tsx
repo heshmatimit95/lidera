@@ -397,15 +397,15 @@ const filteredGuides = guides.filter(guide => {
     dir="rtl"
     className="h-8 sm:h-9 bg-[#1e1e1e] border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-150px] sm:w-220px]"
   />
-
-  {/* دکمه افزودن */}
-  <button
-    onClick={() => setIsAddLeaderModalOpen(true)}
-    title="افزودن لیدر جدید"
-    className="flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 bg-[#F9704E] hover:bg-[#e50b3a] text-black rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
-  >
-    <FaPlus className="text-[18px] sm:text-[14px]" />
-  </button>
+{/* دکمه افزودن */}
+<button
+  type="button"
+  onClick={() => setIsAddLeaderModalOpen(true)}
+  title="افزودن "
+  className="flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 bg-[#F9704E] hover:bg-[#e05b3a] text-white rounded-xl transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
+>
+  <FaPlus className="text-[14px] sm:text-[14px]" />
+</button>
 
   {/* دکمه ذخیره تغییرات (در صورت وجود) */}
   {hasPendingChanges && (
