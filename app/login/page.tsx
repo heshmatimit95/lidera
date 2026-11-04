@@ -74,12 +74,12 @@ return (
 
 {/* هدر و لوگو */}
 <div className="flex flex-col items-center justify-center mb-6">
-  <div className="relative w-38 sm:w-48 h-18 sm:h-14 mb-3">
-<img 
-  src="/logo.png" 
-  alt="Lidera Logo" 
-  className="h-8 sm:h-10 w-auto object-contain mx-auto" 
-/>
+  <div className="flex items-center justify-center mb-3">
+    <img 
+      src="/logo.png" 
+      alt="Lidera Logo" 
+      className="h-12 sm:h-16 w-auto object-contain mx-auto" 
+    />
   </div>
   <h1 className="text-base sm:text-lg font-bold text-white text-center tracking-tight">
     به لیدرا خوش آمدید
