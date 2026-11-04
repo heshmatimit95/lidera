@@ -365,10 +365,10 @@ const filteredGuides = guides.filter(guide => {
   
   {/* لوگو و عنوان در موبایل با فاصله بسیار کم */}
   <div className="flex items-center gap-2 sm:gap-3">
- <img 
+<img 
   src="/logo.png" 
   alt="Lidera Logo" 
-  className="w-36 h-36 sm:w-44 sm:h-44 object-contain mx-auto" 
+  className="h-10 sm:h-12 w-auto object-contain mx-auto" 
 />
     <div>
       <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
