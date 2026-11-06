@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { loginAdminAction } from '@/app/actions/admin-actions';
 
 export default function AdminLoginPage() {
   const router = useRouter();
