@@ -1,88 +1,80 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { SignJWT } from 'jose';
+import { prisma } from '../../../lib/db';
+import { checkRateLimit, resetRateLimit } from '../../../lib/rate-limit';
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
-const prisma = globalForPrisma.prisma || new PrismaClient();
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+const FAIL = { success: false, error: 'نام کاربری یا رمز عبور اشتباه است.' };
+const DUMMY_HASH = '$2a$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinv';
+
+async function makeToken(payload: Record<string, unknown>, secret: Uint8Array) {
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('12h')
+    .sign(secret);
+}
 
 export async function POST(request: Request) {
   try {
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret || jwtSecret.length < 32) {
+      console.error('JWT_SECRET ناقص است');
+      return NextResponse.json({ success: false, error: 'خطای سرور' }, { status: 500 });
+    }
+    const secret = new TextEncoder().encode(jwtSecret);
+
+    const ip = request.headers.get('x-forwarded-for')?.split(',').pop()?.trim() || 'unknown';
     const body = await request.json().catch(() => ({}));
-    
-    const username = body.username || body.adminName || body.user || '';
-    const password = body.password || body.pass || '';
-    
-    const cleanUsername = String(username).trim();
-    const cleanPassword = String(password).trim();
+    const username = String(body.username ?? '').trim().toLowerCase();
+    const password = String(body.password ?? '');
 
-    const secretKey = process.env.JWT_SECRET || 'your_super_secret_key';
-
-    // بررسی ادمین کل
-    if ((cleanUsername === 'admin' || cleanUsername === 'admin') && cleanPassword === 'Anisa56') {
-      
-      // ساخت توکن JWT برای ادمین
-      const token = jwt.sign({ username: cleanUsername, role: 'admin' }, secretKey, { expiresIn: '1d' });
-
-      const response = NextResponse.json({ 
-        success: true, 
-        message: 'ورود موفقیت‌آمیز ادمین کل',
-        role: 'admin' 
-      });
-
-      // ست کردن کوکی امن با نام token (که میدلور چک می‌کند)
-      response.cookies.set({
-        name: 'token',
-        value: token,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 60 * 60 * 24, // 24 ساعت
-      });
-
-      return response;
+    if (!username || !password || username.length > 64 || password.length > 128) {
+      return NextResponse.json({ success: false, error: 'نام کاربری و رمز الزامی است.' }, { status: 400 });
     }
 
-    // بررسی لیدرها در دیتابیس
-    try {
-      const leader = await prisma.leader.findFirst({
-        where: { username: cleanUsername }
-      });
-
-      if (leader && leader.password === cleanPassword) {
-        
-        // ساخت توکن JWT برای لیدر
-        const token = jwt.sign({ username: leader.username, role: 'leader', slug: leader.slug }, secretKey, { expiresIn: '1d' });
-
-        const response = NextResponse.json({ 
-          success: true, 
-          message: 'ورود موفقیت‌آمیز لیدر',
-          role: 'leader',
-          slug: leader.slug 
-        });
-
-        // ست کردن کوکی امن با نام token
-        response.cookies.set({
-          name: 'token',
-          value: token,
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 60 * 60 * 24, // 24 ساعت
-        });
-
-        return response;
-      }
-    } catch (dbErr) {
-      console.error('DB Error:', dbErr);
+    const rl1 = checkRateLimit(`ip:${ip}`, 10, 60_000);
+    const rl2 = checkRateLimit(`user:${username}`, 5, 15 * 60_000);
+    if (!rl1.success || !rl2.success) {
+      return NextResponse.json({ success: false, error: 'تلاش بیش از حد. بعداً دوباره امتحان کنید.' }, { status: 429 });
     }
 
-    return NextResponse.json({ error: '❌ نام کاربری یا رمز عبور اشتباه است.' }, { status: 401 });
+    // ادمین
+    const adminUser = (process.env.ADMIN_USERNAME ?? '').trim().toLowerCase();
+    const adminHash = process.env.ADMIN_PASSWORD_HASH ?? '';
+    if (adminUser && adminHash && username === adminUser) {
+      const ok = await bcrypt.compare(password, adminHash);
+      if (!ok) return NextResponse.json(FAIL, { status: 401 });
 
+      resetRateLimit(`user:${username}`);
+      const token = await makeToken({ role: 'admin' }, secret);
+      const res = NextResponse.json({ success: true, role: 'admin' });
+      res.cookies.set({
+        name: 'admin_token', value: token, httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', sameSite: 'lax',
+        path: '/', maxAge: 60 * 60 * 12,
+      });
+      return res;
+    }
+
+    // لیدر (در صورت استفاده از همین route)
+    const leader = await prisma.leader.findFirst({ where: { username } });
+    const ok = await bcrypt.compare(password, leader?.password ?? DUMMY_HASH);
+    if (!leader || !ok) {
+      return NextResponse.json(FAIL, { status: 401 });
+    }
+
+    resetRateLimit(`user:${username}`);
+    const token = await makeToken({ role: 'leader', leaderId: leader.id, slug: leader.slug }, secret);
+    const res = NextResponse.json({ success: true, role: 'leader', slug: leader.slug });
+    res.cookies.set({
+      name: 'leader_token', value: token, httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', sameSite: 'lax',
+      path: '/', maxAge: 60 * 60 * 12,
+    });
+    return res;
   } catch (error) {
     console.error('Login Error:', error);
-    return NextResponse.json({ error: 'خطای سرور' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'خطای سرور' }, { status: 500 });
   }
 }

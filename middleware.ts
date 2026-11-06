@@ -1,40 +1,64 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 
-export function middleware(request: NextRequest) {
+const RESERVED = [
+  'admin',
+  'api',
+  'leader',
+  'login',
+  'landing',
+  'passengers',
+  'payment',
+  'tours',
+  'favicon.ico',
+];
+
+async function getPayload(token?: string) {
+  const secret = process.env.JWT_SECRET;
+  if (!token || !secret || secret.length < 32) return null;
+  try {
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ۱. محافظت از مسیرهای حساس (مانند ادمین یا داشبورد) با بررسی کوکی HttpOnly
- const protectedPaths = ['/admin', '/leader'];
-  if (protectedPaths.some((path) => pathname.startsWith(path))) {
-    const token = request.cookies.get('token')?.value;
+  const isAdminPath = pathname === '/admin' || pathname.startsWith('/admin/');
+  const isLeaderPath = pathname === '/leader' || pathname.startsWith('/leader/');
 
-    if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    try {
-      const secretKey = process.env.JWT_SECRET || 'your_super_secret_key';
-      jwt.verify(token, secretKey);
-    } catch (error) {
-      // اگر توکن منقضی یا نامعتبر بود، به صفحه لاگین هدایت شود
-      return NextResponse.redirect(new URL('/login', request.url));
+  // ۱. محافظت از پنل ادمین
+  if (isAdminPath && pathname !== '/admin/login') {
+    const p = await getPayload(request.cookies.get('admin_token')?.value);
+    if (!p || p.role !== 'admin') {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
     }
   }
 
-  // ۲. منطق قبلی خودت برای لیدرهای سایت (lidera.ir/username)
-  const reservedRoutes = ['admin', 'api', 'leader', 'login', 'landing', 'passengers', 'payment', 'tours', 'favicon.ico'];
+  // ۲. محافظت از پنل لیدر
+  if (isLeaderPath) {
+    const p = await getPayload(request.cookies.get('leader_token')?.value);
+    if (!p || p.role !== 'leader') {
+      const url = new URL('/login', request.url);
+      const slug = request.nextUrl.searchParams.get('slug');
+      if (slug) url.searchParams.set('slug', slug);
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // ۳. لینک اختصاصی لیدر (lidera.ir/username)
   const segments = pathname.split('/').filter(Boolean);
-
   if (segments.length === 1) {
-    const potentialLeader = segments[0];
-
-    if (!reservedRoutes.includes(potentialLeader) && !potentialLeader.includes('.')) {
+    const s = segments[0];
+    if (!RESERVED.includes(s) && !s.includes('.')) {
       const url = request.nextUrl.clone();
       url.pathname = '/';
-      url.searchParams.set('leader', potentialLeader);
-      url.searchParams.set('slug', potentialLeader);
+      url.searchParams.set('leader', s);
+      url.searchParams.set('slug', s);
       return NextResponse.rewrite(url);
     }
   }
@@ -44,12 +68,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|sw.js|manifest.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

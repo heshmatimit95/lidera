@@ -1,13 +1,26 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { checkRateLimit } from '../../../lib/rate-limit'; // اضافه شدن تابع Rate Limiting
 
 const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
+    // ۱. استخراج IP کاربر برای سیستم Rate Limiting
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0] : '127.0.0.1';
+
+    // ۲. بررسی محدودیت تعداد درخواست (حداکثر ۵ تلاش در ۱ دقیقه)
+    const rateLimit = checkRateLimit(ip, 5, 60 * 1000);
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { success: false, message: `❌ تعداد تلاش‌های ناموفق بیش از حد مجاز. لطفاً پس از ${rateLimit.remainingTime} ثانیه دوباره تلاش کنید.` },
+        { status: 429 } // Too Many Requests
+      );
+    }
+
     const body = await request.json();
     const { username, password } = body;
-
     if (!username || !password) {
       return NextResponse.json(
         { success: false, message: 'نام کاربری و رمز عبور الزامی است.' },
@@ -67,7 +80,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 60 * 24 * 7, // اعتبار ۷ روزه
     });
 
     return response;
