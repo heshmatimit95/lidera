@@ -2,7 +2,7 @@
 
 import { prisma } from "../lib/db";
 import { revalidatePath } from "next/cache";
-
+import bcrypt from 'bcryptjs';
 export async function getLeadersFromDb() {
   return await prisma.leader.findMany({ orderBy: { createdAt: 'desc' } });
 }
@@ -239,17 +239,23 @@ export async function loginLeaderAction(username: string, pass: string) {
 
 export async function loginAdminAction(username: string, pass: string) {
   try {
-    const cleanUser = String(username || '').trim();
+    const cleanUser = String(username || '').trim().toLowerCase();
     const cleanPass = String(pass || '').trim();
 
-    if ((cleanUser === 'admin56' || cleanUser === 'admin') && cleanPass === 'admin5656') {
-      return { success: true, message: "ورود موفقیت‌آمیز ادمین کل" };
+    const adminUser = (process.env.ADMIN_USERNAME || '').trim().toLowerCase();
+    const adminHash = process.env.ADMIN_PASSWORD_HASH || '';
+
+    if (adminUser && adminHash && cleanUser === adminUser) {
+      const ok = await bcrypt.compare(cleanPass, adminHash);
+      if (ok) {
+        return { success: true, message: "ورود موفقیت‌آمیز ادمین کل" };
+      }
     }
 
-    return { success: false, message: 'نام کاربری یا رمز عبور ادمین اشتباه است.' };
+    return { success: false, message: 'نام کاربری یا رمز عبور ادمین اشتباه است' };
   } catch (error) {
     console.error('Admin Login Error:', error);
-    return { success: false, message: 'خطای سرور در ورود ادمین.' };
+    return { success: false, message: 'خطای سرور در ورود ادمین' };
   }
 }
 
@@ -266,3 +272,5 @@ export async function deleteAllRecords(pathName: string) {
     return { success: false, message: "خطا در حذف اطلاعات از دیتابیس." };
   }
 }
+
+
