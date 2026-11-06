@@ -5,7 +5,7 @@ import { prisma } from '../../../lib/db';
 import { checkRateLimit, resetRateLimit } from '../../../lib/rate-limit';
 
 const FAIL = { success: false, error: 'نام کاربری یا رمز عبور اشتباه است.' };
-const DUMMY_HASH = '$2b$12$wMeYCZFovxaFvb5pKGb5OeD99vmdjWzjojMUWqaWzImo4AjB5Po6q';
+const DUMMY_HASH = '$2a$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinv';
 
 async function makeToken(payload: Record<string, unknown>, secret: Uint8Array) {
   return new SignJWT(payload)
