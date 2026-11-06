@@ -12,34 +12,32 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleAdminLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+const handleAdminLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError('');
+  setLoading(true);
 
-    try {
-      const res = await loginAdminAction(username.trim(), password);
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username.trim(), password }),
+    });
 
-if (res && res.success) {
-        document.cookie = "admin_token=admin-session; path=/; max-age=86400";
-        document.cookie = "token=admin-session; path=/; max-age=86400";
-        
-        // تغییر قطعی و اجباری صفحه توسط مرورگر
-        window.location.href = '/admin';
-   router.refresh();
+    const data = await res.json();
 
-      }
-
- else {
-        setError(res?.message || '❌ شناسه مدیریتی یا رمز عبور اشتباه است!');
-      }
-    } catch (err: any) {
-      console.error("Login Page Error:", err);
-      setError('❌ خطایی در ارتباط با سرور رخ داد. لطفاً دوباره تلاش کنید.');
-    } finally {
-      setLoading(false);
+    if (res.ok && data.success) {
+      window.location.href = '/admin';
+    } else {
+      setError(data.error || data.message || 'شناسه مدیریتی یا رمز عبور اشتباه است');
     }
-  };
+  } catch (err: any) {
+    console.error("Login Page Error:", err);
+    setError('خطایی در ارتباط با سرور رخ داد. لطفاً دوباره تلاش کنید');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen w-full bg-[#F9704E] text-white flex items-center justify-center p-4 sm:p-6">
