@@ -83,42 +83,33 @@ const [isLoggingOut, setIsLoggingOut] = useState(false);
   // 5. تغییرات وضعیت معلق (پیش از ذخیره)
   const [pendingStatusChanges, setPendingStatusChanges] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    const hasCookie = document.cookie.includes('admin_token=');
-    if (!hasCookie) {
-      router.push('/admin/login');
-      return;
-    }
-
-    const fetchGuides = async () => {
-      try {
-        const res = await getLeadersFromDb() as any;
-        if (Array.isArray(res)) {
-          setGuides(res);
-        } else if (res && Array.isArray(res.data)) {
-          setGuides(res.data);
-        }
-      } catch (error) {
-        console.error("Error fetching guides:", error);
-      } finally {
-        setIsLoading(false);
+useEffect(() => {
+  const fetchGuides = async () => {
+    try {
+      const res = await getLeadersFromDb() as any;
+      if (Array.isArray(res)) {
+        setGuides(res);
+      } else if (res && Array.isArray(res.data)) {
+        setGuides(res.data);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching guides:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchGuides();
-  }, [router]);
+  fetchGuides();
+}, []);
 
-const handleLogout = () => {
+const handleLogout = async () => {
   if (!confirm('آیا می‌خواهید از پنل مدیریت خارج شوید؟')) return;
-  
-  setIsLoggingOut(true); // نمایش وضعیت خروج
-
-  // پاک کردن کوکی‌های ادمین (یا ادمین توکن)
-  document.cookie = "admin_token=; path=/; max-age=0;";
-  document.cookie = "token=; path=/; max-age=0;";
-
-  // انتقال آنی به صفحه لاگین ادمین یا صفحه اصلی
-  router.replace('/admin/login'); // یا مسیری که برای ورود ادمین دارید
+  setIsLoggingOut(true);
+  try {
+    await fetch('/api/admin/logout', { method: 'POST' });
+  } finally {
+    router.replace('/admin/login');
+  }
 };
 
   // افزودن لیدر جدید در دیتابیس
