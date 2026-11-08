@@ -22,10 +22,10 @@ const handleLogin = async (e: React.FormEvent) => {
 
     try {
       // تغییر مسیر به API مشترک و استاندارد لاگین
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+ const res = await fetch('/api/admin/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ username, password })
       });
 
       const data = await res.json();

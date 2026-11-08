@@ -57,9 +57,17 @@ export async function POST(request: Request) {
       return res;
     }
 
-    // لیدر (در صورت استفاده از همین route)
-    const leader = await prisma.leader.findFirst({ where: { username } });
-    const ok = await bcrypt.compare(password, leader?.password ?? DUMMY_HASH);
+// (route در صورت استفاده از همین) لیدر
+    const leader = await prisma.leader.findFirst({ 
+      where: { 
+        OR: [
+          { username: { equals: username, mode: 'insensitive' } },
+          { slug: { equals: username, mode: 'insensitive' } }
+        ]
+      } 
+    });
+
+    const ok = leader ? await bcrypt.compare(password, leader.password ?? DUMMY_HASH) : false;
     if (!leader || !ok) {
       return NextResponse.json(FAIL, { status: 401 });
     }
