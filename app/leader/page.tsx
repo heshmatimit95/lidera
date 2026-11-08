@@ -22,7 +22,7 @@ const leader = await prisma.leader.findFirst({
       name: true,
       fullName: true,
       mobile: true,
-      zIndexMerchantId: true,
+      zarinpalMerchantId: true,
       paymentMethod: true,
       cards: true,
       mustChangePassword: true, // 👈 این خط را اینجا اضافه کن
