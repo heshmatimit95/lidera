@@ -78,6 +78,9 @@ const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
 const [rejectReason, setRejectReason] = useState('');
 const [showRejectInput, setShowRejectInput] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+const [mustChange, setMustChange] = useState(false);
+
+
 // --- استیت‌های تنظیمات مالی و بانکی لیدر ---
 const [paymentMethod, setPaymentMethod] = useState<'card' | 'gateway' | 'both'>(
     initialLeader?.paymentMethod || 'card'
@@ -150,18 +153,17 @@ const [promoData, setPromoData] = useState<string>('');         // مخصوص ت
   const [editingTourPriceValue, setEditingTourPriceValue] = useState('');
 
 // 👇 این تکه کد را در بدنه کامپوننت LeaderDashboard اضافه کن
-  useEffect(() => {
-    // خواندن کوکی must_change_password از مرورگر
-    const cookies = document.cookie.split(';');
-    const mustChangeCookie = cookies.find(row => row.trim().startsWith('must_change_password='));
-    
-    if (mustChangeCookie) {
-      const value = mustChangeCookie.split('=')[1];
-      if (value === 'true') {
-        setIsChangePassModalOpen(true); // باز کردن خودکار مودال
-      }
+useEffect(() => {
+  const cookies = document.cookie.split(';');
+  const mustChangeCookie = cookies.find(row => row.trim().startsWith('must_change_password='));
+  if (mustChangeCookie) {
+    const value = mustChangeCookie.split('=')[1];
+    if (value === 'true') {
+      setMustChange(true);
+      setIsChangePassModalOpen(true); // باز کردن خودکار مودال
     }
-  }, []);
+  }
+}, []);
 
 // برای باز شدن خودکار مودال در اولین ورود
 useEffect(() => {
@@ -1976,9 +1978,15 @@ onChange={(e) => {
                 </div>
 
                 <div className="flex justify-end gap-2 pt-2">
-                  <button type="button" onClick={() => setIsChangePassModalOpen(false)} className="bg-zinc-800 border border-[#F9704E]  text-zinc-300 px-3 py-2 rounded-xl text-xs cursor-pointer">
-                    انصراف
-                  </button>
+{!mustChange && (
+    <button 
+      type="button" 
+      onClick={() => setIsChangePassModalOpen(false)} 
+      className="bg-zinc-800 border border-[#F9704E] text-zinc-300 px-3 py-2 rounded-xl text-xs"
+    >
+      انصراف
+    </button>
+  )}
                   <button type="submit" className="bg-[#F9704E] hover:bg-yellow-600 text-zinc-950 font-bold px-4 py-2 rounded-xl text-xs transition-all cursor-pointer">
                     بروزرسانی رمز
                   </button>
@@ -1987,7 +1995,7 @@ onChange={(e) => {
             </div>
           </div>
         )}
-
+                 
         {/* مودال بزرگنمایی تصویر فیش */}
         {previewImage && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50" onClick={() => setPreviewImage(null)}>

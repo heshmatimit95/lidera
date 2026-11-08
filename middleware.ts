@@ -39,11 +39,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 // محافظ از پنل لیدر ۲. //
+// محافظ از پنل لیدر
   if (isLeaderPath) {
     const leaderToken = request.cookies.get('leader_token')?.value;
     const leaderSlug = request.cookies.get('leader_slug')?.value;
     
-    // اگر لیدر لاگین نکرده باشد، هدایت به صفحه لاگین
+    // ۱. اگر لاگین نکرده باشد، هدایت به صفحه لاگین
     if (!leaderToken && !leaderSlug) {
       const url = new URL('/login', request.url);
       const slug = request.nextUrl.searchParams.get('slug');
@@ -51,15 +52,14 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // بررسی اجبار تغییر رمز از روی کوکی must_change_password
+    // ۲. بررسی اجبار تغییر رمز از روی کوکی must_change_password
     const mustChangePasswordCookie = request.cookies.get('must_change_password')?.value;
     
-    // اگر مقدار کوکی برابر با true بود و کاربر در حال حاضر در صفحه تغییر رمز نبود
+  
     if (mustChangePasswordCookie === 'true' && !pathname.includes('/change-password')) {
-
+    
     }
   }
-
   // ۳. لینک اختصاصی لیدر (lidera.ir/username)
   const segments = pathname.split('/').filter(Boolean);
   if (segments.length === 1) {
