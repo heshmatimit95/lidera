@@ -1,4 +1,6 @@
 "use client";
+
+
 import { savePassengerPayment } from "@/app/actions/leader-actions"; 
 import { generateTourAiItinerary } from "../actions/ai-actions";
 import { FaWhatsapp, FaTelegramPlane, FaInstagram, FaCopy, } from 'react-icons/fa';
@@ -146,6 +148,21 @@ const [promoData, setPromoData] = useState<string>('');         // مخصوص ت
   const [newTourPrice, setNewTourPrice] = useState('');
   const [editingTourDateValue, setEditingTourDateValue] = useState('');
   const [editingTourPriceValue, setEditingTourPriceValue] = useState('');
+
+// 👇 این تکه کد را در بدنه کامپوننت LeaderDashboard اضافه کن
+  useEffect(() => {
+    // خواندن کوکی must_change_password از مرورگر
+    const cookies = document.cookie.split(';');
+    const mustChangeCookie = cookies.find(row => row.trim().startsWith('must_change_password='));
+    
+    if (mustChangeCookie) {
+      const value = mustChangeCookie.split('=')[1];
+      if (value === 'true') {
+        setIsChangePassModalOpen(true); // باز کردن خودکار مودال
+      }
+    }
+  }, []);
+
 // برای باز شدن خودکار مودال در اولین ورود
 useEffect(() => {
   if (initialLeader?.mustChangePassword) {

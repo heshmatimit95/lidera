@@ -38,21 +38,25 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
   }
-if (isLeaderPath) {
-    const p = await getPayload(request.cookies.get('leader_token')?.value);
-    if (!p || p.role !== 'leader') {
+// محافظ از پنل لیدر ۲. //
+  if (isLeaderPath) {
+    const leaderToken = request.cookies.get('leader_token')?.value;
+    const leaderSlug = request.cookies.get('leader_slug')?.value;
+    
+    // اگر لیدر لاگین نکرده باشد، هدایت به صفحه لاگین
+    if (!leaderToken && !leaderSlug) {
       const url = new URL('/login', request.url);
-      const slug = request.nextUrl.searchParams.get('slug'); // اصلاح نام متغیر
+      const slug = request.nextUrl.searchParams.get('slug');
       if (slug) url.searchParams.set('slug', slug);
       return NextResponse.redirect(url);
     }
 
-    // بررسی اجبار تغییر رمز عبور در سطح میدل‌ویر
-    // (به شرطی که مقدار mustChangePassword هنگام ساخت توکن jwt در فایل لاگین لیدر قرار گرفته باشد)
-    if (p.mustChangePassword && !pathname.startsWith('/leader/change-password')) {
-      // اگر صفحه تغییر رمز جداگانه داری به آنجا هدایت کن یا بگذار مودال باز بماند
-      // اگر از مودال روی صفحه داشبورد استفاده می‌کنی، می‌توانی اجازه بدهی به صفحه اصلی بیاید اما مودال باز بماند، 
-      // یا اگر خواهی کلاً صفحه دیگری را ببینی، اینجا ریدایرکت کنی.
+    // بررسی اجبار تغییر رمز از روی کوکی must_change_password
+    const mustChangePasswordCookie = request.cookies.get('must_change_password')?.value;
+    
+    // اگر مقدار کوکی برابر با true بود و کاربر در حال حاضر در صفحه تغییر رمز نبود
+    if (mustChangePasswordCookie === 'true' && !pathname.includes('/change-password')) {
+
     }
   }
 
