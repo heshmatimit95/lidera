@@ -1,14 +1,21 @@
-'use server'
+'use server';
 
-import { prisma } from "../lib/db";
-import { revalidatePath } from "next/cache";
+import { hashPassword, generatePassword } from '../lib/password';
+import { requireAdmin } from '../lib/require-admin';
+import { prisma } from '../lib/db';
+import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
+
+
 export async function getLeadersFromDb() {
   return await prisma.leader.findMany({ orderBy: { createdAt: 'desc' } });
 }
 
 export async function createLeaderInDb(data: any, pathName: string) {
-  const username = data.username ? data.username.trim() : "";
+  // ۱. بررسی دسترسی ادمین
+  await requireAdmin();
+
+  const username = data.username ? data.username.trim().toLowerCase() : "";
   const nationalId = (data.nationalCode || data.nationalId || "").toString().trim();
   const mobile = (data.phone || data.mobile || "").toString().trim();
 
@@ -26,32 +33,36 @@ export async function createLeaderInDb(data: any, pathName: string) {
     if (existingUser) {
       return { 
         success: false, 
-        message: "خطا: نام کاربری، کد ملی یا شماره موبایل وارد شده تکراری است و قبلاً ثبت شده است." 
+        message: 'خطا: نام کاربری، کد ملی یا شماره موبایل وارد شده تکراری است و قبلاً ثبت شده است.' 
       };
     }
   }
 
-  const uniqueSlug = username ? username : `leader-${username || 'user'}`;
-const newLeader = await prisma.leader.create({
-  data: {
-    slug: data.slug || uniqueSlug,
-    fullName: data.fullName || "",
-    username: username,
-    nationalId: nationalId,
-    mobile: mobile,
-    address: data.address || "",
-    password: data.password || "123456",
-    status: "ACTIVE",
-    // اضافه‌شدن شبکه‌های اجتماعی برای ذخیره در دیتابیس:
-    instagram: data.instagram || "",
-    telegram: data.telegram || "",
-    rubika: data.rubika || "",
-    whatsapp: data.whatsapp || "",
-  },
-});
+  const uniqueSlug = username ? username : `leader-${nationalId || 'user'}`;
   
+  // ۲. هش کردن رمز عبور (اگر پسوردی نفرستاده بود پیش‌فرض 123456 را هش می‌کند)
+  const rawPassword = data.password ? String(data.password).trim() : "123456";
+  const securePassword = await hashPassword(rawPassword);
+
+  const newLeader = await prisma.leader.create({
+    data: {
+      slug: uniqueSlug,
+      fullName: data.fullName || '',
+      username: username,
+      nationalId: nationalId,
+      mobile: mobile,
+      address: data.address || '',
+      password: securePassword, // استفاده از رمز هش‌شده
+      status: 'ACTIVE',
+      instagram: data.instagram || '',
+      telegram: data.telegram || '',
+      rubika: data.rubika || '',
+      whatsapp: data.whatsapp || '',
+    },
+  });
+
   revalidatePath(pathName);
-  return { success: true, data: newLeader, message: "لیدر با موفقیت ثبت شد." };
+  return { success: true, data: newLeader, message: 'لیدر با موفقیت ثبت شد' };
 }
 
 export async function updateLeaderInDb(leader: any, pathName: string) {

@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       return res;
     }
 
-// (route در صورت استفاده از همین) لیدر
+// بررسی لیدر در دیتابیس
     const leader = await prisma.leader.findFirst({ 
       where: { 
         OR: [
