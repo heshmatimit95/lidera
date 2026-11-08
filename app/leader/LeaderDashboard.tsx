@@ -146,7 +146,12 @@ const [promoData, setPromoData] = useState<string>('');         // مخصوص ت
   const [newTourPrice, setNewTourPrice] = useState('');
   const [editingTourDateValue, setEditingTourDateValue] = useState('');
   const [editingTourPriceValue, setEditingTourPriceValue] = useState('');
-
+// برای باز شدن خودکار مودال در اولین ورود
+useEffect(() => {
+  if (initialLeader?.mustChangePassword) {
+    setIsChangePassModalOpen(true);
+  }
+}, [initialLeader]);
   
 useEffect(() => {
   const s = new URLSearchParams(window.location.search).get('slug');
@@ -289,47 +294,38 @@ const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 };
 
 
+// تابع ارسال درخواست تغییر رمز
 const handleChangePassword = async (e: React.FormEvent) => {
   e.preventDefault();
-  if (newPasswordInput.trim().length < 4) {
-    alert('⚠️ رمز عبور جدید باید حداقل ۴ کاراکتر باشد');
+  if (newPasswordInput.length < 8) {
+    alert('رمز جدید باید حداقل ۸ کاراکتر باشد');
     return;
   }
   if (newPasswordInput !== confirmPasswordInput) {
-    alert('❌ رمز عبور جدید با تکرار آن همخوانی ندارد');
+    alert('رمز جدید و تکرار آن یکسان نیستند');
     return;
   }
 
-  try {
-    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-    const tenantKey = searchParams ? (searchParams.get('slug') || searchParams.get('leaderId') || '') : '';
+  const res = await fetch('/api/leaders/change-password', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      currentPassword: oldPasswordInput, 
+      newPassword: newPasswordInput 
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
 
-const res = await fetch('/api/admin/reset-leader-password', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ 
-    leaderId: tenantKey,
-    newPassword: newPasswordInput // ارسال رمز جدید به سرور
-  })
-});
-
-    if (res.ok) {
-      const data = await res.json();
-      alert(`🔑 ${data.message || 'رمز عبور با موفقیت تغییر کرد'}`);
-      setIsChangePassModalOpen(false);
-      setOldPasswordInput('');
-      setNewPasswordInput('');
-      setConfirmPasswordInput('');
-    } else {
-      const data = await res.json().catch(() => ({}));
-      alert(`❌ تغییر رمز ناموفق بود: ${data.message || 'خطای سرور'}`);
-    }
-  } catch (e) {
-    console.error(e);
-    alert('❌ خطا در ارتباط با سرور برای تغییر رمز.');
+  if (res.ok) {
+    alert('رمز عبور با موفقیت تغییر کرد');
+    setIsChangePassModalOpen(false);
+    setOldPasswordInput('');
+    setNewPasswordInput('');
+    setConfirmPasswordInput('');
+  } else {
+    alert(data.message || 'خطا در تغییر رمز');
   }
 };
-
 
   // تابع تغییر وضعیت به صورت تکی در جدول
   const handleInlineStatusChange = (id: string, newStatus: string) => {
