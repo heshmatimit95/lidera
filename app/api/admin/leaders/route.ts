@@ -29,20 +29,19 @@ try {
     const rawPassword = body.password || '123456';
     const hashedPassword = await bcrypt.hash(rawPassword, 12);
 
-    const newLeader = await prisma.leader.create({
-      data: {
-        slug: generatedSlug,
-        lastName: body.lastname || body.lastName || '',
-        lastname: body.lastname || '',
-        fullName: `${body.name || ''} ${body.lastname || ''}`.trim(),
-        username: body.username || null,
-        mobile: body.phone || body.mobile || null,
-        nationalId: body.nationalCode || body.nationalId || null,
-        password: hashedPassword,
-        status: body.status || 'ACTIVE',
-      },
-    });
-
+const newLeader = await prisma.leader.create({
+  data: {
+    slug: generatedSlug,
+    name: body.name || '',
+    lastName: body.lastName || body.lastname || '', // اصلاح نام فیلد به صورت صحیح
+    fullName: `${body.name || ''} ${body.lastName || body.lastname || ''}`.trim(),
+    username: body.username || null,
+    mobile: body.phone || body.mobile || null,
+    nationalId: body.nationalCode || body.nationalId || null,
+    password: hashedPassword,
+    status: body.status || 'ACTIVE',
+  },
+});
     return NextResponse.json(newLeader, { status: 201 });
 
    
