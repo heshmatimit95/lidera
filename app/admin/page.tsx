@@ -687,7 +687,7 @@ const filteredGuides = guides.filter(guide => {
               value={newLeader.fullName}
               onChange={e => setNewLeader({ ...newLeader, fullName: e.target.value })}
               className="w-full bg-zinc-300 border border-orange-600 rounded-xl px-3.5 py-2 text-xs text-black placeholder-#F9704E focus:outline-none"
-              placeholder="مثال: علی رضایی"
+              placeholder="مثال: آنیسا آرین سا"
             />
           </div>
 

@@ -5,6 +5,29 @@ import { prisma } from '../../../lib/db';
 import { checkRateLimit } from '../../../lib/rate-limit';
 import bcrypt from 'bcryptjs';
 
+// تابع بررسی قدرت رمز عبور (قوانین و پیام‌های راهنما)
+function validateStrongPassword(password: string) {
+  const minLength = 8;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasNumbers = /\d/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  if (password.length < minLength) {
+    return 'رمز عبور باید حداقل شامل ۸ کاراکتر باشد.';
+  }
+  if (!hasUpperCase || !hasLowerCase) {
+    return 'رمز عبور باید شامل حروف بزرگ و کوچک انگلیسی باشد.';
+  }
+  if (!hasNumbers) {
+    return 'رمز عبور باید حداقل یک عدد داشته باشد.';
+  }
+  if (!hasSpecialChar) {
+    return 'رمز عبور باید حداقل یک علامت خاص (مثل @, #, $, !) داشته باشد.';
+  }
+  return null;
+}
+
 export async function PUT(request: Request) {
   try {
     // ۱. احراز هویت لیدر از طریق کوکی
@@ -39,14 +62,14 @@ export async function PUT(request: Request) {
     const currentPassword = String(body.currentPassword ?? '');
     const newPassword = String(body.newPassword ?? '');
 
-    if (newPassword.length < 8 || newPassword.length > 128) {
-      return NextResponse.json({ message: 'رمز جدید باید حداقل ۸ کاراکتر باشد' }, { status: 400 });
+    // بررسی قدرت رمز عبور جدید
+    const passwordError = validateStrongPassword(newPassword);
+    if (passwordError) {
+      return NextResponse.json({ message: passwordError }, { status: 400 });
     }
+
     if (newPassword === currentPassword) {
       return NextResponse.json({ message: 'رمز جدید باید با رمز فعلی فرق داشته باشد' }, { status: 400 });
-    }
-    if (newPassword === '123456') {
-      return NextResponse.json({ message: 'این رمز قابل حدس است' }, { status: 400 });
     }
 
     // ۴. بررسی صحت رمز فعلی در دیتابیس
@@ -55,13 +78,13 @@ export async function PUT(request: Request) {
       return NextResponse.json({ message: 'رمز فعلی اشتباه است' }, { status: 400 });
     }
 
-    // ۵. هش کردن رمز جدید و ذخیره در دیتابیس و غیرفعال کردن اجبار تغییر رمز
+    // ۵. هش کردن رمز جدید و برداشتن اجبار تغییر رمز
     const hashedPassword = await bcrypt.hash(newPassword, 12);
     await prisma.leader.update({
       where: { id: leaderId },
       data: {
         password: hashedPassword,
-        mustChangePassword: false,
+        mustChangePassword: false, // غیرفعال کردن اجبار تغییر رمز پس از تغییر موفق
       },
     });
 

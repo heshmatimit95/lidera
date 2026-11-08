@@ -83,6 +83,18 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24 * 7, // اعتبار ۷ روزه
     });
 
+response.cookies.set({
+    name: 'must_change_password',
+   value: String((leader as any).mustChangePassword ?? false),
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 7, // ۷ روز
+  });
+
+
+
+
     return response;
 
   } catch (error) {

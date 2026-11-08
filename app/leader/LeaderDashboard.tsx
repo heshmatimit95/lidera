@@ -1921,16 +1921,32 @@ onChange={(e) => {
                     className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs text-white"
                   />
                 </div>
-                <div>
-                  <label className="block text-[11px] text-zinc-300 mb-1">رمز عبور جدید:</label>
-                  <input 
-                    type="password" 
-                    required
-                    value={newPasswordInput} 
-                    onChange={(e) => setNewPasswordInput(e.target.value)}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs text-white"
-                  />
-                </div>
+           <div>
+  <label className="block text-[11px] text-zinc-300 mb-1">رمز عبور جدید</label>
+  <input
+    type="password"
+    required
+    value={newPasswordInput}
+    onChange={(e) => setNewPasswordInput(e.target.value)}
+    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs text-white"
+  />
+  
+  {/* 👇 دقیقاً اینجا راهنمای پویای رمز عبور را اضافه کن */}
+  <div className="text-xs text-gray-400 space-y-1 mt-2">
+    <p className={newPasswordInput.length >= 8 ? "text-green-500 font-medium" : "text-zinc-500"}>
+      ✓ حداقل ۸ کاراکتر
+    </p>
+    <p className={/[A-Z]/.test(newPasswordInput) && /[a-z]/.test(newPasswordInput) ? "text-green-500 font-medium" : "text-zinc-500"}>
+      ✓ شامل حروف بزرگ و کوچک انگلیسی
+    </p>
+    <p className={/\d/.test(newPasswordInput) ? "text-green-500 font-medium" : "text-zinc-500"}>
+      ✓ شامل حداقل یک عدد (0-9)
+    </p>
+    <p className={/[!@#$%^&*(),.?":{}|<>]/.test(newPasswordInput) ? "text-green-500 font-medium" : "text-zinc-500"}>
+      ✓ شامل کاراکتر خاص (مثل !@#$)
+    </p>
+  </div>
+</div>
                 <div>
                   <label className="block text-[11px] text-zinc-300 mb-1">تکرار رمز عبور جدید:</label>
                   <input 

@@ -38,15 +38,21 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
   }
-
-  // ۲. محافظت از پنل لیدر
-  if (isLeaderPath) {
+if (isLeaderPath) {
     const p = await getPayload(request.cookies.get('leader_token')?.value);
     if (!p || p.role !== 'leader') {
       const url = new URL('/login', request.url);
-      const slug = request.nextUrl.searchParams.get('slug');
+      const slug = request.nextUrl.searchParams.get('slug'); // اصلاح نام متغیر
       if (slug) url.searchParams.set('slug', slug);
       return NextResponse.redirect(url);
+    }
+
+    // بررسی اجبار تغییر رمز عبور در سطح میدل‌ویر
+    // (به شرطی که مقدار mustChangePassword هنگام ساخت توکن jwt در فایل لاگین لیدر قرار گرفته باشد)
+    if (p.mustChangePassword && !pathname.startsWith('/leader/change-password')) {
+      // اگر صفحه تغییر رمز جداگانه داری به آنجا هدایت کن یا بگذار مودال باز بماند
+      // اگر از مودال روی صفحه داشبورد استفاده می‌کنی، می‌توانی اجازه بدهی به صفحه اصلی بیاید اما مودال باز بماند، 
+      // یا اگر خواهی کلاً صفحه دیگری را ببینی، اینجا ریدایرکت کنی.
     }
   }
 
