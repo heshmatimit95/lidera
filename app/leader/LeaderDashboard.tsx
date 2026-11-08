@@ -1976,10 +1976,10 @@ onChange={(e) => {
                 </div>
 
                 <div className="flex justify-end gap-2 pt-2">
-                  <button type="button" onClick={() => setIsChangePassModalOpen(false)} className="bg-zinc-800 text-zinc-300 px-3 py-2 rounded-xl text-xs cursor-pointer">
+                  <button type="button" onClick={() => setIsChangePassModalOpen(false)} className="bg-zinc-800 border border-[#F9704E]  text-zinc-300 px-3 py-2 rounded-xl text-xs cursor-pointer">
                     انصراف
                   </button>
-                  <button type="submit" className="bg-[#E5C060] hover:bg-yellow-600 text-zinc-950 font-bold px-4 py-2 rounded-xl text-xs transition-all cursor-pointer">
+                  <button type="submit" className="bg-[#F9704E] hover:bg-yellow-600 text-zinc-950 font-bold px-4 py-2 rounded-xl text-xs transition-all cursor-pointer">
                     بروزرسانی رمز
                   </button>
                 </div>
