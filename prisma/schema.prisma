@@ -31,11 +31,9 @@ model Leader {
   cards              BankCard[]
   tours              Tour[]
   passengers         Passenger[]
-  
-  // فیلدهای جدید درگاه پرداخت
-  zarinpalMerchantId String?
+   zarinpalMerchantId String?
   hasOnlinePayment   Boolean  @default(false)
-
+  mustChangePassword Boolean @default(false)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
@@ -72,7 +70,7 @@ model Tour {
   updatedAt     DateTime       @updatedAt
   aiItinerary   AiItinerary? @relation(fields: [aiItineraryId], references: [id])
   aiItineraryId String?      @unique
-  mustChangePassword Boolean @default(false)
+
 }
 
 
