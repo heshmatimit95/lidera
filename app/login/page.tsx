@@ -15,13 +15,14 @@ function LoginFormContent() {
   const searchParams = useSearchParams();
   const slug = searchParams.get('slug');
 
-  const handleLogin = async (e: React.FormEvent) => {
+const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
+    setError('');
 
     try {
-      const res = await fetch('/api/admin/login-leader', {
+      // تغییر مسیر به API مشترک و استاندارد لاگین
+      const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -30,11 +31,7 @@ function LoginFormContent() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        // تنظیم کوکی‌ها برای دسترسی به پنل اختصاصی
-        document.cookie = `leader_token=leader-session; path=/; max-age=86400; SameSite=Lax`;
-        document.cookie = `leader_slug=${slug || data.slug || ''}; path=/; max-age=86400; SameSite=Lax`;
-
-        // هدایت سریع و آنی بدون رفرش سنگین با استفاده از router.push
+        // کوکی ها به صورت امن توسط سرور ست شده‌اند، نیازی به document.cookie نیست
         const targetSlug = slug || data.slug;
         if (targetSlug) {
           router.push(`/leader?slug=${targetSlug}`);
@@ -42,20 +39,15 @@ function LoginFormContent() {
           router.push('/leader');
         }
       } else {
-        setError(data.message || 'خطا در نام کاربری یا رمز عبور');
+        setError(data.error || 'خطا در نام کاربری یا رمز عبور');
       }
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('Login Error:', err);
       setError('خطا در ارتباط با سرور');
     } finally {
       setLoading(false);
     }
   };
-
-useEffect(() => {
-  router.prefetch('/leader');
-}, [router]);
-
 return (
     <div className="min-h-screen bg-[#F9704E] flex items-center justify-center p-3 sm:p-6" dir="rtl">
       

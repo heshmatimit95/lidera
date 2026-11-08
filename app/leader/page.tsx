@@ -1,6 +1,8 @@
 import { prisma } from '../lib/db';
 import LeaderDashboard from './LeaderDashboard';
-
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { jwtVerify } from 'jose';
 export default async function Page({ searchParams }: { searchParams: Promise<{ slug?: string }> }) {
   const { slug } = await searchParams;
   
@@ -72,7 +74,15 @@ const passengers = await prisma.passenger.findMany({
     }
   });
 
- 
+ // (این بخش را بعد از پیدا کردن leader در کد قرار بده)
+const token = (await cookies()).get('leader_token')?.value;
+let ok = false;
+try {
+  const { payload } = await jwtVerify(token ?? '', new TextEncoder().encode(process.env.JWT_SECRET!));
+  ok = payload.role === 'leader' && payload.leaderId === leader.id;
+} catch {}
+
+if (!ok) redirect(`/login?slug=${encodeURIComponent(slug)}`);
 
   return <LeaderDashboard initialLeader={leader} initialPassengers={passengers} />;
 }
