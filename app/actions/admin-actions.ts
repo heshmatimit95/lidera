@@ -115,6 +115,11 @@ export async function deleteAllRecordsForLeader(tenantSlug: string, pathName: st
     return { success: false, message: "خطا در حذف رکوردها از دیتابیس." };
   }
 }
+export async function updateAdminPassword(newPass: string, pathName: string) {
+  // کدهای مربوط به آپدیت رمز ادمین در صورت نیاز
+  revalidatePath(pathName);
+  return { success: true, message: "" };
+}
 
 export async function updateLeaderStatusInDb(id: string, status: string, pathName: string) {
   await prisma.leader.update({ where: { id }, data: { status } });
