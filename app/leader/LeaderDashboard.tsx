@@ -1995,7 +1995,7 @@ onChange={(e) => {
     انصراف
   </button>
 )}
-                  <button type="submit" className="bg-[#F9704E] hover:bg-yellow-600 text-zinc-950 font-bold px-4 py-2 rounded-xl text-xs transition-all cursor-pointer">
+                  <button type="submit" className="bg-[#F9704E] hover:bg-[#F9704E] text-zinc-950 font-bold px-4 py-2 rounded-xl text-xs transition-all cursor-pointer">
                     بروزرسانی رمز
                   </button>
                 </div>

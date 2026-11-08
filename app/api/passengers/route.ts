@@ -43,7 +43,9 @@ const leader = await prisma.leader.findFirst({
 });
 
 if (!leader) return NextResponse.json([], { status: 404 });
-
+if (leader.status === 'BLOCKED' || leader.status === 'PENDING') {
+  return NextResponse.json({ message: 'حساب کاربری شما فعال یا مسدود است' }, { status: 403 });
+}
 // 👈 این چک امنیتی را اینجا اضافه کن:
 if (leader.mustChangePassword) {
   return NextResponse.json({ message: 'ابتدا رمز را تغییر دهید' }, { status: 403 });

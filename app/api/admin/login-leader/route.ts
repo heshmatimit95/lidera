@@ -55,6 +55,22 @@ export async function POST(request: Request) {
       );
     }
 
+// 👈 چک کردن وضعیت مسدودی یا عدم تایید لیدر
+  if (leader.status === 'BLOCKED') {
+    return NextResponse.json(
+      { success: false, message: 'دسترسی شما موقتاً مسدود است. با پشتیبانی تماس بگیرید.' },
+      { status: 403 }
+    );
+  }
+
+  if (leader.status === 'PENDING') {
+    return NextResponse.json(
+      { success: false, message: 'حساب شما هنوز تایید نشده است.' },
+      { status: 403 }
+    );
+  }
+
+
     // ساخت پاسخ موفقیت‌آمیز همراه با کوکی
     const response = NextResponse.json(
       { 
