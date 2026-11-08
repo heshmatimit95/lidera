@@ -72,6 +72,7 @@ model Tour {
   updatedAt     DateTime       @updatedAt
   aiItinerary   AiItinerary? @relation(fields: [aiItineraryId], references: [id])
   aiItineraryId String?      @unique
+  mustChangePassword Boolean @default(false)
 }
 
 

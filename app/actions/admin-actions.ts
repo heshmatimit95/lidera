@@ -12,7 +12,7 @@ export async function getLeadersFromDb() {
 }
 
 export async function createLeaderInDb(data: any, pathName: string) {
-  // ۱. بررسی دسترسی ادمین
+  // ۱. اول امنیت و دسترسی ادمین بررسی شود
   await requireAdmin();
 
   const username = data.username ? data.username.trim().toLowerCase() : "";
@@ -40,7 +40,7 @@ export async function createLeaderInDb(data: any, pathName: string) {
 
   const uniqueSlug = username ? username : `leader-${nationalId || 'user'}`;
   
-  // ۲. هش کردن رمز عبور (اگر پسوردی نفرستاده بود پیش‌فرض 123456 را هش می‌کند)
+  // ۲. هش کردن رمز عبور پیش‌فرض یا ارسالی
   const rawPassword = data.password ? String(data.password).trim() : "123456";
   const securePassword = await hashPassword(rawPassword);
 
@@ -52,7 +52,8 @@ export async function createLeaderInDb(data: any, pathName: string) {
       nationalId: nationalId,
       mobile: mobile,
       address: data.address || '',
-      password: securePassword, // استفاده از رمز هش‌شده
+      password: securePassword,
+      mustChangePassword: true, // ۳. اجبار لیدر به تغییر رمز در اولین ورود
       status: 'ACTIVE',
       instagram: data.instagram || '',
       telegram: data.telegram || '',
