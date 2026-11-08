@@ -128,13 +128,15 @@ export async function updatePassword(id: string, newPassword: string, pathName: 
   return { success: true, message: "" };
 }
 
-export async function updateAdminPassword(newPass: string, pathName: string) {
-  revalidatePath(pathName);
-  return { success: true, message: "" };
-}
-
-export async function resetLeaderPasswordInDb(id: string, pathName: string) {
-  await prisma.leader.update({ where: { id }, data: { password: "123456" } });
+export async function resetLeaderPasswordInDb(id: string, pathName: string = "/admin") {
+  const hashedPassword = await bcrypt.hash("123456", 10);
+  await prisma.leader.update({
+    where: { id },
+    data: {
+      password: hashedPassword,
+      mustChangePassword: true
+    }
+  });
   revalidatePath(pathName);
   return { success: true, message: "" };
 }

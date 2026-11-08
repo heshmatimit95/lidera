@@ -38,13 +38,16 @@ export async function GET(request: Request) {
       }));
       return NextResponse.json(mapped);
     }
+const leader = await prisma.leader.findFirst({
+  where: { OR: [{ id: tenantKey }, { slug: tenantKey }, { username: tenantKey }] }
+});
 
-    const leader = await prisma.leader.findFirst({
-      where: { OR: [{ id: tenantKey }, { slug: tenantKey }, { username: tenantKey }] }
-    });
+if (!leader) return NextResponse.json([], { status: 404 });
 
-    if (!leader) return NextResponse.json([], { status: 404 });
-
+// 👈 این چک امنیتی را اینجا اضافه کن:
+if (leader.mustChangePassword) {
+  return NextResponse.json({ message: 'ابتدا رمز را تغییر دهید' }, { status: 403 });
+}
     const passengers = await prisma.passenger.findMany({ 
       where: { 
         OR: [

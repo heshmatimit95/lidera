@@ -53,6 +53,11 @@ const [leaderName, setLeaderName] = useState<string>(
   initialLeader?.fullName || initialLeader?.name || ''
 );
 // بررسی اینکه آیا وضعیت این مسافر تغییر کرده است یا خیر
+
+
+
+
+
 const [modifiedStatuses, setModifiedStatuses] = useState<{ [key: string]: string }>({});
 const [statusChanges, setStatusChanges] = useState<{ [key: string]: string }>({});
   const [passengers, setPassengers] = useState(initialPassengers || []);
@@ -78,7 +83,7 @@ const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
 const [rejectReason, setRejectReason] = useState('');
 const [showRejectInput, setShowRejectInput] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-const [mustChange, setMustChange] = useState(false);
+const [mustChange, setMustChange] = useState<boolean>(!!initialLeader?.mustChangePassword);
 
 
 // --- استیت‌های تنظیمات مالی و بانکی لیدر ---
@@ -92,7 +97,7 @@ const [paymentMethod, setPaymentMethod] = useState<'card' | 'gateway' | 'both'>(
   );
 
    // --- استیت‌های تغییر رمز ---
-  const [isChangePassModalOpen, setIsChangePassModalOpen] = useState<boolean>(false);
+ const [isChangePassModalOpen, setIsChangePassModalOpen] = useState<boolean>(!!initialLeader?.mustChangePassword);
   const [oldPasswordInput, setOldPasswordInput] = useState<string>('');
   const [newPasswordInput, setNewPasswordInput] = useState<string>('');
   const [confirmPasswordInput, setConfirmPasswordInput] = useState<string>('');
@@ -336,11 +341,13 @@ const handleChangePassword = async (e: React.FormEvent) => {
   const data = await res.json().catch(() => ({}));
 
   if (res.ok) {
-    alert('رمز عبور با موفقیت تغییر کرد');
-    setIsChangePassModalOpen(false);
-    setOldPasswordInput('');
-    setNewPasswordInput('');
-    setConfirmPasswordInput('');
+alert('رمز عبور با موفقیت تغییر کرد');
+  setMustChange(false);          // 👈 این خط را اینجا اضافه کن تا قفل صفحه باز شود
+  setIsChangePassModalOpen(false); // بستن مودال
+  setOldPasswordInput(''); 
+  setNewPasswordInput(''); 
+  setConfirmPasswordInput('');
+  router.refresh();
   } else {
     alert(data.message || 'خطا در تغییر رمز');
   }
@@ -1978,15 +1985,16 @@ onChange={(e) => {
                 </div>
 
                 <div className="flex justify-end gap-2 pt-2">
+{/* اگر کاربر مجبور به تغییر رمز نبود، دکمه انصراف نمایش داده شود */}
 {!mustChange && (
-    <button 
-      type="button" 
-      onClick={() => setIsChangePassModalOpen(false)} 
-      className="bg-zinc-800 border border-[#F9704E] text-zinc-300 px-3 py-2 rounded-xl text-xs"
-    >
-      انصراف
-    </button>
-  )}
+  <button 
+    type="button" 
+    onClick={() => setIsChangePassModalOpen(false)} 
+    className="bg-zinc-800 border border-[#F9704E] text-zinc-300 px-3 py-2 rounded-xl text-xs"
+  >
+    انصراف
+  </button>
+)}
                   <button type="submit" className="bg-[#F9704E] hover:bg-yellow-600 text-zinc-950 font-bold px-4 py-2 rounded-xl text-xs transition-all cursor-pointer">
                     بروزرسانی رمز
                   </button>
