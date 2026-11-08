@@ -1916,9 +1916,9 @@ onChange={(e) => {
         )}
         {/* مودال تغییر رمز عبور */}
         {isChangePassModalOpen && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-[#1e1e1e] border border-zinc-800 w-full max-w-sm rounded-2xl p-6 shadow-2xl relative">
-              <div className="flex justify-between items-center pb-3 mb-4 border-b border-zinc-800">
+          <div className="fixed inset-0 bg-black/70   border-b border-[#E5C060]   backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-[#1e1e1e] border border-[#F9704E] w-full max-w-sm rounded-2xl p-6 shadow-2xl relative">
+              <div className="flex justify-between items-center pb-3 mb-4 border-b border-[#F9704E]">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <FaKey className="text-[#E5C060]" /> تغییر رمز عبور پنل
                 </h3>
@@ -1935,7 +1935,7 @@ onChange={(e) => {
                     required
                     value={oldPasswordInput} 
                     onChange={(e) => setOldPasswordInput(e.target.value)}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs text-white"
+                    className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl p-2.5 text-xs text-white"
                   />
                 </div>
            <div>
@@ -1945,7 +1945,7 @@ onChange={(e) => {
     required
     value={newPasswordInput}
     onChange={(e) => setNewPasswordInput(e.target.value)}
-    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs text-white"
+    className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl p-2.5 text-xs text-white"
   />
   
   {/* 👇 دقیقاً اینجا راهنمای پویای رمز عبور را اضافه کن */}
@@ -1971,7 +1971,7 @@ onChange={(e) => {
                     required
                     value={confirmPasswordInput} 
                     onChange={(e) => setConfirmPasswordInput(e.target.value)}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs text-white"
+                    className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl p-2.5 text-xs text-white"
                   />
                 </div>
 
