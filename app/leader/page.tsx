@@ -26,7 +26,7 @@ const leader = await prisma.leader.findFirst({
       paymentMethod: true,
       cards: true,
       mustChangePassword: true, // 👈 این خط را اینجا اضافه کن
-   
+      status: true,
 tours: { 
   select: { 
     id: true, 
@@ -40,17 +40,25 @@ tours: {
     image3: true,
     image4: true,
     tourImages: { select: { url: true } } // واکشی از جدول رابطه TourImage
+    
   } 
 }
     }
   });
 
-  if (!leader) {
+
+  
+if (!leader) {
     return (
       <div className="min-h-screen bg-[#F9704E] text-white flex items-center justify-center font-bold text-lg" dir="rtl">
         لیدر مورد نظر یافت نشد
       </div>
     );
+  }
+
+  // 👈 این چک را اینجا بگذار (بعد از اینکه مطمئن شدیم لیدر وجود دارد)
+  if (leader.status === 'BLOCKED' || leader.status === 'PENDING') {
+    redirect('/login-leader?error=blocked');
   }
 
   // خواندن مسافران مستقیماً از دیتابیس
