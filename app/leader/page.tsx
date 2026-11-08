@@ -56,18 +56,9 @@ if (!leader) {
     );
   }
 
-// 👈 بررسی وضعیت لیدر (مسدود یا در انتظار تایید)
-  if (leader.status === 'BLOCKED' || leader.status === 'PENDING' || leader.status !== 'ACTIVE') {
-    return (
-      <div className="min-h-screen bg-[#F9704E] text-white flex items-center justify-center font-bold text-lg" dir="rtl">
-        حساب کاربری یا ثبت‌نام این تور موقتاً غیرفعال است.
-      </div>
-    );
-  }
 
-  console.log('STATUS FROM DB --->', leader?.status);
 
-  
+
   // خواندن مسافران مستقیماً از دیتابیس
 const passengers = await prisma.passenger.findMany({
     where: { leaderId: leader.id },

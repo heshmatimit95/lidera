@@ -24,6 +24,7 @@ const leader = await prisma.leader.findFirst({
     zarinpalMerchantId: true,
       paymentMethod: true,
       cards: true,
+      status: true,
  tours: {
   select: {
     id: true,
@@ -46,6 +47,13 @@ const leader = await prisma.leader.findFirst({
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '[#F9704E]', color: '#ff4d4d', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
         <h2>❌ لیدر یا تور مورد نظر یافت نشد.</h2>
+      </div>
+    );
+  }
+if (leader.status !== 'ACTIVE') {
+    return (
+      <div className="min-h-screen bg-[#F9704E] text-white flex items-center justify-center font-bold text-lg" dir="rtl">
+        ثبت‌نام این تور موقتاً غیرفعال است.
       </div>
     );
   }
