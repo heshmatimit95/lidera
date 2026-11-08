@@ -32,7 +32,7 @@ try {
     const newLeader = await prisma.leader.create({
       data: {
         slug: generatedSlug,
-        name: body.name || '',
+        lastName: body.lastname || body.lastName || '',
         lastname: body.lastname || '',
         fullName: `${body.name || ''} ${body.lastname || ''}`.trim(),
         username: body.username || null,
