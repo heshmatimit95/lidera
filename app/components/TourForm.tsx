@@ -754,7 +754,7 @@ const allImages = currentTourDetails?.images?.length > 0
 </button>
 
 <span className="text-white font-bold text-sm">
-  {seatsCount} صندلی
+  {seatsCount} تعداد نفر/ صندلی
 </span>
                     <button
                       type="button"

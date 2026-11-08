@@ -43,11 +43,11 @@ tours: {
     
   } 
 }
+
     }
   });
 
-
-  
+ 
 if (!leader) {
     return (
       <div className="min-h-screen bg-[#F9704E] text-white flex items-center justify-center font-bold text-lg" dir="rtl">
@@ -60,7 +60,13 @@ if (!leader) {
   if (leader.status === 'BLOCKED' || leader.status === 'PENDING') {
     redirect('/login-leader?error=blocked');
   }
-
+if (!leader || leader.status !== 'ACTIVE') {
+    return (
+      <div className="min-h-screen bg-[#F9704E] text-white flex items-center justify-center font-bold text-lg" dir="rtl">
+        ثبت‌نام این تور موقتاً غیرفعال است.
+      </div>
+    );
+  }
   // خواندن مسافران مستقیماً از دیتابیس
 const passengers = await prisma.passenger.findMany({
     where: { leaderId: leader.id },
