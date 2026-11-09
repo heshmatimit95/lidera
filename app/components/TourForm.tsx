@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { submitPassengerAction } from '@/app/actions/admin-actions';
-const [selectedHotel, setSelectedHotel] = useState<any>(null);
+
 const p2e = (s: any) => (s != null && typeof s === 'string' ? s.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString()) : '');
 
 function getTenantFromHost(host: string | null): string | null {
@@ -670,7 +670,8 @@ return (
                     </div>
                   )}
                 </div>
-            
+
+               
 {/* گالری تصاویر تور انتخابی (طراحی مدرن با قابلیت بزرگنمایی) */}
 {currentTourDetails && (() => {
 const allImages = currentTourDetails?.images?.length > 0
@@ -736,7 +737,6 @@ const allImages = currentTourDetails?.images?.length > 0
               </div>
             </div>
           )}
-
 
                      {/* تعداد صندلی مورد نیاز */}
                 <div className="mb-4">
@@ -869,7 +869,6 @@ const allImages = currentTourDetails?.images?.length > 0
           </label>
         </div>
       )}
-      
 <div>
 {/*<label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
   <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
