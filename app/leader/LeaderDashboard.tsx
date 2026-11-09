@@ -1,5 +1,5 @@
 "use client";
-
+import TourEditModal from '../components/TourEditModal';
 import TourAddForm from '../components/TourAddForm'; // (یا هر مسیری که کامپوننت را آنجا ساختی)
 import { savePassengerPayment } from "@/app/actions/leader-actions"; 
 import { generateTourAiItinerary } from "../actions/ai-actions";
@@ -79,7 +79,8 @@ const [rejectReason, setRejectReason] = useState('');
 const [showRejectInput, setShowRejectInput] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 const [mustChange, setMustChange] = useState<boolean>(!!initialLeader?.mustChangePassword);
-
+const [editingTour, setEditingTour] = useState<any>(null);
+const [isEditTourModalOpen, setIsEditTourModalOpen] = useState(false);
 
 // --- استیت‌های تنظیمات مالی و بانکی لیدر ---
 const [paymentMethod, setPaymentMethod] = useState<'card' | 'gateway' | 'both'>(
@@ -1794,6 +1795,9 @@ onChange={(e) => {
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <FaMapMarkedAlt className="text-[#F9704E]" /> مدیریت تورهای فعال
                 </h3>
+
+
+                
                 <button onClick={() => setIsTourModalOpen(false)} className="text-zinc-400 hover:text-white cursor-pointer">
                   <FaTimes size={16} />
                 </button>
@@ -1802,8 +1806,8 @@ onChange={(e) => {
               <div className="space-y-4">
 <TourAddForm onTourCreated={(newTour: any) => {
   setActiveTours((prev: any) => [...prev, newTour]);
-  setIsTourModalOpen(false); // بستن مودال بعد از ثبت موفق
-}} />
+  alert('✅ با موقیت ثبت گردید'); // پیام موفقیت
+  }} />
 
                 <div className="space-y-2">
                   <div className="text-xs font-bold text-zinc-400">تورهای فعلی ثبت شده:</div>
@@ -1846,10 +1850,23 @@ onChange={(e) => {
                               <button onClick={() => handleStartEditTour(idx, t.name, (t as any).date || '', t.price ? String(t.price) : '')} className="p-1.5 bg-zinc-800 text-blue-400 rounded cursor-pointer">
                                 <FaEdit size={12} />
                               </button>
+                           
                             )}
+<button 
+        type="button"
+        onClick={() => { 
+        setEditingTour(t); 
+          setIsEditTourModalOpen(true); 
+        }}
+        className="bg-amber-500/20 text-amber-400 px-3 py-1.5 rounded-lg text-xs hover:bg-amber-500/30 cursor-pointer transition-all"
+      >
+        ویرایش کامل
+      </button>    
+
                             <button onClick={() => handleDeleteTour(t.id, t.name)} className="p-1.5 bg-zinc-800 text-rose-500 rounded cursor-pointer">
                               <FaTrash size={12} />
                             </button>
+                 
 {/* دکمه اختصاصی جمینی (Gemini Sparkle) */}
 <button
   onClick={() => handleGenerateAi(t.id || String(idx), t.name, 3, "طبیعت‌گردی")}
@@ -2132,6 +2149,28 @@ onChange={(e) => {
           </div>
         </div>
       )}
+{/* قرار دادن مودال در انتهای کدها */}
+<TourEditModal 
+  tour={editingTour} 
+  isOpen={isEditTourModalOpen} 
+  onClose={() => setIsEditTourModalOpen(false)} 
+  onTourUpdated={(updated) => {
+    setActiveTours((prev: any) => prev.map((t: any) => t.id === updated.id ? updated : t));
+  }} 
+/>
+     
+
+{/* مودال ویرایش کامل تور */}
+<TourEditModal 
+  tour={editingTour} 
+  isOpen={isEditTourModalOpen} 
+  onClose={() => setIsEditTourModalOpen(false)} 
+  onTourUpdated={(updated: any) => {
+    setActiveTours((prev: any) => prev.map((t: any) => t.id === updated.id ? updated : t));
+  }} 
+/>
+
+
 
 
 {/* مودال هوش مصنوعی */}

@@ -869,8 +869,9 @@ const allImages = currentTourDetails?.images?.length > 0
           </label>
         </div>
       )}
+      
 <div>
-<label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
+{/*<label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
   <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
   {idCardPreview ? (
     <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] bg-neutral-900">
@@ -885,7 +886,7 @@ const allImages = currentTourDetails?.images?.length > 0
       <span className="text-lg">🪪</span>
       <span>برای آپلود عکس کارت ملی کلیک کنید</span>
     </button>
-  )}
+  )}*/}
   {idCardError && <p className="text-xs text-red-400 mt-2 font-medium">{idCardError}</p>}
                       </div>
                     </div>
