@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { requireAdmin } from '../../../lib/require-admin'; // 👈 تابع امنیتی ادمین
 
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
+    // 👈 بررسی امنیتی: فقط ادمین مجاز به ریست کردن رمز لیدرها است
+    await requireAdmin();
+
     // دریافت اطلاعات ارسالی از فرم (شامل شناسه و رمز جدید)
     const { leaderId, newPassword } = await request.json();
 
@@ -39,6 +43,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error resetting password:', error);
-    return NextResponse.json({ message: 'خطا در ارتباط با دیتابیس' }, { status: 500 });
+    return NextResponse.json({ message: 'خطا در ارتباط با دیتابیس یا عدم دسترسی ادمین' }, { status: 500 });
   }
 }

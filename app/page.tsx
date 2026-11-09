@@ -1,10 +1,6 @@
 import { prisma } from './lib/db';
 import TourForm from './components/TourForm';
-
 import { isActive } from './lib/leader-status';
-
-
-
 export default async function Page({ 
   searchParams 
 }: { 

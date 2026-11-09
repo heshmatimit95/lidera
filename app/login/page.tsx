@@ -1,9 +1,7 @@
 "use client";
 import Image from 'next/image';
 import React, { useState, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 function LoginFormContent() {
   const router = useRouter();
@@ -14,18 +12,19 @@ function LoginFormContent() {
   
   const searchParams = useSearchParams();
   const slug = searchParams.get('slug');
+  const isBlocked = searchParams.get('blocked'); // 👈 انتقال صحیح به داخل کامپوننت
 
-const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
       // تغییر مسیر به API مشترک و استاندارد لاگین
- const res = await fetch('/api/admin/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ username, password })
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
       });
 
       const data = await res.json();
@@ -48,6 +47,7 @@ const handleLogin = async (e: React.FormEvent) => {
       setLoading(false);
     }
   };
+  
 return (
     <div className="min-h-screen bg-[#F9704E] flex items-center justify-center p-3 sm:p-6" dir="rtl">
       

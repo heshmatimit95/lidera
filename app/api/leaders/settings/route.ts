@@ -1,37 +1,34 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { requireActiveLeader } from '../../../lib/auth'; // 👈 تابع امنیتی کلود
 
 const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
+    // 👈 بررسی امنیتی: لیدر باید لاگین کرده باشد و حسابش فعال و مسدود نباشد
+    const auth = await requireActiveLeader();
+    if (!auth.ok) {
+      return NextResponse.json({ success: false, message: auth.message }, { status: auth.status });
+    }
+
     const body = await request.json();
-    const { tenantId, paymentMethod, cards } = body;
+    const { paymentMethod, cards } = body;
 
-    if (!tenantId) {
-      return NextResponse.json({ error: 'Tenant ID is required' }, { status: 400 });
-    }
-
-    // اول لیدر را پیدا کنیم تا ID اصلی‌اش را داشته باشیم (چونکه ممکن است tenantId همان slug باشد)
-    const leader = await prisma.leader.findFirst({
-      where: { OR: [{ id: tenantId }, { slug: tenantId }] }
-    });
-
-    if (!leader) {
-      return NextResponse.json({ error: 'Leader not found' }, { status: 404 });
-    }
+    // از آیدی خودِ لیدر احراز هویت شده استفاده می‌شود تا امنیت کامل برقرار باشد
+    const leaderId = auth.leader.id;
 
     // استفاده از Transaction برای آپدیت روش پرداخت و مدیریت کارت‌ها
     await prisma.$transaction(async (tx) => {
       // ۱. آپدیت روش پرداخت لیدر
       await tx.leader.update({
-        where: { id: leader.id },
+        where: { id: leaderId },
         data: { paymentMethod: paymentMethod }
       });
 
       // ۲. حذف کارت‌های قبلی این لیدر
       await tx.bankCard.deleteMany({
-        where: { leaderId: leader.id }
+        where: { leaderId: leaderId }
       });
 
       // ۳. اگر کارتی ارسال شده بود، جدیدها را اضافه کن
@@ -41,7 +38,7 @@ export async function POST(request: Request) {
             cardNumber: card.cardNumber || card.number || '',
             bankName: card.bankName || card.bank || '',
             cardHolder: card.cardHolder || card.holder || '',
-            leaderId: leader.id
+            leaderId: leaderId
           }))
         });
       }

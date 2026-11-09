@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
+import { requireActiveLeader } from '../../lib/auth'; // 👈 اضافه شدن تابع امنیتی کلود
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -8,6 +9,12 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 export async function POST(req: NextRequest) {
   try {
+    // 👈 بررسی امنیتی: لیدر باید فعال باشد تا اجازه آپلود فایل داشته باشد
+    const auth = await requireActiveLeader();
+    if (!auth.ok) {
+      return NextResponse.json({ success: false, message: auth.message }, { status: auth.status });
+    }
+
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
 

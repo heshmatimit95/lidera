@@ -1,92 +1,133 @@
+import { NextResponse } from 'next/server';
 import { prisma } from '../../../lib/db';
-import { NextResponse, NextRequest } from 'next/server';
+import { isActive } from '../../../lib/leader-status';
+import { checkRateLimit } from '../../../lib/rate-limit';
 
-export async function POST(req: NextRequest) {
+const toEnglishDigits = (s: string) =>
+  s.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+   .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+
+const cleanStr = (v: unknown, max: number) => String(v ?? '').trim().slice(0, max);
+const digitsOnly = (v: unknown, max: number) =>
+  toEnglishDigits(String(v ?? '')).replace(/\D/g, '').slice(0, max);
+
+// فقط تصاویر Cloudinary خودمان
+const cleanImageUrl = (v: unknown): string | null => {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (s.length > 500) return null;
   try {
-    const body = await req.json();
-    const { amountInRial: bodyAmount, description, leaderId, tourId } = body;
-    const pData = body.passengerData || {};
+    const u = new URL(s);
+    if (u.protocol === 'https:' && u.hostname === 'res.cloudinary.com') return s;
+  } catch {}
+  return null;
+};
 
-    const fFullName = (pData.fullName || body.fullName || '').trim();
-    const fPhone = (pData.phone || pData.mobile || body.phone || body.mobile || '').trim();
-    const fNationalId = (pData.nationalId || body.nationalId || '').trim();
-    const fTourname = description || pData.tourName || body.tourName || 'تور گردشگری';
-    const fSeatsCount = Number(pData.seatsCount || body.seatsCount || 1);
-
-    if (!fFullName || !fPhone || !fNationalId) {
-      return NextResponse.json({ success: false, message: 'اطلاعات مسافر ناقص است' }, { status: 400 });
+export async function POST(request: Request) {
+  try {
+    // ۱. محدودیت درخواست (عمومی است)
+    const ip = request.headers.get('x-forwarded-for')?.split(',').pop()?.trim() || 'unknown';
+    const rl = checkRateLimit(`reg:${ip}`, 10, 10 * 60_000);
+    if (!rl.success) {
+      return NextResponse.json({ error: 'درخواست زیاد است. کمی بعد تلاش کنید.' }, { status: 429 });
     }
 
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'درخواست نامعتبر است' }, { status: 400 });
+    }
+
+    // ۲. کلید لیدر: حتماً رشته (جلوگیری از operator injection)
+    const tenantKey = cleanStr(body.tenantId ?? body.leaderId ?? body.slug, 64);
+    if (!tenantKey) {
+      return NextResponse.json({ error: 'Tenant key required' }, { status: 400 });
+    }
+
+    // ۳. پیدا کردن لیدر؛ بدون username
     const leader = await prisma.leader.findFirst({
-      where: { OR: [{ id: leaderId }, { slug: leaderId }] },
+      where: { OR: [{ id: tenantKey }, { slug: tenantKey }] },
+      select: { id: true, status: true },
     });
-
     if (!leader) {
-      return NextResponse.json({ success: false, message: 'لیدر یافت نشد' }, { status: 404 });
+      return NextResponse.json({ error: 'Leader not found' }, { status: 404 });
     }
 
-    // تأیید و محاسبه امن مبلغ سمت سرور از روی دیتابیس (جلوگیری از دستکاری قیمت در کلاینت)
-    let amountInRial = Number(bodyAmount || 0);
-    if (tourId) {
-      const tour = await prisma.tour.findUnique({ where: { id: tourId } });
-      if (tour && tour.price) {
-        amountInRial = Number(tour.price) * fSeatsCount;
-      }
+    // ۴. وضعیت لیدر
+    if (!isActive(leader.status)) {
+      return NextResponse.json(
+        { success: false, message: 'ثبت‌نام این تور موقتاً غیرفعال است.' },
+        { status: 403 }
+      );
     }
 
-    const amountInToman = Math.floor(amountInRial / 10);
+    // ۵. اعتبارسنجی ورودی
+    const fullName = cleanStr(body.fullName, 80);
+    const mobile = digitsOnly(body.mobile ?? body.phone, 11);
+    const nationalId = digitsOnly(body.nationalId, 10);
+    const birthDate = cleanStr(body.birthDate, 10);
+    const seats = Math.floor(Number(body.seatsCount ?? body.seats ?? 1));
+    const tourId = cleanStr(body.tourId, 64);
 
-    const newPassenger = await prisma.passenger.create({
+    if (!fullName) return NextResponse.json({ error: 'نام الزامی است' }, { status: 400 });
+    if (!/^09\d{9}$/.test(mobile)) return NextResponse.json({ error: 'شماره موبایل نامعتبر است' }, { status: 400 });
+    if (!/^\d{10}$/.test(nationalId)) return NextResponse.json({ error: 'کد ملی باید ۱۰ رقم باشد' }, { status: 400 });
+    if (!Number.isFinite(seats) || seats < 1 || seats > 20) {
+      return NextResponse.json({ error: 'تعداد صندلی نامعتبر است' }, { status: 400 });
+    }
+    if (!tourId) return NextResponse.json({ error: 'تور انتخاب نشده است' }, { status: 400 });
+    if (body.hasAcceptedWaiver !== true) {
+      return NextResponse.json({ error: 'پذیرش تعهدنامه الزامی است' }, { status: 400 });
+    }
+
+    // ۶. تور باید متعلق به همین لیدر باشد؛ قیمت از دیتابیس
+    const tour = await prisma.tour.findFirst({
+      where: { id: tourId, leaderId: leader.id },
+      select: { id: true, name: true, title: true, price: true },
+    });
+    if (!tour) {
+      return NextResponse.json({ error: 'تور یافت نشد' }, { status: 404 });
+    }
+    const unitPrice = Number(toEnglishDigits(String(tour.price ?? '')).replace(/\D/g, ''));
+    if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
+      return NextResponse.json({ error: 'قیمت تور نامعتبر است' }, { status: 400 });
+    }
+    const totalToman = unitPrice * seats; // مبلغ فقط سمت سرور
+
+    // ۷. جلوگیری از ثبت تکراری (همین کد ملی برای همین تور)
+    const tourLabel = tour.title || tour.name;
+    const dup = await prisma.passenger.findFirst({
+      where: { leaderId: leader.id, nationalId, tourId: tour.id },
+      select: { id: true },
+    });
+    if (dup) {
+      return NextResponse.json({ error: 'با این کد ملی قبلاً برای این تور ثبت‌نام شده است' }, { status: 409 });
+    }
+
+    // ۸. ثبت مسافر؛ وضعیت را سرور تعیین می‌کند
+    const passenger = await prisma.passenger.create({
       data: {
-        fullName: fFullName,
-        mobile: fPhone,
-        nationalId: fNationalId,
-        tourName: fTourname,
+        fullName,
+        mobile,
+        nationalId,
+        birthDate: birthDate || null,
+        tourName: tourLabel,
+        tourId: tour.id,
+        seatsCount: seats,
+        amount: String(totalToman),
         paymentStatus: 'در انتظار پرداخت',
-        amount: String(amountInToman),
-        seatsCount: fSeatsCount,
-        receiptDate: new Date().toLocaleDateString('fa-IR'),
+        insurance: false,
+        hasAcceptedWaiver: true,
+        waiverSignedAt: new Date(),
+        idCardImage: cleanImageUrl(body.idCardImage),
         leaderId: leader.id,
         tenantId: leader.id,
       },
+      select: { id: true },
     });
 
-    const merchant = leader?.zarinpalMerchantId || process.env.ZARINPAL_MERCHANT || "1c337482-1e50-11e9-a417-005056a205be";
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lidera.ir';
-    const callbackUrl = `${baseUrl}/api/payment/verify?leaderId=${leader.id}&passengerId=${newPassenger.id}&amount=${amountInRial}`;
-
-    const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/request.json', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        merchant_id: merchant,
-        amount: amountInRial,
-        callback_url: callbackUrl,
-        description: `رزرو تور ${fTourname} (${fSeatsCount} نفر)`,
-        metadata: { mobile: fPhone },
-      }),
-    });
-
-    const data = await response.json();
-
-    if (data && data.data && data.data.code === 100) {
-      return NextResponse.json({
-        success: true,
-        url: `https://sandbox.zarinpal.com/pg/StartPay/${data.data.authority}`,
-      });
-    } else {
-      await prisma.passenger.update({
-        where: { id: newPassenger.id },
-        data: { paymentStatus: 'ناموفق' },
-      }).catch(() => {});
-
-      return NextResponse.json({
-        success: false,
-        message: data.errors?.message || 'خطا در ارتباط با درگاه زرین‌پال',
-      }, { status: 400 });
-    }
+    return NextResponse.json({ success: true, passengerId: passenger.id, amountInToman: totalToman });
   } catch (error) {
-    console.error('Payment Request Fatal Error:', error);
-    return NextResponse.json({ success: false, message: 'خطای داخلی سرور' }, { status: 500 });
+    console.error('Passenger register error:', error);
+    return NextResponse.json({ error: 'خطای سرور' }, { status: 500 });
   }
 }

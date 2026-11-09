@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { requireAdmin } from '../../../../lib/require-admin'; // 👈 تابع امنیتی ادمین
 
 const prisma = new PrismaClient();
 
@@ -9,6 +10,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 👈 بررسی امنیتی: فقط ادمین اجازه حذف لیدر را دارد
+    await requireAdmin();
+
     const resolvedParams = await params;
     const id = resolvedParams.id;
 
@@ -23,7 +27,7 @@ export async function DELETE(
     return NextResponse.json({ message: 'لیدر با موفقیت حذف شد' }, { status: 200 });
   } catch (error) {
     console.error('Error deleting leader:', error);
-    return NextResponse.json({ error: 'خطا در حذف رکورد از دیتابیس' }, { status: 500 });
+    return NextResponse.json({ error: 'خطا در حذف رکورد از دیتابیس یا عدم دسترسی ادمین' }, { status: 500 });
   }
 }
 
@@ -33,6 +37,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 👈 بررسی امنیتی: فقط ادمین اجازه ویرایش وضعیت/اطلاعات لیدر را دارد
+    await requireAdmin();
+
     const resolvedParams = await params;
     const id = resolvedParams.id;
     const body = await request.json();
@@ -49,6 +56,6 @@ export async function PATCH(
     return NextResponse.json(updatedLeader, { status: 200 });
   } catch (error) {
     console.error('Error updating leader:', error);
-    return NextResponse.json({ error: 'خطا در ویرایش اطلاعات لیدر' }, { status: 500 });
+    return NextResponse.json({ error: 'خطا در ویرایش اطلاعات لیدر یا عدم دسترسی ادمین' }, { status: 500 });
   }
 }

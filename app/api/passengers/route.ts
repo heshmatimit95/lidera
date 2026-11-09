@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { requireActiveLeader } from '../../lib/auth'; // 👈 تابع امنیتی کلود
 
 const prisma = new PrismaClient();
 
@@ -11,8 +12,17 @@ export async function GET(request: Request) {
     // خواندن شماره صفحه برای صفحه‌بندی (پیش‌فرض صفحه ۱)
     const page = Number(searchParams.get('page')) || 1;
 
+    // 👈 بررسی امنیتی وضعیت لیدر با تابع مشترک
+    const auth = await requireActiveLeader();
+    if (!auth.ok) {
+      return NextResponse.json({ success: false, message: auth.message }, { status: auth.status });
+    }
+
+    const leaderId = auth.leader.id;
+
     if (!tenantKey) {
       const allPassengers = await prisma.passenger.findMany({ 
+        where: { leaderId },
         orderBy: { createdAt: 'desc' },
         take: 20,
         skip: (page - 1) * 20,
@@ -28,7 +38,6 @@ export async function GET(request: Request) {
           amount: true,
           seatsCount: true,
           createdAt: true,
-          // عکس‌های سنگین حذف شدند تا سرعت بالا برود
         }
       });
       const mapped = allPassengers.map((p: any) => ({
@@ -38,25 +47,10 @@ export async function GET(request: Request) {
       }));
       return NextResponse.json(mapped);
     }
-const leader = await prisma.leader.findFirst({
-  where: { OR: [{ id: tenantKey }, { slug: tenantKey }, { username: tenantKey }] }
-});
 
-if (!leader) return NextResponse.json([], { status: 404 });
-if (leader.status === 'BLOCKED' || leader.status === 'PENDING') {
-  return NextResponse.json({ message: 'حساب کاربری شما فعال یا مسدود است' }, { status: 403 });
-}
-// 👈 این چک امنیتی را اینجا اضافه کن:
-if (leader.mustChangePassword) {
-  return NextResponse.json({ message: 'ابتدا رمز را تغییر دهید' }, { status: 403 });
-}
     const passengers = await prisma.passenger.findMany({ 
       where: { 
-        OR: [
-          { leaderId: leader.id },
-          { tenantId: leader.id },
-          { tenantId: leader.slug }
-        ]
+        leaderId: leaderId,
       }, 
       orderBy: { createdAt: 'desc' },
       take: 20, // فقط ۲۰ مسافر در هر صفحه
@@ -73,7 +67,6 @@ if (leader.mustChangePassword) {
         amount: true,
         seatsCount: true,
         createdAt: true,
-        // عمداً receiptImage و idCardImage اینجا نیستند تا حجم دیتابیس و سرعت لود سبک شود!
       }
     });
     
@@ -92,28 +85,19 @@ if (leader.mustChangePassword) {
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireActiveLeader();
+    if (!auth.ok) {
+      return NextResponse.json({ success: false, message: auth.message }, { status: auth.status });
+    }
+
     const body = await request.json();
     console.log("Received POST body:", body);
 
-    const tenantKey = body.tenantId || body.leaderId || body.slug;
-    
     const { fullName, mobile, phone, nationalId, tourName, paymentStatus, insurance, receiptDate, amount, receiptImage } = body;
     const mobileValue = mobile || phone;
 
-    // در ثبت‌نام جدید، اگر کاربر صندلی انتخاب کرده باشد خوانده می‌شود، وگرنه پیش‌فرض ۱ است
     const seatsValue = Number(body.seatsCount || body.seats || 1);
-
-    if (!tenantKey) {
-      return NextResponse.json({ error: 'Tenant or Leader ID required' }, { status: 400 });
-    }
-
-    const leader = await prisma.leader.findFirst({
-      where: { OR: [{ id: tenantKey }, { slug: tenantKey }, { username: tenantKey }] }
-    });
-
-    if (!leader) {
-      return NextResponse.json({ error: 'Leader not found' }, { status: 404 });
-    }
+    const leaderId = auth.leader.id;
 
     const newPassenger = await prisma.passenger.create({
       data: { 
@@ -127,9 +111,9 @@ export async function POST(request: Request) {
         receiptDate: receiptDate || new Date().toLocaleDateString('fa-IR'), 
         amount: amount ? String(amount) : '0', 
         receiptImage: receiptImage || null,
-        tenantId: leader.id,
+        tenantId: leaderId,
         leader: {
-          connect: { id: leader.id }
+          connect: { id: leaderId }
         }
       }
     });
@@ -149,6 +133,11 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
+    const auth = await requireActiveLeader();
+    if (!auth.ok) {
+      return NextResponse.json({ success: false, message: auth.message }, { status: auth.status });
+    }
+
     const body = await request.json();
     console.log("Received PUT body:", body);
 
@@ -187,30 +176,20 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const auth = await requireActiveLeader();
+    if (!auth.ok) {
+      return NextResponse.json({ success: false, message: auth.message }, { status: auth.status });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    const tenantKey = searchParams.get('tenantId') || searchParams.get('slug');
     const all = searchParams.get('all');
+    const leaderId = auth.leader.id;
 
     // اگر درخواست حذف همه بود
     if (all === 'true') {
-      if (!tenantKey) {
-        return NextResponse.json({ error: 'Tenant ID required for delete all' }, { status: 400 });
-      }
-
-      // پیدا کردن لیدر برای پوشش دادن هم ID و هم Slug
-      const leader = await prisma.leader.findFirst({
-        where: { OR: [{ id: tenantKey }, { slug: tenantKey }, { username: tenantKey }] }
-      });
-
-      // حذف تمام مسافرانی که به این لیدر مرتبط هستند
       await prisma.passenger.deleteMany({
-        where: {
-          OR: [
-            { tenantId: tenantKey },
-            ...(leader ? [{ tenantId: leader.id }, { tenantId: leader.slug }] : [])
-          ]
-        }
+        where: { tenantId: leaderId }
       });
 
       return NextResponse.json({ success: true, message: 'All records deleted successfully' });
