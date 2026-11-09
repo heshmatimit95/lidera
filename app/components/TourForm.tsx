@@ -530,7 +530,10 @@ async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
 
 
 
-
+// استخراج ایمن اطلاعات تور انتخاب شده بدون ریسک کرش
+const currentTourObj = (typeof selectedTour === 'object' && selectedTour !== null) 
+  ? selectedTour 
+  : ((currentLider?.tours || []).find((t: any) => t === selectedTour || t?.name === selectedTour || t?.title === selectedTour) || {});
 
 
 
