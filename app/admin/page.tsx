@@ -510,18 +510,18 @@ const filteredGuides = guides.filter(guide => {
                       >
 
 
-    
-    {/* 🔗 لینک مسافر */}
-    <button
-      onClick={() => {
-        const passengerLink = `${window.location.origin}/?slug=${guide.username || guide.slug}`;
-        navigator.clipboard.writeText(passengerLink);
-        alert(`لینک صفحه مسافران کپی شد:\n${passengerLink}`);
-      }}
-      className="flex items-center justify-center gap-1.5 py-2 px-3 bg-white/5 hover:bg-emerald-500/20 text-emerald-400 text-xs rounded-lg transition-all"
-    >
-      <FaLink size={15} />
-    </button>
+  {/* 🔑 لینک ورود لیدر (موبایل) */}
+<button
+  onClick={() => {
+    const leaderLoginLink = `${window.location.origin}/login?slug=${guide.username || guide.slug}`;
+    navigator.clipboard.writeText(leaderLoginLink);
+    alert(`لینک اختصاصی ورود لیدر کپی شد:\n${leaderLoginLink}`);
+  }}
+  className="flex items-center justify-center gap-1.5 py-2 px-3 bg-white/5 hover:bg-blue-500/20 text-blue-400 text-xs rounded-lg transition-all cursor-pointer"
+  title="کپی لینک اختصاصی ورود لیدر"
+>
+  <FaLink size={15} /> 
+</button>
 
 
 
@@ -686,23 +686,6 @@ const filteredGuides = guides.filter(guide => {
                             >
                               <FaKey size={14} />
                             </button>
-{/* دکمه کپی لینک اختصاصی صفحه مسافر */}
-<button
-  onClick={() => handleCopyLeaderLink(guide.username || guide.slug)}
-  className="p-2 text-emerald-400 hover:text-emerald-400 rounded-lg hover:bg-emerald-500/10 transition-colors cursor-pointer"
-  title="کپی لینک اختصاصی مسافر"
->
-  <FaLink size={15} />
-</button>
-
-{/* 👈 دکمه جدید: کپی لینک اختصاصی ورود (لاگین) تورلیدر */}
-<button
-  onClick={() => handleCopyLeaderLoginLink(guide.username || guide.slug)}
-  className="p-2 text-blue-400 hover:text-blue-400 rounded-lg hover:bg-blue-500/10 transition-colors cursor-pointer"
-  title="کپی لینک ورود اختصاصی لیدر"
->
-  🔑 {/* یا می‌توانید از آیکون‌های lucide/react یا react-icons دلخواه استفاده کنید */}
-</button>
                             <button
                               onClick={() => handleDelete(guide.id)}
                               className="p-2 text-rose-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
