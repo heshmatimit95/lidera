@@ -508,6 +508,8 @@ const filteredGuides = guides.filter(guide => {
                         className="p-2 text-amber-400 hover:text-amber-400 bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
                         title="ریست رمز"
                       >
+                        <FaKey size={14} />
+                      </button>
 
 
   {/* 🔑 لینک ورود لیدر (موبایل) */}
@@ -523,10 +525,6 @@ const filteredGuides = guides.filter(guide => {
   <FaLink size={15} /> 
 </button>
 
-
-
-                        <FaKey size={14} />
-                      </button>
                       <button
                         onClick={() => handleDelete(guide.id)}
                         className="p-2 text-rose-500 hover:text-rose-500 bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
