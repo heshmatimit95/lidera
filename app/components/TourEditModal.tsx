@@ -5,7 +5,8 @@ import { FaEdit, FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
 export default function TourEditModal({ tour, isOpen, onClose, onTourUpdated }: { tour: any; isOpen: boolean; onClose: () => void; onTourUpdated: (updated: any) => void }) {
   if (!isOpen || !tour) return null;
 
-  const [name, setName] = useState(tour.name || '');
+  // استفاده از اطلاعات خودِ تور انتخابی به عنوان مقدار اولیه
+  const [name, setName] = useState(tour.name || tour.title || '');
   const [duration, setDuration] = useState(tour.duration || '۳ شب و ۴ روز');
   const [startDate, setStartDate] = useState(tour.startDate || '');
   const [endDate, setEndDate] = useState(tour.endDate || '');
@@ -14,7 +15,6 @@ export default function TourEditModal({ tour, isOpen, onClose, onTourUpdated }: 
   const [services, setServices] = useState<string[]>(tour.services || ['صبحانه', 'بیمه']);
   const [newService, setNewService] = useState('');
   const [hotels, setHotels] = useState(tour.hotels || [{ name: '', price: '', desc: '' }]);
-
   const handleAddHotel = () => setHotels([...hotels, { name: '', price: '', desc: '' }]);
   const handleHotelChange = (index: number, field: string, value: string) => {
     const updated = [...hotels];
