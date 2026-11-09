@@ -283,7 +283,12 @@ if (res.ok) {
     }
   };
 
-
+// تابع جدید برای کپی لینک اختصاصی ورود لیدر
+const handleCopyLeaderLoginLink = (slug: string) => {
+  const loginUrl = `${window.location.origin}/login?slug=${slug}`;
+  navigator.clipboard.writeText(loginUrl);
+  alert(`لینک اختصاصی ورود لیدر کپی شد:\n${loginUrl}`);
+};
 
 
 // --- تولید و کپی لینک اختصاصی تورلیدر ---
@@ -500,6 +505,55 @@ const filteredGuides = guides.filter(guide => {
                         className="p-2 text-amber-400 hover:text-amber-400 bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
                         title="ریست رمز"
                       >
+
+{/* --- نمای موبایل (کارت مخصوص گوشی) --- */}
+<div className="md:hidden bg-[#061421] border border-white/10 rounded-xl p-4 mb-4 space-y-3 shadow-lg">
+  <div className="flex justify-between items-start border-b border-white/10 pb-3">
+    <div>
+      <h3 className="text-white font-bold text-base">{guide.fullName}</h3>
+      <p className="text-xs text-gray-400 mt-0.5">همراه: {guide.mobile}</p>
+    </div>
+    <span className="px-2 py-0.5 text-xs rounded bg-white/10 text-white">
+      {guide.status === 'ACTIVE' ? 'فعال' : 'مسدود'}
+    </span>
+  </div>
+
+  <div className="text-xs text-gray-300 space-y-1">
+    <p><span className="text-gray-500">نام کاربری:</span> {guide.username}</p>
+    <p><span className="text-gray-500">کد ملی:</span> {guide.nationalId || '---'}</p>
+  </div>
+
+  {/* دکمه‌های عملیاتی و کپی لینک در موبایل */}
+  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
+    
+    {/* 🔗 لینک مسافر */}
+    <button
+      onClick={() => {
+        const passengerLink = `${window.location.origin}/?slug=${guide.username || guide.slug}`;
+        navigator.clipboard.writeText(passengerLink);
+        alert(`لینک صفحه مسافران کپی شد:\n${passengerLink}`);
+      }}
+      className="flex items-center justify-center gap-1.5 py-2 px-3 bg-white/5 hover:bg-emerald-500/20 text-emerald-400 text-xs rounded-lg transition-all"
+    >
+      🔗 لینک مسافر
+    </button>
+
+    {/* 🔑 لینک ورود لیدر (موبایل) */}
+    <button
+      onClick={() => {
+        const leaderLoginLink = `${window.location.origin}/login?slug=${guide.username || guide.slug}`;
+        navigator.clipboard.writeText(leaderLoginLink);
+        alert(`لینک ورود لیدر کپی شد:\n${leaderLoginLink}`);
+      }}
+      className="flex items-center justify-center gap-1.5 py-2 px-3 bg-white/5 hover:bg-blue-500/20 text-blue-400 text-xs rounded-lg transition-all"
+    >
+      🔑 ورود لیدر
+    </button>
+
+  </div>
+</div>
+
+
                         <FaKey size={14} />
                       </button>
                       <button
@@ -650,7 +704,23 @@ const filteredGuides = guides.filter(guide => {
                             >
                               <FaKey size={14} />
                             </button>
+{/* دکمه کپی لینک اختصاصی صفحه مسافر */}
+<button
+  onClick={() => handleCopyLeaderLink(guide.username || guide.slug)}
+  className="p-2 text-emerald-400 hover:text-emerald-400 rounded-lg hover:bg-emerald-500/10 transition-colors cursor-pointer"
+  title="کپی لینک اختصاصی مسافر"
+>
+  <FaLink size={15} />
+</button>
 
+{/* 👈 دکمه جدید: کپی لینک اختصاصی ورود (لاگین) تورلیدر */}
+<button
+  onClick={() => handleCopyLeaderLoginLink(guide.username || guide.slug)}
+  className="p-2 text-blue-400 hover:text-blue-400 rounded-lg hover:bg-blue-500/10 transition-colors cursor-pointer"
+  title="کپی لینک ورود اختصاصی لیدر"
+>
+  🔑 {/* یا می‌توانید از آیکون‌های lucide/react یا react-icons دلخواه استفاده کنید */}
+</button>
                             <button
                               onClick={() => handleDelete(guide.id)}
                               className="p-2 text-rose-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
