@@ -2,6 +2,8 @@ import { prisma } from '../lib/db';
 import LeaderDashboard from './LeaderDashboard';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { isActive } from '../lib/leader-status';
+
 import { jwtVerify } from 'jose';
 export default async function Page({ searchParams }: { searchParams: Promise<{ slug?: string }> }) {
   const { slug } = await searchParams;
@@ -46,7 +48,6 @@ tours: {
 
     }
   });
-
  
 if (!leader) {
     return (
@@ -55,10 +56,6 @@ if (!leader) {
       </div>
     );
   }
-
-
-
-
   // خواندن مسافران مستقیماً از دیتابیس
 const passengers = await prisma.passenger.findMany({
     where: { leaderId: leader.id },
@@ -91,6 +88,6 @@ try {
 } catch {}
 
 if (!ok) redirect(`/login?slug=${encodeURIComponent(slug)}`);
-
+if (!isActive(leader.status)) redirect(`/login?slug=${encodeURIComponent(slug)}&blocked=1`);
   return <LeaderDashboard initialLeader={leader} initialPassengers={passengers} />;
 }

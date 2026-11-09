@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { SignJWT } from 'jose';
 import { prisma } from '../../../lib/db';
 import { checkRateLimit, resetRateLimit } from '../../../lib/rate-limit';
-
+import { isActive, isBlocked } from '../../../lib/leader-status';
 const FAIL = { success: false, error: 'نام کاربری یا رمز عبور اشتباه است.' };
 const DUMMY_HASH = '$2a$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinv';
 
@@ -39,12 +39,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'تلاش بیش از حد. بعداً دوباره امتحان کنید.' }, { status: 429 });
     }
 
+
+
+
     // ادمین
     const adminUser = (process.env.ADMIN_USERNAME ?? '').trim().toLowerCase();
     const adminHash = process.env.ADMIN_PASSWORD_HASH ?? '';
     if (adminUser && adminHash && username === adminUser) {
       const ok = await bcrypt.compare(password, adminHash);
       if (!ok) return NextResponse.json(FAIL, { status: 401 });
+
+
+      
 
       resetRateLimit(`user:${username}`);
       const token = await makeToken({ role: 'admin' }, secret);
@@ -71,7 +77,14 @@ export async function POST(request: Request) {
     if (!leader || !ok) {
       return NextResponse.json(FAIL, { status: 401 });
     }
-
+if (!isActive(leader.status)) {
+  return NextResponse.json(
+    { success: false, error: isBlocked(leader.status)
+        ? 'دسترسی شما موقتاً مسدود است. با پشتیبانی تماس بگیرید.'
+        : 'حساب شما هنوز تأیید نشده است.' },
+    { status: 403 }
+  );
+}
     resetRateLimit(`user:${username}`);
     const token = await makeToken({ role: 'leader', leaderId: leader.id, slug: leader.slug }, secret);
     const res = NextResponse.json({ success: true, role: 'leader', slug: leader.slug });
@@ -80,6 +93,7 @@ export async function POST(request: Request) {
       secure: process.env.NODE_ENV === 'production', sameSite: 'lax',
       path: '/', maxAge: 60 * 60 * 12,
     });
+    
     return res;
   } catch (error) {
     console.error('Login Error:', error);

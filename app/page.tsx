@@ -1,5 +1,10 @@
 import { prisma } from './lib/db';
 import TourForm from './components/TourForm';
+
+import { isActive } from './lib/leader-status';
+
+
+
 export default async function Page({ 
   searchParams 
 }: { 
@@ -50,7 +55,7 @@ const leader = await prisma.leader.findFirst({
       </div>
     );
   }
-if (leader.status !== 'ACTIVE') {
+if (!isActive(leader.status)) {
     return (
       <div className="min-h-screen bg-[#F9704E] text-white flex items-center justify-center font-bold text-lg" dir="rtl">
         ثبت‌نام این تور موقتاً غیرفعال است.
