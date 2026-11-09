@@ -283,11 +283,11 @@ if (res.ok) {
     }
   };
 
-// تابع جدید برای کپی لینک اختصاصی ورود لیدر
+  
 const handleCopyLeaderLoginLink = (slug: string) => {
-  const loginUrl = `${window.location.origin}/login?slug=${slug}`;
-  navigator.clipboard.writeText(loginUrl);
-  alert(`لینک اختصاصی ورود لیدر کپی شد:\n${loginUrl}`);
+  const loginLink = `${window.location.origin}/login?slug=${slug}`;
+  navigator.clipboard.writeText(loginLink);
+  alert(`لینک ورود اختصاصی لیدر کپی شد:\n${loginLink}`);
 };
 
 
@@ -299,7 +299,11 @@ const handleCopyLeaderLoginLink = (slug: string) => {
     navigator.clipboard.writeText(leaderLink);
     alert(`🔗 لینک اختصاصی تورلیدر با موفقیت کپی شد:\n${leaderLink}`);
   };
+
+
+
 // فیلتر کردن لیدرها بر اساس جستجو (نام، نام کاربری، کد ملی، شماره تماس)
+
 const filteredGuides = guides.filter(guide => {
   const term = searchTerm.toLowerCase();
   return (
@@ -440,7 +444,6 @@ const filteredGuides = guides.filter(guide => {
   >
     <FaTrash className="text-[18px] sm:text-[14px]" />
   </button>
-
   {/* دکمه خروج از پنل */}
   <button
     onClick={handleLogout}
@@ -485,7 +488,7 @@ const filteredGuides = guides.filter(guide => {
                     </div>
                     
                     <div className="flex items-center gap-1">
-
+                       {/* 🔗 لینک مسافر */}
                             <button
                               onClick={() => handleCopyLeaderLink(guide.username)}
                               className="p-2 text-emerald-400 hover:text-emerald-400  bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
@@ -506,25 +509,7 @@ const filteredGuides = guides.filter(guide => {
                         title="ریست رمز"
                       >
 
-{/* --- نمای موبایل (کارت مخصوص گوشی) --- */}
-<div className="md:hidden bg-[#061421] border border-white/10 rounded-xl p-4 mb-4 space-y-3 shadow-lg">
-  <div className="flex justify-between items-start border-b border-white/10 pb-3">
-    <div>
-      <h3 className="text-white font-bold text-base">{guide.fullName}</h3>
-      <p className="text-xs text-gray-400 mt-0.5">همراه: {guide.mobile}</p>
-    </div>
-    <span className="px-2 py-0.5 text-xs rounded bg-white/10 text-white">
-      {guide.status === 'ACTIVE' ? 'فعال' : 'مسدود'}
-    </span>
-  </div>
 
-  <div className="text-xs text-gray-300 space-y-1">
-    <p><span className="text-gray-500">نام کاربری:</span> {guide.username}</p>
-    <p><span className="text-gray-500">کد ملی:</span> {guide.nationalId || '---'}</p>
-  </div>
-
-  {/* دکمه‌های عملیاتی و کپی لینک در موبایل */}
-  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
     
     {/* 🔗 لینک مسافر */}
     <button
@@ -535,23 +520,9 @@ const filteredGuides = guides.filter(guide => {
       }}
       className="flex items-center justify-center gap-1.5 py-2 px-3 bg-white/5 hover:bg-emerald-500/20 text-emerald-400 text-xs rounded-lg transition-all"
     >
-      🔗 لینک مسافر
+      <FaLink size={15} />
     </button>
 
-    {/* 🔑 لینک ورود لیدر (موبایل) */}
-    <button
-      onClick={() => {
-        const leaderLoginLink = `${window.location.origin}/login?slug=${guide.username || guide.slug}`;
-        navigator.clipboard.writeText(leaderLoginLink);
-        alert(`لینک ورود لیدر کپی شد:\n${leaderLoginLink}`);
-      }}
-      className="flex items-center justify-center gap-1.5 py-2 px-3 bg-white/5 hover:bg-blue-500/20 text-blue-400 text-xs rounded-lg transition-all"
-    >
-      🔑 ورود لیدر
-    </button>
-
-  </div>
-</div>
 
 
                         <FaKey size={14} />
@@ -684,7 +655,7 @@ const filteredGuides = guides.filter(guide => {
                             <button
                               onClick={() => handleCopyLeaderLink(guide.username)}
                               className="p-2 text-emerald-400 hover:text-emerald-400 rounded-lg hover:bg-emerald-500/10 transition-colors cursor-pointer"
-                              title="کپی لینک اختصاصی"
+                              title="کپی لینک اختصاصی مسافر"
                             >
                               <FaLink size={15} />
                             </button>
@@ -696,6 +667,17 @@ const filteredGuides = guides.filter(guide => {
                             >
                               <FaEdit size={16} />
                             </button>
+
+{/* دکمه کپی لینک لاگین لیدر در دسکتاپ */}
+<button
+  onClick={() => handleCopyLeaderLoginLink(guide.username || guide.slug)}
+  className="p-2 text-blue-400 hover:text-blue-400 rounded-lg hover:bg-blue-500/10 transition-colors cursor-pointer"
+  title="کپی لینک ورود اختصاصی لیدر"
+>
+   <FaLink size={15} />
+</button>
+
+
 
                             <button
                               onClick={() => handleResetLeaderPassword(guide.id)}
