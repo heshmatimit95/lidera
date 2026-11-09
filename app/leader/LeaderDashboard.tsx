@@ -1,6 +1,6 @@
 "use client";
 
-
+import TourAddForm from '../components/TourAddForm'; // (یا هر مسیری که کامپوننت را آنجا ساختی)
 import { savePassengerPayment } from "@/app/actions/leader-actions"; 
 import { generateTourAiItinerary } from "../actions/ai-actions";
 import { FaWhatsapp, FaTelegramPlane, FaInstagram, FaCopy, } from 'react-icons/fa';
@@ -53,11 +53,6 @@ const [leaderName, setLeaderName] = useState<string>(
   initialLeader?.fullName || initialLeader?.name || ''
 );
 // بررسی اینکه آیا وضعیت این مسافر تغییر کرده است یا خیر
-
-
-
-
-
 const [modifiedStatuses, setModifiedStatuses] = useState<{ [key: string]: string }>({});
 const [statusChanges, setStatusChanges] = useState<{ [key: string]: string }>({});
   const [passengers, setPassengers] = useState(initialPassengers || []);
@@ -1790,6 +1785,7 @@ onChange={(e) => {
             </div>
           </div>
         )}
+      
        {/* مودال مدیریت تورها */}
         {isTourModalOpen && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -1804,35 +1800,10 @@ onChange={(e) => {
               </div>
 
               <div className="space-y-4">
-                <form onSubmit={handleAddTour} className="bg-zinc-900 p-4 rounded-xl border border-zinc-800 space-y-3">
-                  <div className="text-xs font-bold text-zinc-300">افزودن تور جدید:</div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <input 
-                      type="text" 
-                      placeholder="عنوان تور (مثلا: تور کویر)" 
-                      value={newTourName} 
-                      onChange={(e) => setNewTourName(e.target.value)}
-                      className="bg-zinc-800 border border-zinc-700 p-2.5 rounded-lg text-xs text-white"
-                    />
-                    <input 
-                      type="text" 
-                      placeholder="تاریخ تور (اختیاری)" 
-                      value={newTourDate} 
-                      onChange={(e) => setNewTourDate(e.target.value)}
-                      className="bg-zinc-800 border border-zinc-700 p-2.5 rounded-lg text-xs text-white font-mono"
-                    />
-                    <input 
-                      type="text" 
-                      placeholder="قیمت هر صندلی (تومان)" 
-                      value={newTourPrice} 
-                      onChange={(e) => setNewTourPrice(e.target.value.replace(/[^0-9]/g, ''))}
-                      className="bg-zinc-800 border border-zinc-700 p-2.5 rounded-lg text-xs text-white font-mono"
-                    />
-                  </div>
-                     <button type="submit" className="w-full bg-[#F9704E] hover:bg-orange-600 text-white p-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer">
-                    ثبت تور جدید در لیست
-                  </button>
-                </form>
+<TourAddForm onTourCreated={(newTour: any) => {
+  setActiveTours((prev: any) => [...prev, newTour]);
+  setIsTourModalOpen(false); // بستن مودال بعد از ثبت موفق
+}} />
 
                 <div className="space-y-2">
                   <div className="text-xs font-bold text-zinc-400">تورهای فعلی ثبت شده:</div>

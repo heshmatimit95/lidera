@@ -110,7 +110,7 @@ export async function POST(request: Request) {
         mobile,
         nationalId,
         birthDate: birthDate || null,
-        tourName: tourLabel,
+        tourName: tourLabel || '',
         tourId: tour.id,
         seatsCount: seats,
         amount: String(totalToman),

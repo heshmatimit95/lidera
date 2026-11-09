@@ -287,7 +287,7 @@ if (res.ok) {
 const handleCopyLeaderLoginLink = (slug: string) => {
   const loginLink = `${window.location.origin}/login?slug=${slug}`;
   navigator.clipboard.writeText(loginLink);
-  alert(`لینک ورود اختصاصی لیدر کپی شد:\n${loginLink}`);
+  alert(`لینک ورود اختصاصی مسافرین کپی شد:\n${loginLink}`);
 };
 
 
@@ -297,7 +297,7 @@ const handleCopyLeaderLoginLink = (slug: string) => {
     const leaderLink = `${window.location.origin}/?slug=${username}`;
 
     navigator.clipboard.writeText(leaderLink);
-    alert(`🔗 لینک اختصاصی تورلیدر با موفقیت کپی شد:\n${leaderLink}`);
+    alert(`🔗 لینک ورود اختصاصی تورلیدر با موفقیت کپی شد:\n${leaderLink}`);
   };
 
 

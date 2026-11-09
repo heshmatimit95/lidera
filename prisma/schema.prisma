@@ -47,32 +47,51 @@ model BankCard {
   leader      Leader   @relation(fields: [leaderId], references: [id], onDelete: Cascade)
 }
 
+
 model Tour {
-  id            String         @id @default(uuid())
-  name          String
-  title         String?
-  date          String?
-  price         String?
-  images        String[]
-  tenantId      String
-
-  image1        String?
-  image2        String?
-  image3        String?
-  image4        String?
-
-  leaderId      String
-  leader        Leader         @relation(fields: [leaderId], references: [id], onDelete: Cascade)
+  id           String        @id @default(uuid())
+  name         String?
+  title        String?
+  date         String?
+  price        String?
+  images       String[]
+  tenantId     String
   
-  tourImages    TourImage[]
-  passengers    Passenger[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  aiItinerary   AiItinerary? @relation(fields: [aiItineraryId], references: [id])
+  image1       String?
+  image2       String?
+  image3       String?
+  image4       String?
+
+  duration     String?       
+  startDate    String?       
+  endDate      String?       
+  services     String[]      
+
+  leaderId     String
+  leader       Leader        @relation(fields: [leaderId], references: [id], onDelete: Cascade)
+  
+  tourImages   TourImage[]
+  passengers   Passenger[]
+  
+
+  hotels       Hotel[]       @relation("TourHotels")
+
+  aiItinerary  AiItinerary?  @relation(fields: [aiItineraryId], references: [id])
   aiItineraryId String?      @unique
 
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
+model Hotel {
+  id          String   @id @default(uuid())
+  tourId      String
+  name        String   
+  price       Float    
+  description String?  
+  
+  tour        Tour     @relation("TourHotels", fields: [tourId], references: [id], onDelete: Cascade)
+}
 
 
 model TourImage {

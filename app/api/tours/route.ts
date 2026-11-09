@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
 
   const leader = await prisma.leader.findFirst({
     where: { OR: [{ id: tenantId }, { slug: tenantId }] },
-    select: { id: true, status: true } // 👈 فقط فیلدهای لازم برای امنیت و کارایی
+    select: { id: true, status: true } 
   });
 
   // بررسی مسدود نبودن لیدر در نمایش عمومی
@@ -18,13 +18,14 @@ export async function GET(request: NextRequest) {
 
   const tours = await prisma.tour.findMany({ 
     where: { leaderId: leader.id }, 
+    include: { hotels: true }, // 👈 اضافه شدن شامل بودن هتل‌ها برای نمایش کامل
     orderBy: { createdAt: 'desc' } 
   });
   
   return NextResponse.json(tours);
 }
 
-// POST: ایجاد تور جدید (با بررسی مالکیت قطعی از روی توکن)
+// POST: ایجاد تور جدید (با بررسی مالکیت قطعی از روی توکن + پشتیبانی از هتل‌ها و جزئیات پیشرفته)
 export async function POST(request: NextRequest) {
   try {
     const leaderAuth = await requireActiveLeader();
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, title, date, price, images } = body;
+    const { name, title, date, price, images, duration, startDate, endDate, services, hotels } = body;
 
     // 🔒 نکته حیاتی امنیتی (جلوگیری از IDOR): شناسه لیدر اجباراً از توکن خوانده می‌شود نه از بدنه درخواست!
     const verifiedLeaderId = leaderAuth.leader.id;
@@ -42,13 +43,28 @@ export async function POST(request: NextRequest) {
       data: {
         name: name || title || 'تور بدون عنوان',
         title: title || name || 'تور بدون عنوان',
-        date: date ? String(date) : null,
+        date: date ? String(date) : (startDate ? `${startDate} تا ${endDate || ''}` : null),
         price: price ? String(price) : null,
         images: images || [],
+        duration: duration || null,
+        startDate: startDate || null,
+        endDate: endDate || null,
+        services: services || [],
         tenantId: verifiedLeaderId,
         leader: {
           connect: { id: verifiedLeaderId }
+        },
+        // 🏨 ثبت نرخ‌نامه هتل‌ها به صورت ارتباطی (در صورت وجود)
+        hotels: {
+          create: hotels?.map((h: { name: string; price: string | number; desc?: string; description?: string }) => ({
+            name: h.name,
+            price: Number(h.price) || 0,
+            description: h.desc || h.description || '',
+          })) || [],
         }
+      },
+      include: {
+        hotels: true,
       }
     });
 
@@ -59,7 +75,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT: ویرایش تور (با بررسی مالکیت: لیدر فقط تور خودش را می‌تواند ویرایش کند)
+// PUT: ویرایش تور (با بررسی مالکیت و امکان ویرایش هتل‌ها و جزئیات)
 export async function PUT(request: NextRequest) {
   try {
     const leaderAuth = await requireActiveLeader();
@@ -68,7 +84,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, name, title, date, price, images } = body;
+    const { id, name, title, date, price, images, duration, startDate, endDate, services, hotels } = body;
     
     if (!id) {
       return NextResponse.json({ error: 'Tour ID required' }, { status: 400 });
@@ -83,6 +99,11 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'تور یافت نشد یا شما دسترسی ندارید' }, { status: 403 });
     }
 
+    // اگر هتل‌های جدید ارسال شده باشند، ابتدا هتل‌های قبلی را پاک کرده و جدیدها را ثبت می‌کنیم یا آپدیت انجام می‌دهیم
+    if (hotels && Array.isArray(hotels)) {
+      await prisma.hotel.deleteMany({ where: { tourId: id } });
+    }
+
     const updated = await prisma.tour.update({
       where: { id },
       data: {
@@ -90,7 +111,23 @@ export async function PUT(request: NextRequest) {
         ...(title !== undefined && { title }),
         ...(date !== undefined && { date: String(date) }),
         ...(price !== undefined && { price: String(price) }),
-        ...(images !== undefined && { images })
+        ...(images !== undefined && { images }),
+        ...(duration !== undefined && { duration }),
+        ...(startDate !== undefined && { startDate }),
+        ...(endDate !== undefined && { endDate }),
+        ...(services !== undefined && { services }),
+        ...(hotels && Array.isArray(hotels) && {
+          hotels: {
+            create: hotels.map((h: { name: string; price: string | number; desc?: string; description?: string }) => ({
+              name: h.name,
+              price: Number(h.price) || 0,
+              description: h.desc || h.description || '',
+            }))
+          }
+        })
+      },
+      include: {
+        hotels: true,
       }
     });
     
@@ -121,6 +158,9 @@ export async function DELETE(request: NextRequest) {
     if (!existingTour) {
       return NextResponse.json({ error: 'تور یافت نشد یا شما دسترسی ندارید' }, { status: 403 });
     }
+
+    // حذف هتل‌های وابسته به این تور ابتدا (برای جلوگیری از خطای کلید خارجی)
+    await prisma.hotel.deleteMany({ where: { tourId: id } });
 
     await prisma.tour.delete({ where: { id } });
     return NextResponse.json({ success: true });
