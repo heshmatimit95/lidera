@@ -1,13 +1,20 @@
 import { prisma } from '../lib/db';
-import TourForm from '../components/TourForm';
+import LeaderDashboard from './LeaderDashboard';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { isActive } from '../lib/leader-status';
-export default async function Page({ 
-  searchParams 
-}: { 
-  searchParams: Promise<{ slug?: string; leader?: string }> 
-}) {
-  const resolvedParams = await searchParams;
-  const slug = resolvedParams.slug || resolvedParams.leader || 'leader_1';
+
+import { jwtVerify } from 'jose';
+export default async function Page({ searchParams }: { searchParams: Promise<{ slug?: string }> }) {
+  const { slug } = await searchParams;
+  
+  if (!slug) {
+    return (
+      <div className="min-h-screen bg-[#F9704E] text-white flex items-center justify-center font-bold text-lg" dir="rtl">
+        اسلاگ لیدر در آدرس صفحه یافت نشد
+      </div>
+    );
+  }
 
 const leader = await prisma.leader.findFirst({
   where: {
@@ -55,21 +62,46 @@ const leader = await prisma.leader.findFirst({
 },
   }
 });
-
-  if (!leader) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F9704E', color: '#ff4d4d', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
-        <h2>❌ لیدر یا تور مورد نظر یافت نشد.</h2>
-      </div>
-    );
-  }
-if (!isActive(leader.status)) {
+ 
+if (!leader) {
     return (
       <div className="min-h-screen bg-[#F9704E] text-white flex items-center justify-center font-bold text-lg" dir="rtl">
-        ثبت‌نام این تور موقتاً غیرفعال است.
+        لیدر مورد نظر یافت نشد
       </div>
     );
   }
+  // خواندن مسافران مستقیماً از دیتابیس
+const passengers = await prisma.passenger.findMany({
+    where: { leaderId: leader.id },
+    orderBy: { createdAt: 'desc' },
+    take: 50,
+    select: {
+      id: true,
+      fullName: true,
+      mobile: true,
+      nationalId: true,
+      tourName: true,
+      paymentStatus: true,
+      insurance: true,
+      receiptDate: true,
+      amount: true,
+      seatsCount: true,
+      receiptImage: true,
+      createdAt: true
 
- return <TourForm leader={leader} />;
+      
+    }
+  });
+
+ // (این بخش را بعد از پیدا کردن leader در کد قرار بده)
+const token = (await cookies()).get('leader_token')?.value;
+let ok = false;
+try {
+  const { payload } = await jwtVerify(token ?? '', new TextEncoder().encode(process.env.JWT_SECRET!));
+  ok = payload.role === 'leader' && payload.leaderId === leader.id;
+} catch {}
+
+if (!ok) redirect(`/login?slug=${encodeURIComponent(slug)}`);
+if (!isActive(leader.status)) redirect(`/login?slug=${encodeURIComponent(slug)}&blocked=1`);
+  return <LeaderDashboard initialLeader={leader} initialPassengers={passengers} />;
 }
