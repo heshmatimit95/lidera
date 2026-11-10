@@ -5,7 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { submitPassengerAction } from '@/app/actions/admin-actions';
 
-const p2e = (s: any) => (s != null && typeof s === 'string' ? s.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString()) : '');
+// اصلاح تابع p2e برای جلوگیری از خطا در صورت عددی بودن قیمت
+const p2e = (s: any) => {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString());
+};
 
 function getTenantFromHost(host: string | null): string | null {
   if (!host) return null;
@@ -30,20 +34,28 @@ interface TourFormProps {
 export default function TourForm({ leader: initialLeader }: TourFormProps) {
   const [currentLider, setCurrentLider] = useState<any>(initialLeader || null);
   const [selectedTour, setSelectedTour] = useState<string>(
-    initialLeader?.tours?.[0]?.id ?? ''
+    initialLeader?.tours?.[0]?.id ?? initialLeader?.tours?.[0]?._id ?? ''
   );
 
-const [selectedHotel, setSelectedHotel] = useState<any>(null);
+  const [selectedHotel, setSelectedHotel] = useState<any>(null);
 
+  // پیدا کردن تور انتخاب شده با پشتیبانی از id و _id
   const currentTourObj = (typeof selectedTour === 'object' && selectedTour !== null) 
     ? selectedTour 
-    : ((currentLider?.tours || []).find((t: any) => t === selectedTour || t?.name === selectedTour || t?.title === selectedTour) || {});
+    : ((currentLider?.tours || []).find((t: any) => String(t.id) === String(selectedTour) || String(t._id) === String(selectedTour) || t?.name === selectedTour || t?.title === selectedTour) || {});
 
   const matchedTour: any = currentTourObj || {};
+  // در دیتابیس شما فیلد services وجود دارد
   const tourServices: string[] = Array.isArray(matchedTour.services) ? matchedTour.services : [];
-  const tourHotels: any[] = Array.isArray(matchedTour.hotels) ? matchedTour.hotels : [];
+  
+  // پیدا کردن هتل‌ها با پشتیبانی از نام‌های مختلف فیلد در دیتابیس
+  const tourHotels: any[] = Array.isArray(matchedTour.hotels) 
+    ? matchedTour.hotels 
+    : (Array.isArray(matchedTour.Hotel) 
+        ? matchedTour.Hotel 
+        : (Array.isArray(matchedTour.newTourHotels) ? matchedTour.newTourHotels : []));
 
-const [isloadingLeader, setIsLoadingLeader] = useState(!initialLeader);
+  const [isloadingLeader, setIsLoadingLeader] = useState(!initialLeader);
   const router = useRouter();
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -58,34 +70,34 @@ const [isloadingLeader, setIsLoadingLeader] = useState(!initialLeader);
   const [birthDate, setBirthDate] = useState('');
   const [phone, setPhone] = useState('');
   const [nationalId, setNationalId] = useState('');
-   const [seatsCount, setSeatsCount] = useState('1');
+  const [seatsCount, setSeatsCount] = useState('1');
   const [idCardImage, setIdCardImage] = useState<File | null>(null);
   const [idCardPreview, setIdCardPreview] = useState<string | null>(null);
   const [idCardError, setIdCardError] = useState<string | null>(null);
-   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [receiptError, setReceiptError] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
   const idCardInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
-const [isTermsAccepted, setIsTermsAccepted] = useState(false);
-const [showTermsAccordion, setShowTermsAccordion] = useState(false);
-const [paymentMethod, setPaymentMethod] = useState<'card' | 'online'>('card');
-const isBirthDateValid = birthDate.trim().length >= 8; // مثلاً 1370/01/01
-const isNationalIdValid = nationalId.trim().length === 10;
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+  const [showTermsAccordion, setShowTermsAccordion] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'online'>('card');
+  const isBirthDateValid = birthDate.trim().length >= 8;
+  const isNationalIdValid = nationalId.trim().length === 10;
 
+  const toPersianNumbers = (str: string | number) => {
+    if (!str) return '';
+    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    return String(str).replace(/\d/g, (digit) => persianDigits[parseInt(digit)]);
+  };
 
-const toPersianNumbers = (str: string | number) => {
-  if (!str) return '';
-  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-  return String(str).replace(/\d/g, (digit) => persianDigits[parseInt(digit)]);
-};
-// تابع تبدیل اعداد فارسی/عربی به انگلیسی
   const toEnglishDigits = (str: string) => {
     if (!str) return "";
     return str
       .replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d).toString())
       .replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d).toString());
   };
+
   const handleRemoveIdCard = () => {
     setIdCardImage(null);
     if (idCardPreview) {
@@ -110,58 +122,58 @@ const toPersianNumbers = (str: string | number) => {
   }, [searchParams]);
 
   useEffect(() => {
-  // اگر اطلاعات لیدر قبلاً از سرور رسیده باشد، اصلاً نیازی به fetch مجدد نیست
-  if (initialLeader) {
-    setCurrentLider(initialLeader);
-    setIsLoadingLeader(false);
-    return;
-  }
+    if (initialLeader) {
+      setCurrentLider(initialLeader);
+      setIsLoadingLeader(false);
+      if (initialLeader.tours && initialLeader.tours.length > 0) {
+        setSelectedTour(initialLeader.tours[0].id || initialLeader.tours[0]._id);
+      }
+      return;
+    }
 
-  if (!tenantSlug) {
-    setIsLoadingLeader(false);
-    return;
-  }
+    if (!tenantSlug) {
+      setIsLoadingLeader(false);
+      return;
+    }
 
-  let isMounted = true;
+    let isMounted = true;
 
-  const fetchLeaderFromDb = async () => {
-    try {
-      const res = await fetch(`/api/leader-info?slug=${tenantSlug}`, {
-        cache: 'no-store'
-      });
-      const data = await res.json();
+    const fetchLeaderFromDb = async () => {
+      try {
+        const res = await fetch(`/api/leader-info?slug=${tenantSlug}`, {
+          cache: 'no-store'
+        });
+        const data = await res.json();
 
-      if (isMounted && data && data.success && data.leader) {
-        setCurrentLider(data.leader);
-        if (data.leader.tours && data.leader.tours.length > 0) {
-          setSelectedTour(data.leader.tours[0].id || data.leader.tours[0]._id);
+        if (isMounted && data && data.success && data.leader) {
+          setCurrentLider(data.leader);
+          if (data.leader.tours && data.leader.tours.length > 0) {
+            setSelectedTour(data.leader.tours[0].id || data.leader.tours[0]._id);
+          }
+        }
+      } catch (error) {
+        console.error("خطا در دریافت اطلاعات لیدر از دیتابیس", error);
+      } finally {
+        if (isMounted) {
+          setIsLoadingLeader(false);
         }
       }
-    } catch (error) {
-      console.error("خطا در دریافت اطلاعات لیدر از دیتابیس", error);
-    } finally {
-      if (isMounted) {
-        setIsLoadingLeader(false);
-      }
-    }
-  };
+    };
 
-  fetchLeaderFromDb();
+    fetchLeaderFromDb();
 
-  return () => {
-    isMounted = false;
-  };
-}, [tenantSlug, initialLeader]);
+    return () => {
+      isMounted = false;
+    };
+  }, [tenantSlug, initialLeader]);
 
-
-useEffect(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const paymentStatus = urlParams.get('payment');
 
       if (paymentStatus === 'success') {
         alert('🎉 پرداخت و ثبت‌نام شما با موفقیت انجام شد!.');
-        // پاک کردن پارامتر از URL برای جلوگیری از نمایش مجدد هنگام رفرش
         window.history.replaceState({}, document.title, window.location.pathname + (window.location.search.includes('slug=') ? `?slug=${urlParams.get('slug') || ''}` : ''));
       } else if (paymentStatus === 'canceled') {
         alert('⚠️ فرآیند پرداخت توسط شما لغو شد.');
@@ -175,68 +187,69 @@ useEffect(() => {
 
   const maxSize = 5 * 1024 * 1024;
 
-const handleIdCardChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  setIdCardError(null);
-  if (e.target.files && e.target.files[0]) {
-    const file = e.target.files[0];
-    if (file.size > maxSize) {
-      setIdCardError("❌ حجم عکس کارت ملی بیش از ۵ مگابایت است.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        setIdCardImage(data.url); // ذخیره لینک ابری Cloudinary
-        setIdCardPreview(URL.createObjectURL(file)); // نمایش پیش‌نمایش محلی
-      } else {
-        setIdCardError(data.message || 'خطا در آپلود عکس');
+  const handleIdCardChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIdCardError(null);
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > maxSize) {
+        setIdCardError("❌ حجم عکس کارت ملی بیش از ۵ مگابایت است.");
+        return;
       }
-    } catch (err) {
-      console.error('Upload error:', err);
-      setIdCardError('خطا در ارتباط با سرور برای آپلود');
-    }
-  }
-};
-const handleReceiptChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  setReceiptError(null);
-  if (e.target.files && e.target.files[0]) {
-    const file = e.target.files[0];
-    if (file.size > maxSize) {
-      setReceiptError("❌ حجم عکس فیش بیش از ۵ مگابایت است.");
-      return;
-    }
 
-    const formData = new FormData();
-    formData.append('file', file);
+      const formData = new FormData();
+      formData.append('file', file);
 
-    try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
 
-      if (data.success) {
-        setReceiptImage(data.url); // ذخیره لینک ابری Cloudinary
-        setReceiptPreview(URL.createObjectURL(file)); // نمایش پیش‌نمایش محلی
-      } else {
-        setReceiptError(data.message || 'خطا در آپلود عکس فیش');
+        if (data.success) {
+          setIdCardImage(data.url);
+          setIdCardPreview(URL.createObjectURL(file));
+        } else {
+          setIdCardError(data.message || 'خطا در آپلود عکس');
+        }
+      } catch (err) {
+        console.error('Upload error:', err);
+        setIdCardError('خطا در ارتباط با سرور برای آپلود');
       }
-    } catch (err) {
-      console.error('Upload error:', err);
-      setReceiptError('خطا در ارتباط با سرور برای آپلود');
     }
-  }
-};
+  };
+
+  const handleReceiptChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setReceiptError(null);
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > maxSize) {
+        setReceiptError("❌ حجم عکس فیش بیش از ۵ مگابایت است.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          setReceiptImage(data.url);
+          setReceiptPreview(URL.createObjectURL(file));
+        } else {
+          setReceiptError(data.message || 'خطا در آپلود عکس فیش');
+        }
+      } catch (err) {
+        console.error('Upload error:', err);
+        setReceiptError('خطا در ارتباط با سرور برای آپلود');
+      }
+    }
+  };
 
   const handleCopyCard = (cardNumber: string) => {
     navigator.clipboard.writeText(cardNumber);
@@ -281,17 +294,15 @@ const handleReceiptChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (step > 1) setStep(step - 1);
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // ۱. ابتدا تمام متغیرهای محاسباتی رو در بالاترین نقطه تعریف می‌کنیم تا در کل تابع قابل دسترس باشند
     const tourObj = currentLider?.tours?.find((t: any) => (t.id || t._id) === selectedTour);
     const tourTitle = tourObj ? `${tourObj.title || tourObj.name} (${tourObj.date || ''})` : 'تور عمومی';
     const rawPrice = tourObj?.price ? parseInt(String(tourObj.price).replace(/[^0-9]/g, ''), 10) || 0 : 0;
     const calculatedAmount = (rawPrice * parseInt(String(seatsCount || 1), 10)).toString();
 
-    // ۲. اگر روش پرداخت کارت به کارت بود، مستقیم اطلاعات را ثبت کن و به درگاه نرو
     if (paymentMethod === "card") {
       try {
         const payload = {
@@ -328,7 +339,6 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    // ۳. در غیر این صورت (پرداخت آنلاین / زرین‌پال) ادامه کدهای قبلی اجرا می‌شوند:
     try {
       const payRes = await fetch('/api/payment/request', {
         method: 'POST',
@@ -372,15 +382,13 @@ const handleSubmit = async (e: React.FormEvent) => {
     setPhone('');
     setNationalId('');
     setSeatsCount('1');
-setStep(1);
-  setSelectedTour(currentLider?.tours?.[0]?.id || currentLider?.tours?.[0]?._id || '');
-     setFullName('');
-  setNationalId('');
-  setBirthDate('');
-   setPaymentMethod('online');
-  setReceiptImage(null);
-  setReceiptPreview(null);
-  setIsSuccess(false);
+    setStep(1);
+    setSelectedTour(currentLider?.tours?.[0]?.id || currentLider?.tours?.[0]?._id || '');
+    setBirthDate('');
+    setPaymentMethod('online');
+    setReceiptImage(null);
+    setReceiptPreview(null);
+    setIsSuccess(false);
     if (idCardPreview) URL.revokeObjectURL(idCardPreview);
     if (receiptPreview) URL.revokeObjectURL(receiptPreview);
     setIdCardImage(null);
@@ -398,19 +406,15 @@ setStep(1);
 
   const activeColor = currentLider?.primaryColor || '#e60a0ad8';
   const currentTourDetails = currentLider?.tours?.find(
-  (t: any) => String(t.id) === String(selectedTour) || String(t._id) === String(selectedTour)
-);
-console.log("Current Tour Object:", currentTourDetails);
-console.log("Images Array:", currentTourDetails?.images);
-console.log("Image 1 to 4:", currentTourDetails?.image1, currentTourDetails?.image2);
+    (t: any) => String(t.id) === String(selectedTour) || String(t._id) === String(selectedTour)
+  );
 
-
-
+  // اصلاح محاسبه قیمت برای جلوگیری از خطای NaN در صورت عددی بودن قیمت
   const calculateTotalPrice = () => {
     if (!currentTourDetails) return "۰ تومان";
 
     let englishDigits = p2e(currentTourDetails.price);
-    const cleanPriceString = englishDigits.replace(/[^0-9]/g, '');
+    const cleanPriceString = String(englishDigits).replace(/[^0-9]/g, '');
 
     const pricePerSeat = parseInt(cleanPriceString, 10);
     const seats = parseInt(seatsCount, 10);
@@ -423,18 +427,15 @@ console.log("Image 1 to 4:", currentTourDetails?.image1, currentTourDetails?.ima
     return total.toLocaleString('fa-IR') + " تومان";
   };
 
-// توابع کمکی برای تبدیل اعداد
-const toPersianDigits = (num: string | number) => {
-  if (num === null || num === undefined) return '';
-  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-  return String(num).replace(/\d/g, (d) => persianDigits[parseInt(d)]);
-};
+  const toPersianDigits = (num: string | number) => {
+    if (num === null || num === undefined) return '';
+    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    return String(num).replace(/\d/g, (d) => persianDigits[parseInt(d)]);
+  };
 
-
-const handleOnlinePayment = async () => {
+  const handleOnlinePayment = async () => {
     let rawPrice = currentTourDetails?.price ? p2e(String(currentTourDetails.price)).replace(/[^0-9]/g, '') : '0';
     
-    // شکار امن تعداد صندلی از استیت یا المان‌های صفحه
     let finalSeats = '1';
     if (typeof seatsCount !== 'undefined' && seatsCount) {
       finalSeats = String(seatsCount);
@@ -445,7 +446,6 @@ const handleOnlinePayment = async () => {
 
     let amountInRial = (parseInt(rawPrice, 10) * parseInt(finalSeats, 10)) * 10;
 
-    // شکار امن مشخصات مسافر
     let domName = '', domPhone = '', domNationalId = '';
     if (typeof window !== 'undefined') {
       const inputs = document.querySelectorAll('input');
@@ -465,8 +465,6 @@ const handleOnlinePayment = async () => {
     const finalPhone = domPhone || (typeof phone !== 'undefined' ? phone : '') || '09120000000';
     const finalNationalId = domNationalId || (typeof nationalId !== 'undefined' ? nationalId : '') || '0000000000';
 
-    console.log('FINAL CAPTURED VALUES:', { finalFullName, finalPhone, finalNationalId, finalSeats, amountInRial });
-
     try {
       const res = await fetch('/api/payment/request', {
         method: 'POST',
@@ -479,13 +477,13 @@ const handleOnlinePayment = async () => {
           mobile: finalPhone,
           phone: finalPhone,
           nationalId: finalNationalId,
-          seatsCount: finalSeats, // ارسال تعداد صندلی در سطح اصلی body[cite: 38]
+          seatsCount: finalSeats,
           passengerData: {
             fullName: finalFullName,
             phone: finalPhone,
             mobile: finalPhone,
             nationalId: finalNationalId,
-            seatsCount: finalSeats // ارسال تعداد صندلی درون passengerData[cite: 38]
+            seatsCount: finalSeats
           }
         }),
       });
@@ -493,7 +491,7 @@ const handleOnlinePayment = async () => {
       const data = await res.json();
 
       if (data.url) {
-        window.location.href = data.url; // انتقال مستقیم به درگاه بانکی
+        window.location.href = data.url;
       } else {
         alert(data.message || 'خطا در ایجاد درگاه پرداخت');
       }
@@ -504,252 +502,227 @@ const handleOnlinePayment = async () => {
     }
   };
   
-const handleRemoveReceipt = () => {
-  setReceiptPreview(null);
-  if (receiptInputRef.current) {
-    receiptInputRef.current.value = "";
-  }
-};
-
-async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  const formData = new FormData();
-  formData.append('file', file);
-
-  try {
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      console.log('لینک تصویر در فضای ابری:', data.url);
-      // حالا می‌توانید این لینک را در استیت فرم ذخیره کرده و به همراه بقیه اطلاعات بفرستید
-    } else {
-      alert(data.message || 'خطا در آپلود عکس');
+  const handleRemoveReceipt = () => {
+    setReceiptPreview(null);
+    if (receiptInputRef.current) {
+      receiptInputRef.current.value = "";
     }
-  } catch (error) {
-    console.error('Upload failed:', error);
+  };
+
+  async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log('لینک تصویر در فضای ابری:', data.url);
+      } else {
+        alert(data.message || 'خطا در آپلود عکس');
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+    }
   }
-}
 
-
-
-
-
-
-
-
-  // ۲. اگر لودینگ تمام شد اما لیدر یافت نشد
   if (!currentLider) {
     return (
       <div className="min-h-screen bg-[#121214] text-white flex flex-col items-center justify-center p-4 dir-rtl">
         <div className="text-center p-10 bg-neutral-900 border border-[#F9704E] rounded-2xl max-w-sm">
-          <h2 className="text-base font-bold text-[#F9704E] mb-2">در حال بارگذاری اطلاعات تور لیدر از ........</h2>
-        
+          <h2 className="text-base font-bold text-[#F9704E] mb-2">در حال بارگذاری اطلاعات تور لیدر...</h2>
         </div>
       </div>
     );
   }
 
-return (
-  <div className="min-h-screen bg-[#F9704E] text-white p-4 flex flex-col items-center justify-center" dir="rtl">
-    <div className="w-full max-w-lg bg-[#121215] border-2 border-[#E5C060] rounded-[28px] sm:rounded-[28px] p-5 sm:p-8 overflow-hidden shadow-2xl shadow-black/80 my-2">
-{/* هدر لیدر و لوگو اصلاح شده کاملاً ریسپانسیو */}
-<div className="p-2.5 sm:p-4 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-row items-center justify-between bg-neutral-900/20 gap-2 sm:gap-4 w-full overflow-hidden">
-  
-  {/* ۱. سمت راست: لوگو */}
-{/* ۱. سمت راست: لوگو کوچک‌تر */}
-<div className="flex items-center justify-start shrink-0">
-  <img 
-    src="/logo.png" 
-    alt="Lidera Logo" 
-    className="h-8 sm:h-10 w-auto object-contain" 
-  />
-</div>
-
-{/* ۲. وسط: نام و عنوان لیدر با تراز وسط یا انعطاف‌پذیر */}
-<div className="flex-1 text-center px-2">
-  <h1 className="text-sm sm:text-base md:text-lg font-bold text-white tracking-tight truncate">
-    {currentLider.fullName || currentLider.name}
-  </h1>
-  <p className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 truncate">
-    {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
-  </p>
-</div>
-
-
-  {/* ۳. سمت چپ: دکمه ورود لیدر */}
-  <div className="flex items-center justify-end shrink-0 ml-0 sm:ml-0 ">
-    <a
-      href={`/login${window.location.search}`}
-      className="flex items-center justify-center px-1.5 sm:px-3 py-1 sm:py-1.5 bg-[#F9704E] text-white rounded-lg sm:rounded-xl transition-all duration-200 active:scale-95 text-[10px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap ml-0.5 sm:ml-4"
-      title="ورود تورلیدر"
-    >
-      ورود لیدر
-    </a>
-  </div>
-
-</div>
-
-
-{!isSuccess && (
-  <div className="px-2 pt-3 pb-2 flex items-center justify-center w-full max-w-300px] sm:max-w-sm mx-auto" dir="rtl">
-    {[
-      { n: 1, label: 'انتخاب تور' },
-      { n: 2, label: 'مشخصات' },
-      { n: 3, label: 'پرداخت' },
-    ].map((s, i, arr) => (
-      <React.Fragment key={s.n}>
-        {/* دایره مرحله و متن */}
-        <div className="flex items-center gap-1 shrink-0">
-          <span
-            className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
-              step >= s.n ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-400'
-            }`}
-          >
-            {s.n}
-          </span>
-          <span className={step >= s.n ? 'text-white' : 'text-neutral-500'}>
-            {s.label}
-          </span>
+  return (
+    <div className="min-h-screen bg-[#F9704E] text-white p-4 flex flex-col items-center justify-center" dir="rtl">
+      <div className="w-full max-w-lg bg-[#121215] border-2 border-[#E5C060] rounded-[28px] sm:rounded-[28px] p-5 sm:p-8 overflow-hidden shadow-2xl shadow-black/80 my-2">
+        
+        {/* هدر لیدر */}
+        <div className="p-2.5 sm:p-4 border-2 border-[#E5C060] rounded-[20px] sm:rounded-24px flex flex-row items-center justify-between bg-neutral-900/20 gap-2 sm:gap-4 w-full overflow-hidden">
+          <div className="flex items-center justify-start shrink-0">
+            <img src="/logo.png" alt="Lidera Logo" className="h-8 sm:h-10 w-auto object-contain" />
+          </div>
+          <div className="flex-1 text-center px-2">
+            <h1 className="text-sm sm:text-base md:text-lg font-bold text-white tracking-tight truncate">
+              {currentLider.fullName || currentLider.name}
+            </h1>
+            <p className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 truncate">
+              {currentLider.title || currentLider.brandName || 'تورلیدر رسمی'}
+            </p>
+          </div>
+          <div className="flex items-center justify-end shrink-0 ml-0 sm:ml-0">
+            <a
+              href={`/login${typeof window !== 'undefined' ? window.location.search : ''}`}
+              className="flex items-center justify-center px-1.5 sm:px-3 py-1 sm:py-1.5 bg-[#F9704E] text-white rounded-lg sm:rounded-xl transition-all duration-200 active:scale-95 text-[10px] sm:text-xs font-bold border border-[#F9704E] whitespace-nowrap ml-0.5 sm:ml-4"
+              title="ورود تورلیدر"
+            >
+              ورود لیدر
+            </a>
+          </div>
         </div>
 
-        {/* خط رابط بین مراحل (با استایل مستقیم و بدون خطای Tailwind) */}
-{/* خط رابط بین مراحل (با فاصله از دایره‌ها) */}
-{i < arr.length - 1 && (
-  <div
-    className="mx-2 sm:mx-3"
-    style={{
-      flex: 1,
-      height: '3px',
-      minWidth: '12px',
-      borderRadius: '9999px',
-      background: step > s.n ? '#F9704E' : '#525252',
-      transition: 'background 300ms',
-    }}
-  />
-)}
-      </React.Fragment>
-    ))}
-  </div>
-)}
-
-      <div className="p-2">
-        {isSuccess ? (
-          <div className="text-center py-8 space-y-5">
-            <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-2xl font-bold mx-auto">✓</div>
-            <div className="space-y-2">
-              <h3 className="text-sm font-bold text-emerald-400">اطلاعات و فیش شما ثبت شد</h3>
-              <p className="text-xs font-medium text-neutral-300 leading-relaxed px-4">
-                ثبت‌نام شما پس از بررسی مدارک و فیش واریزی توسط لیدر تایید و پیامک هماهنگی ارسال خواهد شد.
-              </p>
-            </div>
-            <button onClick={handleReset} className="text-xs font-bold px-6 py-3 rounded-xl bg-[#F9704E] hover:bg-[#F9704E] text-white border-b-2 border-[#F9704E]  transition-all duration-200 mt-4 mx-auto block active:scale-95">
-              ثبت‌نام جدید
-            </button>
+        {/* مراحل */}
+        {!isSuccess && (
+          <div className="px-2 pt-3 pb-2 flex items-center justify-center w-full max-w-300px] sm:max-w-sm mx-auto" dir="rtl">
+            {[
+              { n: 1, label: 'انتخاب تور' },
+              { n: 2, label: 'مشخصات' },
+              { n: 3, label: 'پرداخت' },
+            ].map((s, i, arr) => (
+              <React.Fragment key={s.n}>
+                <div className="flex items-center gap-1 shrink-0">
+                  <span
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+                      step >= s.n ? 'bg-[#F9704E] text-white' : 'bg-neutral-800 text-neutral-400'
+                    }`}
+                  >
+                    {s.n}
+                  </span>
+                  <span className={step >= s.n ? 'text-white' : 'text-neutral-500'}>
+                    {s.label}
+                  </span>
+                </div>
+                {i < arr.length - 1 && (
+                  <div
+                    className="mx-2 sm:mx-3"
+                    style={{
+                      flex: 1,
+                      height: '3px',
+                      minWidth: '12px',
+                      borderRadius: '9999px',
+                      background: step > s.n ? '#F9704E' : '#525252',
+                      transition: 'background 300ms',
+                    }}
+                  />
+                )}
+              </React.Fragment>
+            ))}
           </div>
-        ) : (
-          <form className="space-y-5" onSubmit={handleSubmit}>
+        )}
 
-            {step === 1 && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm text-white mb-2 font-medium">انتخاب تور اختصاصی</label>
-                  {currentLider?.tours && currentLider.tours.length > 0 ? (
-                    <select 
-                      value={selectedTour} 
-                      onChange={(e) => setSelectedTour(e.target.value)}
-                      className="w-full bg-[#1c1c21] border border-[#F9704E] focus:border-[#F9704E] p-2.5 rounded-xl text-xs md:text-sm text-white focus:outline-none transition-all duration-200"
+        <div className="p-2">
+          {isSuccess ? (
+            <div className="text-center py-8 space-y-5">
+              <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-2xl font-bold mx-auto">✓</div>
+              <div className="space-y-2">
+                <h3 className="text-sm font-bold text-emerald-400">اطلاعات و فیش شما ثبت شد</h3>
+                <p className="text-xs font-medium text-neutral-300 leading-relaxed px-4">
+                  ثبت‌نام شما پس از بررسی مدارک و فیش واریزی توسط لیدر تایید و پیامک هماهنگی ارسال خواهد شد.
+                </p>
+              </div>
+              <button onClick={handleReset} className="text-xs font-bold px-6 py-3 rounded-xl bg-[#F9704E] hover:bg-[#F9704E] text-white border-b-2 border-[#F9704E] transition-all duration-200 mt-4 mx-auto block active:scale-95">
+                ثبت‌نام جدید
+              </button>
+            </div>
+          ) : (
+            <form className="space-y-5" onSubmit={handleSubmit}>
+
+              {step === 1 && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-white mb-2 font-medium">انتخاب تور اختصاصی</label>
+                    {currentLider?.tours && currentLider.tours.length > 0 ? (
+                      <select 
+                        value={selectedTour} 
+                        onChange={(e) => setSelectedTour(e.target.value)}
+                        className="w-full bg-[#1c1c21] border border-[#F9704E] focus:border-[#F9704E] p-2.5 rounded-xl text-xs md:text-sm text-white focus:outline-none transition-all duration-200"
+                      >
+                        {currentLider.tours.map((tour: any, idx: number) => {
+                          // پشتیبانی از id و _id
+                          const tourId = tour.id || tour._id || idx;
+                          return (
+                            <option key={tourId} value={tourId}>
+                              {toPersianNumbers(tour.name || tour.title || 'بدون عنوان')} | تاریخ: {toPersianNumbers(tour.date || 'تعیین نشده')} | {tour.price ? Number(tour.price).toLocaleString('fa-IR') : ''} تومان
+                            </option>
+                          );
+                        })}
+                      </select>
+                    ) : (
+                      <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl text-center">
+                        هنوز توری برای این لیدر ثبت نشده است.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* گالری تصاویر تور انتخابی - اصلاح شده برای خواندن از دیتابیس شما */}
+                  {currentTourDetails && (() => {
+                    // ترکیب تمام منابع ممکن برای تصاویر
+                    const allImages = currentTourDetails?.images?.length > 0
+                      ? currentTourDetails.images
+                      : [
+                          currentTourDetails?.image1,
+                          currentTourDetails?.image2,
+                          currentTourDetails?.image3,
+                          currentTourDetails?.image4,
+                          ...(currentTourDetails?.tourImages?.map((img: any) => img.url) || [])
+                        ].filter(Boolean);
+
+                    if (allImages.length === 0) return null;
+                    return (
+                      <div className="mt-4 p-4 bg-neutral-900/60 border border-[#F9704E] rounded-2xl flex flex-col items-center">
+                        <span className="block text-xs text-neutral-300 mb-3 font-semibold text-center">
+                          📷 (برای بزرگنمایی کلیک کنید) گالری تصاویر تور
+                        </span>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full justify-items-center">
+                          {allImages.map((imgUrl: string, imgIdx: number) => (
+                            <div
+                              key={imgIdx}
+                              onClick={() => setActiveImageModal(imgUrl)}
+                              className="w-full aspect-square rounded-2xl overflow-hidden border border-[#F9704E] bg-neutral-950 cursor-pointer group relative shadow-lg hover:border-white transition-all"
+                            >
+                              <img
+                                src={imgUrl}
+                                alt={`تصویر ${imgIdx + 1}`}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              />
+                              <div className="absolute inset-0 ' bg-gradient-to-t' from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-2">
+                                <span className="text-white text-xs bg-black/70 px-2.5 py-1.5 rounded-lg backdrop-blur-sm shadow-md">
+                                  🔍 بزرگنمایی
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* مودال بزرگنمایی تصویر */}
+                  {activeImageModal && (
+                    <div 
+                      className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
+                      onClick={() => setActiveImageModal(null)}
                     >
-                      {currentLider.tours.map((tour: any, idx: number) => {
-                        const tourId = tour.id || tour._id || idx;
-                        return (
-<option key={tourId} value={tourId}>
-  {toPersianNumbers(tour.name || tour.title || 'بدون عنوان')} | تاریخ: {toPersianNumbers(tour.date || 'تعیین نشده')} | {tour.price ? Number(tour.price).toLocaleString('fa-IR') : ''} تومان
-</option>
-                        );
-                      })}
-                    </select>
-                  ) : (
-                    <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl text-center">
-                      هنوز توری برای این لیدر ثبت نشده است.
+                      <div className="relative max-w-4xl max-h-[90vh] w-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                        <img 
+                          src={activeImageModal} 
+                          alt="تصویر بزرگ شده" 
+                          className="max-w-full max-h-[85vh] object-contain rounded-2xl border border-neutral-700 shadow-2xl"
+                        />
+                        <button 
+                          type="button"
+                          onClick={() => setActiveImageModal(null)}
+                          className="absolute top-4 left-4 bg-neutral-800/80 hover:bg-neutral-700 text-white w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all shadow-lg border border-neutral-600 cursor-pointer"
+                          title="بستن"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
                   )}
-                </div>
 
-               
-{/* گالری تصاویر تور انتخابی (طراحی مدرن با قابلیت بزرگنمایی) */}
-{currentTourDetails && (() => {
-const allImages = currentTourDetails?.images?.length > 0
-  ? currentTourDetails.images
-  : [
-      currentTourDetails?.image1,
-      currentTourDetails?.image2,
-      currentTourDetails?.image3,
-      currentTourDetails?.image4,
-      ...(currentTourDetails?.tourImages?.map((img: any) => img.url) || [])
-    ].filter(Boolean);
-
-  if (allImages.length === 0) return null;
-  return (
-    <div className="mt-4 p-4 bg-neutral-900/60 border border-[#F9704E] rounded-2xl flex flex-col items-center">
-      <span className="block text-xs text-neutral-300 mb-3 font-semibold text-center">
-        📷 (برای بزرگنمایی کلیک کنید) گالری تصاویر تور
-      </span>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full justify-items-center">
-        {allImages.map((imgUrl: string, imgIdx: number) => (
-          <div
-            key={imgIdx}
-            onClick={() => setActiveImageModal(imgUrl)}
-            className="w-full aspect-square rounded-2xl overflow-hidden border border-[#F9704E] bg-neutral-950 cursor-pointer group relative shadow-lg hover:border-white transition-all"
-          >
-            <img
-              src={imgUrl}
-              alt={`تصویر ${imgIdx + 1}`}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 ' bg-gradient-to-t' from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-2">
-              <span className="text-white text-xs bg-black/70 px-2.5 py-1.5 rounded-lg backdrop-blur-sm shadow-md">
-                🔍 بزرگنمایی
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-})()}
-
-                 {/* مودال بزرگنمایی تصویر گالری (باید داخل return باشد) */}
-          {activeImageModal && (
-            <div 
-              className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
-              onClick={() => setActiveImageModal(null)}
-            >
-              <div className="relative max-w-4xl max-h-[90vh] w-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-                <img 
-                  src={activeImageModal} 
-                  alt="تصویر بزرگ شده" 
-                  className="max-w-full max-h-[85vh] object-contain rounded-2xl border border-neutral-700 shadow-2xl"
-                />
-                <button 
-                  type="button"
-                  onClick={() => setActiveImageModal(null)}
-                  className="absolute top-4 left-4 bg-neutral-800/80 hover:bg-neutral-700 text-white w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all shadow-lg border border-neutral-600 cursor-pointer"
-                  title="بستن"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          )}
-{/* اطلاعات حمل‌ونقل، خدمات و هتل‌ها متصل به پنل لیدر */}
-{/* اطلاعات حمل‌ونقل، خدمات و هتل‌ها (متصل به دیتابیس واقعی) */}
+                  {/* اطلاعات حمل‌ونقل، خدمات و هتل‌ها - اصلاح شده برای خواندن دقیق از دیتابیس */}
                   {matchedTour && (
                     <div className="bg-black/30 border border-white/10 rounded-xl p-4 space-y-3 mt-4 text-right" dir="rtl">
                       
@@ -760,7 +733,7 @@ const allImages = currentTourDetails?.images?.length > 0
                         </div>
                       )}
 
-                      {/* خدمات تور */}
+                      {/* خدمات تور (متصل به فیلد services در دیتابیس) */}
                       {((Array.isArray(matchedTour.services) && matchedTour.services.length > 0) || (Array.isArray(matchedTour.customServices) && matchedTour.customServices.length > 0)) && (
                         <div>
                           <span className="text-xs text-zinc-400 block mb-1.5">خدمات این تور:</span>
@@ -815,58 +788,56 @@ const allImages = currentTourDetails?.images?.length > 0
                           </div>
                         );
                       })()}
-
                     </div>
                   )}
 
-                     {/* تعداد صندلی مورد نیاز */}
-                <div className="mb-4">
-                  <label className="block text-sm text-white mb-2 font-medium">تعداد صندلی مورد نیاز</label>
-                  <div className="flex items-center justify-between bg-[#1c1c21] border border-[#F9704E] p-3 rounded-xl">
-<button
-  type="button"
-  onClick={() => {
-    const current = parseInt(seatsCount, 10) || 1;
-    if (current > 1) setSeatsCount((current - 1).toString());
-  }}
-  className="w-10 h-10 rounded-lg bg-rose-950/60 text-rose-400 border border-rose-900/40 hover:bg-rose-900/80 flex items-center justify-center text-lg font-bold transition-all active:scale-95 cursor-pointer"
->
-  -
-</button>
-
-<span className="text-white font-bold text-sm">
-  {seatsCount} تعداد نفر/ صندلی
-</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const current = parseInt(seatsCount, 10) || 1;
-                        if (current < 10) setSeatsCount((current + 1).toString());
-                      }}
-                       className="w-10 h-10 rounded-lg bg-rose-950/60 text-rose-400 border border-rose-900/40 hover:bg-rose-900/80 flex items-center justify-center text-lg font-bold transition-all active:scale-95 cursor-pointer"
-                    >
-                      +
-                    </button>
+                  {/* تعداد صندلی مورد نیاز */}
+                  <div className="mb-4">
+                    <label className="block text-sm text-white mb-2 font-medium">تعداد صندلی مورد نیاز</label>
+                    <div className="flex items-center justify-between bg-[#1c1c21] border border-[#F9704E] p-3 rounded-xl">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = parseInt(seatsCount, 10) || 1;
+                          if (current > 1) setSeatsCount((current - 1).toString());
+                        }}
+                        className="w-10 h-10 rounded-lg bg-rose-950/60 text-rose-400 border border-rose-900/40 hover:bg-rose-900/80 flex items-center justify-center text-lg font-bold transition-all active:scale-95 cursor-pointer"
+                      >
+                        -
+                      </button>
+                      <span className="text-white font-bold text-sm">
+                        {seatsCount} تعداد نفر/ صندلی
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = parseInt(seatsCount, 10) || 1;
+                          if (current < 10) setSeatsCount((current + 1).toString());
+                        }}
+                        className="w-10 h-10 rounded-lg bg-rose-950/60 text-rose-400 border border-rose-900/40 hover:bg-rose-900/80 flex items-center justify-center text-lg font-bold transition-all active:scale-95 cursor-pointer"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
+
+                  {/* مجموع قیمت صندلی‌ها در مرحله اول */}
+                  {currentTourDetails && (
+                    <div className="mb-4 p-4 rounded-xl bg-neutral-900/60 border border-[#F9704E] flex items-center justify-between">
+                      <span className="text-xs text-neutral-400 font-medium">🧮 قیمت کل:</span>
+                      <span className="text-xs font-bold text-[#F9704E] tracking-wide">
+                        {calculateTotalPrice()}
+                      </span>
+                    </div>
+                  )}
                 </div>
+              )}
 
-                {/* مجموع قیمت صندلی‌ها در مرحله اول */}
-                {currentTourDetails && (
-                  <div className="mb-4 p-4 rounded-xl bg-neutral-900/60 border border-[#F9704E] flex items-center justify-between">
-                    <span className="text-xs text-neutral-400 font-medium">🧮 قیمت کل:</span>
-                    <span className="text-xs font-bold text-[#F9704E] tracking-wide">
-                      {calculateTotalPrice()}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-
-             {step === 2 && (
+              {step === 2 && (
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-sm  text-white mb-2 font-medium">نام و نام خانوادگی نماینده مسافران</label>
-                    <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="مثال: آنیسا کیهانی" className="w-full bg-[#1c1c21]  border border-[#F9704E] focus:border-[#F9704E] p-4 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-medium" />
+                    <label className="block text-sm text-white mb-2 font-medium">نام و نام خانوادگی نماینده مسافران</label>
+                    <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="مثال: آنیسا کیهانی" className="w-full bg-[#1c1c21] border border-[#F9704E] focus:border-[#F9704E] p-4 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-medium" />
                   </div>
 
                   <div>
@@ -874,33 +845,31 @@ const allImages = currentTourDetails?.images?.length > 0
                     <input type="tel" required maxLength={11} value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))} placeholder="09191294068" className={`w-full bg-[#1c1c21] border p-4 rounded-xl text-xs text-left text-white placeholder-neutral-500 focus:outline-none transition-all duration-200 font-mono tracking-wider font-medium ${phone.length > 0 && !isPhoneValid ? ' border border-[#F9704E] focus:border-[#F9704E]' : ' border border-[#F9704E] focus:border-[#F9704E]'}`} style={{ direction: 'ltr' }} />
                   </div>
 
-{/* ۳. تاریخ تولد (آکاردئونی - پس از تکمیل ۱۱ رقم موبایل) */}
-  {isPhoneValid && (
-    <div className="animate-fadeIn transition-all duration-300">
-      <label className="block text-sm text-white mb-2 font-medium">تاریخ تولد :</label>
-  <input
-              type="text"
-              required
-              maxLength={10}
-              placeholder="۱۳۷۰/۰۱/۰۱"
-              value={toPersianDigits(birthDate)}
-              onChange={(e) => {
-                // استفاده از تابع اسلاش‌گذاری هوشمند و تبدیل ارقام
-                const enVal = toEnglishDigits(e.target.value).replace(/\D/g, '');
-                let formatted = enVal;
-                if (enVal.length > 4 && enVal.length <= 6) {
-                  formatted = enVal.slice(0, 4) + '/' + enVal.slice(4);
-                } else if (enVal.length > 6) {
-                  formatted = enVal.slice(0, 4) + '/' + enVal.slice(4, 6) + '/' + enVal.slice(6, 8);
-                }
-                setBirthDate(formatted);
-              }}
-              className="w-full bg-[#1c1c21] border border-[#F9704E] p-4 rounded-xl text-xs text-right text-white placeholder-neutral-500 focus:outline-none transition-all duration-300 font-mono font-bold"
-            />
-    </div>
-  )}
+                  {isPhoneValid && (
+                    <div className="animate-fadeIn transition-all duration-300">
+                      <label className="block text-sm text-white mb-2 font-medium">تاریخ تولد :</label>
+                      <input
+                        type="text"
+                        required
+                        maxLength={10}
+                        placeholder="۱۳۷۰/۰۱/۰۱"
+                        value={toPersianDigits(birthDate)}
+                        onChange={(e) => {
+                          const enVal = toEnglishDigits(e.target.value).replace(/\D/g, '');
+                          let formatted = enVal;
+                          if (enVal.length > 4 && enVal.length <= 6) {
+                            formatted = enVal.slice(0, 4) + '/' + enVal.slice(4);
+                          } else if (enVal.length > 6) {
+                            formatted = enVal.slice(0, 4) + '/' + enVal.slice(4, 6) + '/' + enVal.slice(6, 8);
+                          }
+                          setBirthDate(formatted);
+                        }}
+                        className="w-full bg-[#1c1c21] border border-[#F9704E] p-4 rounded-xl text-xs text-right text-white placeholder-neutral-500 focus:outline-none transition-all duration-300 font-mono font-bold"
+                      />
+                    </div>
+                  )}
 
-                  {isBirthDateValid&& (
+                  {isBirthDateValid && (
                     <div className="space-y-5 animate-fadeIn">
                       <div>
                         <label className="block text-sm text-white mb-2 font-medium">کد ملی</label>
@@ -920,276 +889,261 @@ const allImages = currentTourDetails?.images?.length > 0
                         />
                       </div>
 
-{/* ۵. بخش تعهدنامه کشویی و اجباری (ظهور پس از ۱۰ رقمی شدن کد ملی) */}
-      {isNationalIdValid && (
-        <div className="bg-[#1c1c21] border border-[#F9704E] rounded-2xl p-4 space-y-3 animate-fadeIn transition-all duration-300">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-[#E5C060] flex items-center gap-1.5">
-              📜 تعهدنامه سلامت و قوانین سفر
-            </label>
-            <button
-              type="button"
-              onClick={() => alert("متن کامل قوانین: مسافر متعهد می‌شود تمامی اصول ایمنی، سلامت و زمان‌بندی تور را رعایت کند.")}
-              className="text-[11px] text-amber-400 hover:underline cursor-pointer"
-            >
-              مشاهده متن کامل
-            </button>
-          </div>
+                      {isNationalIdValid && (
+                        <div className="bg-[#1c1c21] border border-[#F9704E] rounded-2xl p-4 space-y-3 animate-fadeIn transition-all duration-300">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-bold text-[#E5C060] flex items-center gap-1.5">
+                              📜 تعهدنامه سلامت و قوانین سفر
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => alert("متن کامل قوانین: مسافر متعهد می‌شود تمامی اصول ایمنی، سلامت و زمان‌بندی تور را رعایت کند.")}
+                              className="text-[11px] text-amber-400 hover:underline cursor-pointer"
+                            >
+                              مشاهده متن کامل
+                            </button>
+                          </div>
 
-          <label className="flex items-start gap-2.5 cursor-pointer pt-1">
-            <input
-              type="checkbox"
-              checked={isTermsAccepted}
-              onChange={(e) => setIsTermsAccepted(e.target.checked)}
-              required
-              className="mt-0.5 accent-[#E5C060] w-4 h-4 rounded cursor-pointer"
-            />
-            <span className="text-xs text-zinc-300 leading-relaxed">
-              اینجانب تمامی قوانین سفر، شرایط کنسل‌شدن و تعهدنامه سلامت و ایمنی را مطالعه نموده و با آگاهی کامل پذیرفتم.
-            </span>
-          </label>
-        </div>
-      )}
-<div>
-<label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
-  <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
-  {idCardPreview ? (
-    <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] bg-neutral-900">
-      <img src={idCardPreview} alt="کارت ملی" className="w-full h-full object-cover opacity-80" />
-      <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
-        <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-neutral-200 transition-all cursor-pointer">تغییر عکس</button>
-        <button type="button" onClick={handleRemoveIdCard} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-bold transition-all cursor-pointer">حذف عکس</button>
-      </div>
-    </div>
-  ) : (
-    <button type="button" onClick={() => idCardInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${idCardError ? 'border-red-500/50 text-red-400' : 'border-[#F9704E] text-neutral-400'}`}>
-      <span className="text-lg">🪪</span>
-      <span>برای آپلود عکس کارت ملی کلیک کنید</span>
-    </button>
-  )}
-  {idCardError && <p className="text-xs text-red-400 mt-2 font-medium">{idCardError}</p>}
+                          <label className="flex items-start gap-2.5 cursor-pointer pt-1">
+                            <input
+                              type="checkbox"
+                              checked={isTermsAccepted}
+                              onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                              required
+                              className="mt-0.5 accent-[#E5C060] w-4 h-4 rounded cursor-pointer"
+                            />
+                            <span className="text-xs text-zinc-300 leading-relaxed">
+                              اینجانب تمامی قوانین سفر، شرایط کنسل‌شدن و تعهدنامه سلامت و ایمنی را مطالعه نموده و با آگاهی کامل پذیرفتم.
+                            </span>
+                          </label>
+                        </div>
+                      )}
+                      
+                      <div>
+                        <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
+                        <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
+                        {idCardPreview ? (
+                          <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] bg-neutral-900">
+                            <img src={idCardPreview} alt="کارت ملی" className="w-full h-full object-cover opacity-80" />
+                            <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
+                              <button type="button" onClick={() => idCardInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-neutral-200 transition-all cursor-pointer">تغییر عکس</button>
+                              <button type="button" onClick={handleRemoveIdCard} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-bold transition-all cursor-pointer">حذف عکس</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button type="button" onClick={() => idCardInputRef.current?.click()} className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${idCardError ? 'border-red-500/50 text-red-400' : 'border-[#F9704E] text-neutral-400'}`}>
+                            <span className="text-lg">🪪</span>
+                            <span>برای آپلود عکس کارت ملی کلیک کنید</span>
+                          </button>
+                        )}
+                        {idCardError && <p className="text-xs text-red-400 mt-2 font-medium">{idCardError}</p>}
                       </div>
                     </div>
                   )}
                 </div>
               )}
-            <div className="space-y-5">
-                
-{step === 3 && (
-  <div className="space-y-4 my-4">
-    
-    {/* مبلغ کل به تومان */}
-    <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
-      <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex items-center justify-between">
-        <span className="text-[11px] sm:text-xs text-[#F9704E] font-bold ">💰 مبلغ دقیق  :</span>
-        <div className="text-xs sm:text-base  text-white tracking-tight font-medium">
-          {calculateTotalPrice()}
-        </div>
-      </div>
-    </div>
 
-    {/* تب‌های انتخاب نحوه پرداخت (۱. کارت‌به‌کارت | ۲. پرداخت آنلاین) */}
-    <div className="grid grid-cols-2 gap-2 bg-[#1c1c21] p-1.5 sm:p-2 rounded-2xl border border-[#F9704E]">
-      <button
-        type="button"
-        onClick={() => setPaymentMethod('card')}
-        className={`py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
-          paymentMethod === 'card'
-            ? 'bg-[#F9704E] text-white shadow-lg'
-            : 'bg-[#121215] text-neutral-400 hover:text-white border border-[#F9704E]'
-        }`}
-      >
-        <span>💳 ۱. کارت‌به‌کارت</span>
-      </button>
+              <div className="space-y-5">
+                {step === 3 && (
+                  <div className="space-y-4 my-4">
+                    <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
+                      <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex items-center justify-between">
+                        <span className="text-[11px] sm:text-xs text-[#F9704E] font-bold ">💰 مبلغ دقیق  :</span>
+                        <div className="text-xs sm:text-base  text-white tracking-tight font-medium">
+                          {calculateTotalPrice()}
+                        </div>
+                      </div>
+                    </div>
 
-      <button
-        type="button"
-        onClick={() => setPaymentMethod('online')}
-        className={`py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
-          paymentMethod === 'online'
-            ? 'bg-[#F9704E] text-white shadow-lg'
-            : 'bg-[#121215] text-neutral-400 hover:text-white border border-[#F9704E]'
-        }`}
-      >
-        <span>🌐 ۲. پرداخت آنلاین</span>
-      </button>
-    </div>
+                    <div className="grid grid-cols-2 gap-2 bg-[#1c1c21] p-1.5 sm:p-2 rounded-2xl border border-[#F9704E]">
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('card')}
+                        className={`py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                          paymentMethod === 'card'
+                            ? 'bg-[#F9704E] text-white shadow-lg'
+                            : 'bg-[#121215] text-neutral-400 hover:text-white border border-[#F9704E]'
+                        }`}
+                      >
+                        <span>💳 ۱. کارت‌به‌کارت</span>
+                      </button>
 
-    {/* محتوای روش اول: کارت‌به‌کارت */}
-    {paymentMethod === 'card' && (
-      <div className="space-y-3 animate-fadeIn">
-        
-{/* شماره کارت‌های لیدر */}
-<div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
-  <span className="block text-[11px] text-[#F9704E] font-bold text-right">💳 شماره کارت‌های لیدر:</span>
-  {currentLider.cards && currentLider.cards.length > 0 ? (
-    currentLider.cards.map((card: any, index: number) => (
-      <div key={index} className="bg-[#121215] p-3.5 rounded-xl border border-[#F9704E] flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex flex-col items-center sm:items-start">
-          <span className="text-[11px] sm:text-xs text-[#F9704E] font-bold">{card.bankName ? `بانک ${card.bankName}` : `کارت ${index + 1}`}</span>
-          <span className="text-[10px] sm:text-xs text-neutral-300 font-mono mt-0.5">{card.cardOwner}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {/* تبدیل شماره کارت به ارقام فارسی */}
-          <span className="font-mono text-xs sm:text-sm text-white tracking-wider">
-            {toPersianDigits(card.cardNumber)}
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              navigator.clipboard.writeText(card.cardNumber); // مقدار کپی‌شده همچنان انگلیسی و استاندارد می‌ماند تا در کارت‌به‌کارت با خطا مواجه نشود
-              alert('شماره کارت کپی شد!');
-            }}
-            className="text-[10px] bg-neutral-800 border border-[#F9704E] text-neutral-300 px-2.5 py-1 rounded-md hover:bg-[#F9704E] hover:text-white transition-colors"
-          >
-            کپی کارت
-          </button>
-        </div>
-      </div>
-    ))
-  ) : (
-    <div className="bg-[#121215] p-3 rounded-xl border border-[#F9704E] text-center">
-      <span className="text-xs text-neutral-400">شماره کارتی ثبت نشده است.</span>
-    </div>
-  )}
-</div>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('online')}
+                        className={`py-2.5 sm:py-3 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                          paymentMethod === 'online'
+                            ? 'bg-[#F9704E] text-white shadow-lg'
+                            : 'bg-[#121215] text-neutral-400 hover:text-white border border-[#F9704E]'
+                        }`}
+                      >
+                        <span>🌐 ۲. پرداخت آنلاین</span>
+                      </button>
+                    </div>
 
-{/* مبلغ ریالی و دکمه کپی ریال */}
-<div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
-  <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex flex-col sm:flex-row items-center justify-between gap-3">
-    <span className="text-[11px] sm:text-xs text-[#F9704E] font-bold ">💳 مبلغ ریال جهت واریز:</span>
-    
-    {/* بخش مبلغ که دقیقاً وسط و مرتب قرار گرفته است */}
-    <div className="flex items-center justify-center gap-3 w-full sm:w-auto">
-      <div className="text-xs sm:text-base font-bold text-white tracking-tight font-mono text-center">
-        {(() => {
-          let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-          let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-          return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
-        })()}
-      </div>
-      <button
-        type="button"
-        onClick={() => {
-          let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-          let numericRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-          navigator.clipboard.writeText(numericRial.toString());
-          alert('مبلغ ریالی برای کارت‌به‌کارت کپی شد!');
-        }}
-        className="text-[10px] sm:text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-2.5 py-1.5 rounded-lg font-medium hover:bg-[#F9704E] transition-colors"
-      >
-        کپی ریال
-      </button>
-    </div>
-  </div>
-</div>
-        {/* بارگذاری تصویر فیش واریزی (فقط در حالت کارت‌به‌کارت نمایش داده می‌شود) */}
-        <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
-          <label className="block text-sm text-[#F9704E] mb-2 font-medium text-center">بارگذاری تصویر فیش واریزی</label>
-          <input type="file" ref={receiptInputRef} accept="image/*" onChange={handleReceiptChange} className="hidden" />
-          
-          {receiptPreview ? (
-            <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
-              <img src={receiptPreview} alt="فیش" className="w-full h-full object-cover opacity-80" />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 gap-3">
-                <button type="button" onClick={() => receiptInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-medium">
-                  تغییر فیش
-                </button>
-                <button type="button" onClick={handleRemoveReceipt} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-medium">
-                  حذف فیش
-                </button>
+                    {paymentMethod === 'card' && (
+                      <div className="space-y-3 animate-fadeIn">
+                        <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
+                          <span className="block text-[11px] text-[#F9704E] font-bold text-right">💳 شماره کارت‌های لیدر:</span>
+                          {currentLider.cards && currentLider.cards.length > 0 ? (
+                            currentLider.cards.map((card: any, index: number) => (
+                              <div key={index} className="bg-[#121215] p-3.5 rounded-xl border border-[#F9704E] flex flex-col sm:flex-row items-center justify-between gap-3">
+                                <div className="flex flex-col items-center sm:items-start">
+                                  <span className="text-[11px] sm:text-xs text-[#F9704E] font-bold">{card.bankName ? `بانک ${card.bankName}` : `کارت ${index + 1}`}</span>
+                                  <span className="text-[10px] sm:text-xs text-neutral-300 font-mono mt-0.5">{card.cardOwner}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-mono text-xs sm:text-sm text-white tracking-wider">
+                                    {toPersianDigits(card.cardNumber)}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(card.cardNumber);
+                                      alert('شماره کارت کپی شد!');
+                                    }}
+                                    className="text-[10px] bg-neutral-800 border border-[#F9704E] text-neutral-300 px-2.5 py-1 rounded-md hover:bg-[#F9704E] hover:text-white transition-colors"
+                                  >
+                                    کپی کارت
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="bg-[#121215] p-3 rounded-xl border border-[#F9704E] text-center">
+                              <span className="text-xs text-neutral-400">شماره کارتی ثبت نشده است.</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
+                          <div className="bg-[#121215] p-3.5 sm:p-4 rounded-xl border border-[#F9704E] flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <span className="text-[11px] sm:text-xs text-[#F9704E] font-bold ">💳 مبلغ ریال جهت واریز:</span>
+                            
+                            <div className="flex items-center justify-center gap-3 w-full sm:w-auto">
+                              <div className="text-xs sm:text-base font-bold text-white tracking-tight font-mono text-center">
+                                {(() => {
+                                  let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+                                  let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+                                  return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
+                                })()}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
+                                  let numericRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
+                                  navigator.clipboard.writeText(numericRial.toString());
+                                  alert('مبلغ ریالی برای کارت‌به‌کارت کپی شد!');
+                                }}
+                                className="text-[10px] sm:text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-2.5 py-1.5 rounded-lg font-medium hover:bg-[#F9704E] transition-colors"
+                              >
+                                کپی ریال
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3">
+                          <label className="block text-sm text-[#F9704E] mb-2 font-medium text-center">بارگذاری تصویر فیش واریزی</label>
+                          <input type="file" ref={receiptInputRef} accept="image/*" onChange={handleReceiptChange} className="hidden" />
+                          
+                          {receiptPreview ? (
+                            <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
+                              <img src={receiptPreview} alt="فیش" className="w-full h-full object-cover opacity-80" />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/40 gap-3">
+                                <button type="button" onClick={() => receiptInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-medium">
+                                  تغییر فیش
+                                </button>
+                                <button type="button" onClick={handleRemoveReceipt} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-medium">
+                                  حذف فیش
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button 
+                              type="button" 
+                              onClick={() => receiptInputRef.current?.click()} 
+                              className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${receiptError ? 'border-red-500/50 text-red-400' : ' border-[#F9704E] hover:border-[#F9704E]/50 text-neutral-400'}`}
+                            >
+                              <span className="text-lg">📸</span>
+                              <span>برای آپلود عکس فیش کلیک کنید</span>
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="space-y-3 pt-2">
+                          {!isStepValid() && getValidationHint() && (
+                            <div className="text-[11px] font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl text-center">
+                              {getValidationHint()}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {paymentMethod === 'online' && (
+                      <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3 animate-fadeIn text-center">
+                        <p className="text-[11px] sm:text-xs text-neutral-300 leading-relaxed">
+                          ⚡ با انتخاب پرداخت آنلاین، بدون نیاز به ارسال فیش، با کلیک روی دکمه ثبت نهایی زیر مستقیماً به درگاه امن بانکی منتقل می‌شوید و ثبت‌نام شما به صورت آنی قطعی می‌شود.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  {step > 1 && (
+                    <button type="button" onClick={prevStep} className="w-1/3 bg-amber-500/10 hover:bg-amber-500/10 text-white font-bold py-4 rounded-xl text-xs transition-all border border-[#F9704E] active:scale-95">
+                      مرحله قبل
+                    </button>
+                  )}
+
+                  {step < 3 ? (
+                    <button 
+                      type="button" 
+                      disabled={isSubmitting || !isStepValid()} 
+                      onClick={nextStep} 
+                      className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-95 flex items-center justify-center disabled:cursor-not-allowed border" 
+                      style={
+                        isStepValid() 
+                          ? { backgroundColor: activeColor, borderColor: activeColor } 
+                          : { backgroundColor: 'rgba(249, 112, 78, 0.15)', borderColor: 'rgba(249, 112, 78, 0.3)', color: 'rgba(255, 255, 255, 0.4)' }
+                      }
+                    >
+                      مرحله بعدی 
+                    </button>
+                  ) : (
+                    <button 
+                      type="submit" 
+                      disabled={isSubmitting || (paymentMethod === 'card' && !receiptPreview)} 
+                      onClick={(e) => {
+                        if (paymentMethod === 'online') {
+                          e.preventDefault();
+                          handleOnlinePayment();
+                        }
+                      }}
+                      className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-[0.99] flex items-center justify-center gap-2 disabled:cursor-not-allowed border" 
+                      style={
+                        (paymentMethod === 'online' || (paymentMethod === 'card' && receiptPreview))
+                          ? { backgroundColor: activeColor, borderColor: activeColor, boxShadow: `0 8px 24px ${activeColor}30` }
+                          : { backgroundColor: 'rgba(249, 112, 78, 0.15)', borderColor: 'rgba(249, 112, 78, 0.3)', color: 'rgba(255, 255, 255, 0.4)' }
+                      }
+                    >
+                      {isSubmitting 
+                        ? "در حال پردازش..." 
+                        : paymentMethod === 'online' 
+                          ? "💳 انتقال به درگاه بانکی و ثبت‌نام آنی" 
+                          : "ثبت نهایی و ارسال مدارک"
+                      }
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ) : (
-            <button 
-              type="button" 
-              onClick={() => receiptInputRef.current?.click()} 
-              className={`w-full border-2 border-dashed bg-[#1c1c21] p-5 rounded-xl text-xs text-center transition-all duration-200 font-medium flex flex-col items-center justify-center gap-2 cursor-pointer ${receiptError ? 'border-red-500/50 text-red-400' : ' border-[#F9704E] hover:border-[#F9704E]/50 text-neutral-400'}`}
-            >
-              <span className="text-lg">📸</span>
-              <span>برای آپلود عکس فیش کلیک کنید</span>
-            </button>
+            </form>
           )}
         </div>
-
-        {/* خطای اعتبارسنجی فیش */}
-        <div className="space-y-3 pt-2">
-          {!isStepValid() && getValidationHint() && (
-            <div className="text-[11px] font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl text-center">
-              {getValidationHint()}
-            </div>
-          )}
-        </div>
-
-      </div>
-    )}
-
-    {/* محتوای روش دوم: درگاه آنلاین */}
-    {paymentMethod === 'online' && (
-      <div className="bg-[#1c1c21] border border-[#F9704E] p-4 sm:p-5 rounded-2xl space-y-3 animate-fadeIn text-center">
-        <p className="text-[11px] sm:text-xs text-neutral-300 leading-relaxed">
-          ⚡ با انتخاب پرداخت آنلاین، بدون نیاز به ارسال فیش، با کلیک روی دکمه ثبت نهایی زیر مستقیماً به درگاه امن بانکی منتقل می‌شوید و ثبت‌نام شما به صورت آنی قطعی می‌شود.
-        </p>
-      </div>
-    )}
-
-  </div>
-)}
-
-<div className="flex gap-3">
-  {step > 1 && (
-    <button type="button" onClick={prevStep} className="w-1/3 bg-amber-500/10 hover:bg-amber-500/10 text-white font-bold py-4 rounded-xl text-xs transition-all border border-[#F9704E] active:scale-95">
-      مرحله قبل
-    </button>
-  )}
-
-  {step < 3 ? (
-    <button 
-      type="button" 
-      disabled={isSubmitting || !isStepValid()} 
-      onClick={nextStep} 
-      className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-95 flex items-center justify-center disabled:cursor-not-allowed border" 
-      style={
-        isStepValid() 
-          ? { backgroundColor: activeColor, borderColor: activeColor } 
-          : { backgroundColor: 'rgba(249, 112, 78, 0.15)', borderColor: 'rgba(249, 112, 78, 0.3)', color: 'rgba(255, 255, 255, 0.4)' }
-      }
-    >
-      مرحله بعدی 
-    </button>
-  ) : (
-    <button 
-      type="submit" 
-      disabled={isSubmitting || (paymentMethod === 'card' && !receiptPreview)} 
-      onClick={(e) => {
-        if (paymentMethod === 'online') {
-          e.preventDefault();
-          handleOnlinePayment(); // فراخوانی مستقیم بدون نیاز به ارسال پارامتر
-        }
-      }}
-      className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-[0.99] flex items-center justify-center gap-2 disabled:cursor-not-allowed border" 
-      style={
-        (paymentMethod === 'online' || (paymentMethod === 'card' && receiptPreview))
-          ? { backgroundColor: activeColor, borderColor: activeColor, boxShadow: `0 8px 24px ${activeColor}30` }
-          : { backgroundColor: 'rgba(249, 112, 78, 0.15)', borderColor: 'rgba(249, 112, 78, 0.3)', color: 'rgba(255, 255, 255, 0.4)' }
-      }
-    >
-      {isSubmitting 
-        ? "در حال پردازش..." 
-        : paymentMethod === 'online' 
-          ? "💳 انتقال به درگاه بانکی و ثبت‌نام آنی" 
-          : "ثبت نهایی و ارسال مدارک"
-      }
-    </button>
-  )}
-</div>
- </div>
-          </form>
-        )}
       </div>
     </div>
-    
-  </div>
-);
-} 
-
+  );
+}
