@@ -14,7 +14,7 @@ const toEnglishDigits = (s: string) =>
   s.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
    .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
 
-// فیلدهای عمومی (برای صفحه ثبت‌نام مسافران): بدون رمز، کد ملی، مرچنت و مسافر
+// فیلدهای عمومی (برای صفحه ثبت‌نام مسافران)
 const PUBLIC_SELECT = {
   id: true,
   slug: true,
@@ -25,9 +25,30 @@ const PUBLIC_SELECT = {
   tours: {
     orderBy: { createdAt: 'desc' },
     select: {
-      id: true, name: true, title: true, price: true, date: true,
-      images: true, image1: true, image2: true, image3: true, image4: true,
+      id: true, 
+      name: true, 
+      title: true, 
+      price: true, 
+      date: true,
+      duration: true,
+      startDate: true,
+      endDate: true,
+      services: true, // <--- اضافه شد (طبق اسکیما String[] است)
+      images: true, 
+      image1: true, 
+      image2: true, 
+      image3: true, 
+      image4: true,
       tourImages: { select: { url: true } },
+      // <--- اضافه شدن هتل‌ها دقیقا طبق اسکیما
+      hotels: {
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          description: true, // فیلد description در اسکیما دارید
+        }
+      },
     },
   },
   cards: { select: { id: true, cardNumber: true, bankName: true, cardHolder: true } },
@@ -46,7 +67,6 @@ const PRIVATE_SELECT = {
       id: true, fullName: true, mobile: true, nationalId: true, tourName: true,
       paymentStatus: true, insurance: true, receiptDate: true, amount: true,
       seatsCount: true, receiptImage: true, createdAt: true,
-      // idCardImage عمداً نیست (حساس و سنگین؛ فقط با route جدا و چک مالکیت)
     },
   },
 } satisfies Prisma.LeaderSelect;
@@ -72,7 +92,6 @@ export async function GET(request: Request) {
       );
     }
 
-    // بدون fallback به «اولین لیدر»
     const found = await prisma.leader.findFirst({
       where: { OR: [{ slug }, { id: slug }] },
       select: { id: true, status: true },
@@ -92,7 +111,6 @@ export async function GET(request: Request) {
       );
     }
 
-    // آیا درخواست‌دهنده خود همین لیدر (با توکن معتبر) است؟
     const auth = await requireActiveLeader({ allowMustChange: true });
     const isOwner = auth.ok && auth.leader.id === found.id;
 
@@ -120,7 +138,7 @@ export async function PUT(request: Request) {
     if (!auth.ok) {
       return NextResponse.json({ success: false, message: auth.message }, { status: auth.status });
     }
-    const leaderId = auth.leader.id; // فقط از توکن، نه از ورودی
+    const leaderId = auth.leader.id; 
 
     const rl = checkRateLimit(`li-put:${leaderId}`, 20, 60_000);
     if (!rl.success) {
@@ -137,7 +155,6 @@ export async function PUT(request: Request) {
 
     const data: Prisma.LeaderUpdateInput = {};
 
-    // نوع پرداخت: فقط مقادیر مجاز
     if (body.paymentMethod !== undefined) {
       if (!ALLOWED_PAYMENT_METHODS.includes(body.paymentMethod)) {
         return NextResponse.json({ success: false, message: 'نوع پرداخت نامعتبر است' }, { status: 400 });
@@ -145,7 +162,6 @@ export async function PUT(request: Request) {
       data.paymentMethod = body.paymentMethod;
     }
 
-    // کارت‌ها: حداکثر ۴، شماره ۱۶ رقمی، طول رشته‌ها محدود
     if (body.cards !== undefined) {
       if (!Array.isArray(body.cards) || body.cards.length > 4) {
         return NextResponse.json(
@@ -157,7 +173,7 @@ export async function PUT(request: Request) {
       const cleaned: { cardNumber: string; cardHolder: string; bankName: string }[] = [];
       for (const c of body.cards) {
         const cardNumber = toEnglishDigits(String(c?.cardNumber ?? '')).replace(/\D/g, '');
-        if (!cardNumber) continue; // کارت خالی ذخیره نشود
+        if (!cardNumber) continue; 
         if (cardNumber.length !== 16) {
           return NextResponse.json(
             { success: false, message: 'شماره کارت باید ۱۶ رقم باشد' },
@@ -174,12 +190,10 @@ export async function PUT(request: Request) {
       data.cards = { deleteMany: {}, create: cleaned };
     }
 
-    // tours عمداً نادیده گرفته می‌شود: مدیریت تور فقط در api/tours با چک مالکیت
-
     const updatedLeader = await prisma.leader.update({
       where: { id: leaderId },
       data,
-      select: PRIVATE_SELECT, // بدون password
+      select: PRIVATE_SELECT, 
     });
 
     return NextResponse.json(
