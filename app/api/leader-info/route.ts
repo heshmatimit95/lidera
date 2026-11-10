@@ -34,6 +34,7 @@ const PUBLIC_SELECT = {
       startDate: true,
       endDate: true,
       services: true, // <--- اضافه شد (طبق اسکیما String[] است)
+      transportType: true,
       images: true, 
       image1: true, 
       image2: true, 

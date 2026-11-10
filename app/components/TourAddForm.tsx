@@ -212,7 +212,7 @@ export default function TourAddForm({ onTourCreated }: { onTourCreated: (newTour
                 placeholder="توضیحات (مثلا: اتاق ۲ تخته)" 
                 value={hotel.desc}
                 onChange={(e) => handleHotelChange(index, 'desc', e.target.value)}
-                className="bg-black/30 border border-white/10 rounded p-2 text-xs outline-`none`"
+                className="bg-black/30 border border-white/10 rounded p-2 text-xs outline-none"
               />
             </div>
           ))}

@@ -64,9 +64,9 @@ model Tour {
 
   duration     String?       
   startDate    String?       
-  endDate      String?       
-  services     String[]      
-
+  endDate      String? 
+   services     String[]      
+ transportType String? 
   leaderId     String
   leader       Leader        @relation(fields: [leaderId], references: [id], onDelete: Cascade)
   

@@ -47,13 +47,15 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
   const matchedTour: any = currentTourObj || {};
   // در دیتابیس شما فیلد services وجود دارد
   const tourServices: string[] = Array.isArray(matchedTour.services) ? matchedTour.services : [];
-  
+
   // پیدا کردن هتل‌ها با پشتیبانی از نام‌های مختلف فیلد در دیتابیس
-  const tourHotels: any[] = Array.isArray(matchedTour.hotels) 
-    ? matchedTour.hotels 
-    : (Array.isArray(matchedTour.Hotel) 
-        ? matchedTour.Hotel 
-        : (Array.isArray(matchedTour.newTourHotels) ? matchedTour.newTourHotels : []));
+  const tourHotels: any[] =
+    Array.isArray(matchedTour.hotels) && matchedTour.hotels.length > 0 ? matchedTour.hotels
+    : Array.isArray(matchedTour.Hotels) && matchedTour.Hotels.length > 0 ? matchedTour.Hotels
+    : Array.isArray(matchedTour.Hotel) && matchedTour.Hotel.length > 0 ? matchedTour.Hotel
+    : Array.isArray(matchedTour.newTourHotels) ? matchedTour.newTourHotels : [];
+  const tourTransport: string = matchedTour.transportType || matchedTour.transport || '';
+  const hasTourExtraInfo = !!tourTransport || tourServices.length > 0 || tourHotels.length > 0;
 
   const [isloadingLeader, setIsLoadingLeader] = useState(!initialLeader);
   const router = useRouter();
@@ -726,24 +728,24 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                     </div>
                   )}
 
-                  {/* اطلاعات حمل‌ونقل، خدمات و هتل‌ها - اصلاح شده برای خواندن دقیق از دیتابیس */}
-                  {matchedTour && (
+                  {/* اطلاعات حمل‌ونقل، خدمات و هتل‌ها - فقط وقتی داده وجود دارد نمایش داده می‌شود */}
+                  {hasTourExtraInfo && (
                     <div className="bg-black/30 border border-white/10 rounded-xl p-4 space-y-3 mt-4 text-right" dir="rtl">
-                      
+
                       {/* نوع حمل‌ونقل */}
-                      {(matchedTour.transport || matchedTour.transportType) && (
+                      {tourTransport && (
                         <div className="flex items-center justify-between text-xs text-zinc-300 border-b border-white/10 pb-2">
-                          <span>نوع سفر / حمل‌ونقل: <strong className="text-[#F9704E]">{matchedTour.transport || matchedTour.transportType}</strong></span>
+                          <span>نوع سفر / حمل‌ونقل: <strong className="text-[#F9704E]">{tourTransport}</strong></span>
                         </div>
                       )}
 
-                      {/* خدمات تور (متصل به فیلد services در دیتابیس) */}
-                      {((Array.isArray(matchedTour.services) && matchedTour.services.length > 0) || (Array.isArray(matchedTour.customServices) && matchedTour.customServices.length > 0)) && (
+                      {/* خدمات تور */}
+                      {tourServices.length > 0 && (
                         <div>
                           <span className="text-xs text-zinc-400 block mb-1.5">خدمات این تور:</span>
                           <div className="flex flex-wrap gap-1.5">
-                            {(matchedTour.services || matchedTour.customServices).map((srv: any, idx: number) => {
-                              const srvName = typeof srv === 'string' ? srv : (srv.name || srv.title);
+                            {tourServices.map((srv: any, idx: number) => {
+                              const srvName = typeof srv === 'string' ? srv : (srv?.name || srv?.title);
                               if (!srvName) return null;
                               return (
                                 <span key={idx} className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-lg text-[11px]">
@@ -755,43 +757,39 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                         </div>
                       )}
 
-                      {/* نرخ‌نامه هتل‌ها (پشتیبانی از جدول Hotel و آرایه هتل‌ها) */}
-                      {(() => {
-                        const hotelList = matchedTour.hotels || matchedTour.Hotel || matchedTour.newTourHotels || [];
-                        if (!Array.isArray(hotelList) || hotelList.length === 0) return null;
-                        return (
-                          <div className="border-t border-white/10 pt-3">
-                            <label className="text-xs text-zinc-400 block mb-2">انتخاب هتل و نرخ‌نامه:</label>
-                            <div className="space-y-2">
-                              {hotelList.map((hotel: any, idx: number) => {
-                                const hotelName = hotel.name || hotel.hotelName;
-                                const hotelPrice = hotel.price || 0;
-                                const hotelDesc = hotel.desc || hotel.description || '';
-                                if (!hotelName) return null;
+                      {/* نرخ‌نامه هتل‌ها */}
+                      {tourHotels.length > 0 && (
+                        <div className="border-t border-white/10 pt-3">
+                          <label className="text-xs text-zinc-400 block mb-2">انتخاب هتل و نرخ‌نامه:</label>
+                          <div className="space-y-2">
+                            {tourHotels.map((hotel: any, idx: number) => {
+                              const hotelName = hotel.name || hotel.hotelName;
+                              const hotelPrice = hotel.price || 0;
+                              const hotelDesc = hotel.desc || hotel.description || '';
+                              if (!hotelName) return null;
 
-                                return (
-                                  <label key={idx} className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${selectedHotel?.name === hotelName ? 'border-[#F9704E] bg-[#F9704E]/10' : 'border-white/10 bg-black/20 hover:bg-black/40'}`}>
-                                    <div className="flex items-center gap-2">
-                                      <input 
-                                        type="radio" 
-                                        name="tourHotel" 
-                                        checked={selectedHotel?.name === hotelName}
-                                        onChange={() => setSelectedHotel(hotel)}
-                                        className="accent-[#F9704E]"
-                                      />
-                                      <div>
-                                        <span className="text-xs font-bold text-white block">{hotelName}</span>
-                                        {hotelDesc && <span className="text-[10px] text-zinc-400">{hotelDesc}</span>}
-                                      </div>
+                              return (
+                                <label key={hotel.id || idx} className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${selectedHotel?.name === hotelName ? 'border-[#F9704E] bg-[#F9704E]/10' : 'border-white/10 bg-black/20 hover:bg-black/40'}`}>
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="radio"
+                                      name="tourHotel"
+                                      checked={selectedHotel?.name === hotelName}
+                                      onChange={() => setSelectedHotel(hotel)}
+                                      className="accent-[#F9704E]"
+                                    />
+                                    <div>
+                                      <span className="text-xs font-bold text-white block">{hotelName}</span>
+                                      {hotelDesc && <span className="text-[10px] text-zinc-400">{hotelDesc}</span>}
                                     </div>
-                                    <span className="text-xs font-bold text-[#F9704E]">{Number(hotelPrice).toLocaleString()} تومان</span>
-                                  </label>
-                                );
-                              })}
-                            </div>
+                                  </div>
+                                  <span className="text-xs font-bold text-[#F9704E]">{Number(hotelPrice).toLocaleString('fa-IR')} تومان</span>
+                                </label>
+                              );
+                            })}
                           </div>
-                        );
-                      })()}
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -994,7 +992,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                               <div key={index} className="bg-[#121215] p-3.5 rounded-xl border border-[#F9704E] flex flex-col sm:flex-row items-center justify-between gap-3">
                                 <div className="flex flex-col items-center sm:items-start">
                                   <span className="text-[11px] sm:text-xs text-[#F9704E] font-bold">{card.bankName ? `بانک ${card.bankName}` : `کارت ${index + 1}`}</span>
-                                  <span className="text-[10px] sm:text-xs text-neutral-300 font-mono mt-0.5">{card.cardOwner}</span>
+         <span className="text-[10px] sm:text-xs text-neutral-300 font-mono mt-0.5">{card.cardHolder || card.cardOwner}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <span className="font-mono text-xs sm:text-sm text-white tracking-wider">

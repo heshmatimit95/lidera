@@ -59,6 +59,7 @@ const clientIp = (req: Request) =>
 const TOUR_SELECT = {
   id: true, name: true, title: true, date: true, price: true, images: true,
   duration: true, startDate: true, endDate: true, services: true,
+  transportType: true,
   image1: true, image2: true, image3: true, image4: true,
   tourImages: { select: { url: true } },
   hotels: true,
@@ -152,6 +153,7 @@ export async function POST(request: NextRequest) {
         startDate,
         endDate,
         services: cleanServices(body.services),
+        transportType: body.transportType ? cleanStr(body.transportType, 40) : null,
         tenantId: verifiedLeaderId,
         leader: { connect: { id: verifiedLeaderId } },
         hotels: { create: cleanHotels(body.hotels) },
@@ -214,6 +216,7 @@ export async function PUT(request: NextRequest) {
     if (body.startDate !== undefined) data.startDate = cleanStr(body.startDate, 20);
     if (body.endDate !== undefined) data.endDate = cleanStr(body.endDate, 20);
     if (body.services !== undefined) data.services = cleanServices(body.services);
+    if (body.transportType !== undefined) data.transportType = cleanStr(body.transportType, 40);
     // leaderId و tenantId هرگز از ورودی تغییر نمی‌کنند
 
     const hotelsProvided = Array.isArray(body.hotels);
