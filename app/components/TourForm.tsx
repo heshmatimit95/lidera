@@ -38,6 +38,8 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
   );
 
   const [selectedHotel, setSelectedHotel] = useState<any>(null);
+  const [showTransport, setShowTransport] = useState(false); // کشوی حمل‌ونقل و خدمات
+  const [showHotels, setShowHotels] = useState(false);       // کشوی انتخاب هتل
 
   // پیدا کردن تور انتخاب شده با پشتیبانی از id و _id
   const currentTourObj = (typeof selectedTour === 'object' && selectedTour !== null) 
@@ -263,7 +265,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
   const isIdValid = /^\d{10}$/.test(nationalId);
 
   const isStepValid = () => {
-    if (step === 1) return selectedTour !== '';
+    if (step === 1) return selectedTour !== '' && (tourHotels.length === 0 || !!selectedHotel);
     if (step === 2) {
       return fullName.trim() !== '' && isPhoneValid && isIdValid && !idCardError && isBirthDateValid && isNationalIdValid && isTermsAccepted;
     }
@@ -273,6 +275,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
 
   const getValidationHint = () => {
     if (step === 1 && !selectedTour) return "لطفاً ابتدا یک تور انتخاب کنید.";
+    if (step === 1 && tourHotels.length > 0 && !selectedHotel) return "🏨 لطفاً هتل مورد نظر را انتخاب کنید.";
     if (step === 2) {
       if (!fullName.trim()) return "✍️ لطفاً نام و نام خانوادگی را وارد کنید.";
       if (!phone) return "📱 لطفاً شماره موبایل را وارد کنید.";
@@ -301,14 +304,18 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
     setIsSubmitting(true);
 
     const tourObj = currentLider?.tours?.find((t: any) => (t.id || t._id) === selectedTour);
-    const tourTitle = tourObj ? `${tourObj.title || tourObj.name} (${tourObj.date || ''})` : 'تور عمومی';
-    const rawPrice = tourObj?.price ? parseInt(String(tourObj.price).replace(/[^0-9]/g, ''), 10) || 0 : 0;
-    const calculatedAmount = (rawPrice * parseInt(String(seatsCount || 1), 10)).toString();
+    const baseTourTitle = tourObj ? `${tourObj.title || tourObj.name} (${tourObj.date || ''})` : 'تور عمومی';
+    // نام هتل انتخابی به عنوان تور اضافه می‌شود تا لیدر در لیست مسافران ببیند
+    const tourTitle = selectedHotel ? `${baseTourTitle} - هتل ${selectedHotel.name}` : baseTourTitle;
+    // مبلغ نهایی = (قیمت تور + قیمت هتل) × تعداد نفرات
+    const calculatedAmount = totalToman.toString();
 
     if (paymentMethod === "card") {
       try {
         const payload = {
           leaderId: currentLider?.id || currentLider?.slug,
+          tourId: tourObj?.id || tourObj?._id || selectedTour,
+          hotelId: selectedHotel?.id || null,
           tourName: tourTitle,
           fullName: fullName.trim(),
           nationalId: nationalId.trim(),
@@ -353,6 +360,8 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
           phone: phone.trim(),
           nationalId: nationalId.trim(),
           tourName: tourTitle,
+          tourId: tourObj?.id || tourObj?._id || selectedTour,
+          hotelId: selectedHotel?.id || null,
           passengerData: {
             fullName: fullName.trim(),
             phone: phone.trim(),
@@ -386,6 +395,9 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
     setSeatsCount('1');
     setStep(1);
     setSelectedTour(currentLider?.tours?.[0]?.id || currentLider?.tours?.[0]?._id || '');
+    setSelectedHotel(null);
+    setShowHotels(false);
+    setShowTransport(false);
     setBirthDate('');
     setPaymentMethod('online');
     setReceiptImage(null);
@@ -411,22 +423,16 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
     (t: any) => String(t.id) === String(selectedTour) || String(t._id) === String(selectedTour)
   );
 
-  // اصلاح محاسبه قیمت برای جلوگیری از خطای NaN در صورت عددی بودن قیمت
+  // ─── محاسبه قیمت ───────────────────────────────────────────
+  // قیمت هر نفر = قیمت تور + قیمت هتل انتخابی (هتل جداگانه نمایش داده نمی‌شود؛ فقط جمع نهایی)
+  const tourUnitPrice = parseInt(String(p2e(currentTourDetails?.price)).replace(/[^0-9]/g, ''), 10) || 0;
+  const hotelUnitPrice = selectedHotel ? Number(selectedHotel.price) || 0 : 0;
+  const seatsNumber = parseInt(seatsCount, 10) || 1;
+  const totalToman = (tourUnitPrice + hotelUnitPrice) * seatsNumber; // مبلغ نهایی به تومان
+
   const calculateTotalPrice = () => {
     if (!currentTourDetails) return "۰ تومان";
-
-    let englishDigits = p2e(currentTourDetails.price);
-    const cleanPriceString = String(englishDigits).replace(/[^0-9]/g, '');
-
-    const pricePerSeat = parseInt(cleanPriceString, 10);
-    const seats = parseInt(seatsCount, 10);
-
-    if (isNaN(pricePerSeat) || isNaN(seats)) {
-      return "۰ تومان";
-    }
-
-    const total = pricePerSeat * seats;
-    return total.toLocaleString('fa-IR') + " تومان";
+    return totalToman.toLocaleString('fa-IR') + " تومان";
   };
 
   const toPersianDigits = (num: string | number) => {
@@ -436,8 +442,6 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
   };
 
   const handleOnlinePayment = async () => {
-    let rawPrice = currentTourDetails?.price ? p2e(String(currentTourDetails.price)).replace(/[^0-9]/g, '') : '0';
-    
     let finalSeats = '1';
     if (typeof seatsCount !== 'undefined' && seatsCount) {
       finalSeats = String(seatsCount);
@@ -446,7 +450,8 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
       if (seatInput && seatInput.value) finalSeats = seatInput.value;
     }
 
-    let amountInRial = (parseInt(rawPrice, 10) * parseInt(finalSeats, 10)) * 10;
+    // مبلغ نهایی (تور + هتل) × تعداد نفرات، به ریال
+    let amountInRial = (tourUnitPrice + hotelUnitPrice) * (parseInt(finalSeats, 10) || 1) * 10;
 
     let domName = '', domPhone = '', domNationalId = '';
     if (typeof window !== 'undefined') {
@@ -473,7 +478,9 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amountInRial: amountInRial,
-          description: `رزرو تور ${currentTourDetails?.title || ''}`,
+          description: `رزرو تور ${currentTourDetails?.title || currentTourDetails?.name || ''}${selectedHotel ? ' - هتل ' + selectedHotel.name : ''}`,
+          tourId: currentTourDetails?.id || currentTourDetails?._id || selectedTour,
+          hotelId: selectedHotel?.id || null,
           leaderId: currentLider?.id || currentLider?.slug || 'leader_1',
           fullName: finalFullName,
           mobile: finalPhone,
@@ -631,13 +638,18 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
             <form className="space-y-5" onSubmit={handleSubmit}>
 
               {step === 1 && (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div>
                     <label className="block text-sm text-white mb-2 font-medium">انتخاب تور اختصاصی</label>
                     {currentLider?.tours && currentLider.tours.length > 0 ? (
                       <select 
                         value={selectedTour} 
-                        onChange={(e) => setSelectedTour(e.target.value)}
+                        onChange={(e) => {
+                          setSelectedTour(e.target.value);
+                          setSelectedHotel(null); // با تغییر تور، هتل انتخابی پاک می‌شود
+                          setShowHotels(false);
+                          setShowTransport(false);
+                        }}
                         className="w-full bg-[#1c1c21] border border-[#F9704E] focus:border-[#F9704E] p-2.5 rounded-xl text-xs md:text-sm text-white focus:outline-none transition-all duration-200"
                       >
                         {currentLider.tours.map((tour: any, idx: number) => {
@@ -661,9 +673,8 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                     )}
                   </div>
 
-                  {/* گالری تصاویر تور انتخابی - اصلاح شده برای خواندن از دیتابیس شما */}
+                  {/* گالری تصاویر تور انتخابی - فشرده (یک ردیف کوچک، با بزرگنمایی) */}
                   {currentTourDetails && (() => {
-                    // ترکیب تمام منابع ممکن برای تصاویر
                     const allImages = currentTourDetails?.images?.length > 0
                       ? currentTourDetails.images
                       : [
@@ -676,28 +687,18 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
 
                     if (allImages.length === 0) return null;
                     return (
-                      <div className="mt-4 p-4 bg-neutral-900/60 border border-[#F9704E] rounded-2xl flex flex-col items-center">
-                        <span className="block text-xs text-neutral-300 mb-3 font-semibold text-center">
-                          📷 (برای بزرگنمایی کلیک کنید) گالری تصاویر تور
-                        </span>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full justify-items-center">
-                          {allImages.map((imgUrl: string, imgIdx: number) => (
-                            <div
+                      <div>
+                        <span className="block text-[11px] text-neutral-400 mb-1.5">📷 تصاویر تور (برای بزرگنمایی لمس کنید)</span>
+                        <div className="grid grid-cols-4 gap-2">
+                          {allImages.slice(0, 4).map((imgUrl: string, imgIdx: number) => (
+                            <button
+                              type="button"
                               key={imgIdx}
                               onClick={() => setActiveImageModal(imgUrl)}
-                              className="w-full aspect-square rounded-2xl overflow-hidden border border-[#F9704E] bg-neutral-950 cursor-pointer group relative shadow-lg hover:border-white transition-all"
+                              className="aspect-square rounded-xl overflow-hidden border border-[#F9704E]/60 bg-neutral-950 cursor-pointer active:scale-95 transition-all"
                             >
-                              <img
-                                src={imgUrl}
-                                alt={`تصویر ${imgIdx + 1}`}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                              />
-                              <div className="absolute inset-0 ' bg-gradient-to-t' from-black/60 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-2">
-                                <span className="text-white text-xs bg-black/70 px-2.5 py-1.5 rounded-lg backdrop-blur-sm shadow-md">
-                                  🔍 بزرگنمایی
-                                </span>
-                              </div>
-                            </div>
+                              <img src={imgUrl} alt={`تصویر ${imgIdx + 1}`} className="w-full h-full object-cover" />
+                            </button>
                           ))}
                         </div>
                       </div>
@@ -728,106 +729,142 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                     </div>
                   )}
 
-                  {/* اطلاعات حمل‌ونقل، خدمات و هتل‌ها - فقط وقتی داده وجود دارد نمایش داده می‌شود */}
-                  {hasTourExtraInfo && (
-                    <div className="bg-black/30 border border-white/10 rounded-xl p-4 space-y-3 mt-4 text-right" dir="rtl">
+                  {/* کشوی حمل‌ونقل و خدمات (بسته به‌صورت پیش‌فرض) */}
+                  {(tourTransport || tourServices.length > 0) && (
+                    <div className="rounded-xl border border-white/10 bg-[#1c1c21] overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setShowTransport(!showTransport)}
+                        className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-xs text-white cursor-pointer"
+                      >
+                        <span className="truncate">
+                          🚆 حمل‌ونقل و خدمات{tourTransport ? <span className="text-[#F9704E] font-bold"> : {tourTransport}</span> : null}
+                        </span>
+                        <span className={`text-neutral-400 transition-transform duration-200 ${showTransport ? 'rotate-180' : ''}`}>▾</span>
+                      </button>
 
-                      {/* نوع حمل‌ونقل */}
-                      {tourTransport && (
-                        <div className="flex items-center justify-between text-xs text-zinc-300 border-b border-white/10 pb-2">
-                          <span>نوع سفر / حمل‌ونقل: <strong className="text-[#F9704E]">{tourTransport}</strong></span>
-                        </div>
-                      )}
-
-                      {/* خدمات تور */}
-                      {tourServices.length > 0 && (
-                        <div>
-                          <span className="text-xs text-zinc-400 block mb-1.5">خدمات این تور:</span>
-                          <div className="flex flex-wrap gap-1.5">
-                            {tourServices.map((srv: any, idx: number) => {
-                              const srvName = typeof srv === 'string' ? srv : (srv?.name || srv?.title);
-                              if (!srvName) return null;
-                              return (
-                                <span key={idx} className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-lg text-[11px]">
-                                  ✓ {srvName}
-                                </span>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* نرخ‌نامه هتل‌ها */}
-                      {tourHotels.length > 0 && (
-                        <div className="border-t border-white/10 pt-3">
-                          <label className="text-xs text-zinc-400 block mb-2">انتخاب هتل و نرخ‌نامه:</label>
-                          <div className="space-y-2">
-                            {tourHotels.map((hotel: any, idx: number) => {
-                              const hotelName = hotel.name || hotel.hotelName;
-                              const hotelPrice = hotel.price || 0;
-                              const hotelDesc = hotel.desc || hotel.description || '';
-                              if (!hotelName) return null;
-
-                              return (
-                                <label key={hotel.id || idx} className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${selectedHotel?.name === hotelName ? 'border-[#F9704E] bg-[#F9704E]/10' : 'border-white/10 bg-black/20 hover:bg-black/40'}`}>
-                                  <div className="flex items-center gap-2">
-                                    <input
-                                      type="radio"
-                                      name="tourHotel"
-                                      checked={selectedHotel?.name === hotelName}
-                                      onChange={() => setSelectedHotel(hotel)}
-                                      className="accent-[#F9704E]"
-                                    />
-                                    <div>
-                                      <span className="text-xs font-bold text-white block">{hotelName}</span>
-                                      {hotelDesc && <span className="text-[10px] text-zinc-400">{hotelDesc}</span>}
-                                    </div>
-                                  </div>
-                                  <span className="text-xs font-bold text-[#F9704E]">{Number(hotelPrice).toLocaleString('fa-IR')} تومان</span>
-                                </label>
-                              );
-                            })}
-                          </div>
+                      {showTransport && (
+                        <div className="px-3 pb-3 pt-2 border-t border-white/10 space-y-2 animate-fadeIn">
+                          {tourTransport && (
+                            <div className="text-[11px] text-zinc-300">
+                              نوع سفر: <strong className="text-[#F9704E]">{tourTransport}</strong>
+                            </div>
+                          )}
+                          {tourServices.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {tourServices.map((srv: any, idx: number) => {
+                                const srvName = typeof srv === 'string' ? srv : (srv?.name || srv?.title);
+                                if (!srvName) return null;
+                                return (
+                                  <span key={idx} className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg text-[11px]">
+                                    ✓ {srvName}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
                   )}
 
-                  {/* تعداد صندلی مورد نیاز */}
-                  <div className="mb-4">
-                    <label className="block text-sm text-white mb-2 font-medium">تعداد صندلی مورد نیاز</label>
-                    <div className="flex items-center justify-between bg-[#1c1c21] border border-[#F9704E] p-3 rounded-xl">
+                  {/* کشوی انتخاب هتل (اجباری اگر تور هتل دارد) */}
+                  {tourHotels.length > 0 && (
+                    <div className={`rounded-xl border bg-[#1c1c21] overflow-hidden transition-colors ${selectedHotel ? 'border-[#F9704E]/60' : 'border-white/10'}`}>
+                      <button
+                        type="button"
+                        onClick={() => setShowHotels(!showHotels)}
+                        className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-xs text-white cursor-pointer"
+                      >
+                        <span className="truncate">
+                          🏨 {selectedHotel
+                            ? <>هتل: <span className="text-[#F9704E] font-bold">{selectedHotel.name || selectedHotel.hotelName}</span></>
+                            : <>انتخاب هتل <span className="text-amber-400">(الزامی)</span></>}
+                        </span>
+                        <span className={`text-neutral-400 transition-transform duration-200 ${showHotels ? 'rotate-180' : ''}`}>▾</span>
+                      </button>
+
+                      {showHotels && (
+                        <div className="px-3 pb-3 pt-2 border-t border-white/10 space-y-2 animate-fadeIn">
+                          {tourHotels.map((hotel: any, idx: number) => {
+                            const hotelName = hotel.name || hotel.hotelName;
+                            const hotelPrice = Number(hotel.price) || 0;
+                            const hotelDesc = hotel.desc || hotel.description || '';
+                            if (!hotelName) return null;
+                            const isChosen = selectedHotel?.name === hotelName;
+
+                            return (
+                              <label
+                                key={hotel.id || idx}
+                                className={`flex items-center justify-between gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${isChosen ? 'border-[#F9704E] bg-[#F9704E]/10' : 'border-white/10 bg-black/20 hover:bg-black/40'}`}
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <input
+                                    type="radio"
+                                    name="tourHotel"
+                                    checked={isChosen}
+                                    onChange={() => {
+                                      setSelectedHotel(hotel);
+                                      setShowHotels(false); // بعد از انتخاب، کشو بسته می‌شود
+                                    }}
+                                    className="accent-[#F9704E] shrink-0"
+                                  />
+                                  <div className="min-w-0">
+                                    <span className="text-xs font-bold text-white block truncate">{hotelName}</span>
+                                    {hotelDesc && <span className="text-[10px] text-zinc-400 block truncate">{hotelDesc}</span>}
+                                  </div>
+                                </div>
+                                <span className="text-[11px] font-bold text-[#F9704E] whitespace-nowrap">
+                                  {hotelPrice.toLocaleString('fa-IR')} تومان
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* تعداد صندلی مورد نیاز - فشرده */}
+                  <div className="flex items-center justify-between bg-[#1c1c21] border border-[#F9704E]/60 px-3 py-2 rounded-xl">
+                    <span className="text-xs text-white font-medium">تعداد نفرات</span>
+                    <div className="flex items-center gap-3">
                       <button
                         type="button"
                         onClick={() => {
                           const current = parseInt(seatsCount, 10) || 1;
                           if (current > 1) setSeatsCount((current - 1).toString());
                         }}
-                        className="w-10 h-10 rounded-lg bg-rose-950/60 text-rose-400 border border-rose-900/40 hover:bg-rose-900/80 flex items-center justify-center text-lg font-bold transition-all active:scale-95 cursor-pointer"
+                        className="w-8 h-8 rounded-lg bg-rose-950/60 text-rose-400 border border-rose-900/40 hover:bg-rose-900/80 flex items-center justify-center text-base font-bold transition-all active:scale-95 cursor-pointer"
                       >
                         -
                       </button>
-                      <span className="text-white font-bold text-sm">
-                        {seatsCount} تعداد نفر/ صندلی
-                      </span>
+                      <span className="text-white font-bold text-sm w-5 text-center">{toPersianNumbers(seatsCount)}</span>
                       <button
                         type="button"
                         onClick={() => {
                           const current = parseInt(seatsCount, 10) || 1;
                           if (current < 10) setSeatsCount((current + 1).toString());
                         }}
-                        className="w-10 h-10 rounded-lg bg-rose-950/60 text-rose-400 border border-rose-900/40 hover:bg-rose-900/80 flex items-center justify-center text-lg font-bold transition-all active:scale-95 cursor-pointer"
+                        className="w-8 h-8 rounded-lg bg-rose-950/60 text-rose-400 border border-rose-900/40 hover:bg-rose-900/80 flex items-center justify-center text-base font-bold transition-all active:scale-95 cursor-pointer"
                       >
                         +
                       </button>
                     </div>
                   </div>
 
-                  {/* مجموع قیمت صندلی‌ها در مرحله اول */}
+                  {/* راهنمای تکمیل مرحله (مثلاً انتخاب هتل) */}
+                  {!isStepValid() && getValidationHint() && (
+                    <div className="text-[11px] font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-xl text-center">
+                      {getValidationHint()}
+                    </div>
+                  )}
+
+                  {/* جمع نهایی (تور + هتل) × نفرات */}
                   {currentTourDetails && (
-                    <div className="mb-4 p-4 rounded-xl bg-neutral-900/60 border border-[#F9704E] flex items-center justify-between">
-                      <span className="text-xs text-neutral-400 font-medium">🧮 قیمت کل:</span>
-                      <span className="text-xs font-bold text-[#F9704E] tracking-wide">
+                    <div className="px-3 py-2.5 rounded-xl bg-neutral-900/60 border border-[#F9704E] flex items-center justify-between">
+                      <span className="text-xs text-neutral-300 font-medium">💰 جمع نهایی قابل پرداخت:</span>
+                      <span className="text-sm font-bold text-[#F9704E] tracking-wide">
                         {calculateTotalPrice()}
                       </span>
                     </div>
@@ -992,7 +1029,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                               <div key={index} className="bg-[#121215] p-3.5 rounded-xl border border-[#F9704E] flex flex-col sm:flex-row items-center justify-between gap-3">
                                 <div className="flex flex-col items-center sm:items-start">
                                   <span className="text-[11px] sm:text-xs text-[#F9704E] font-bold">{card.bankName ? `بانک ${card.bankName}` : `کارت ${index + 1}`}</span>
-         <span className="text-[10px] sm:text-xs text-neutral-300 font-mono mt-0.5">{card.cardHolder || card.cardOwner}</span>
+                                  <span className="text-[10px] sm:text-xs text-neutral-300 font-mono mt-0.5">{card.cardHolder || card.cardOwner}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <span className="font-mono text-xs sm:text-sm text-white tracking-wider">
@@ -1024,18 +1061,12 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                             
                             <div className="flex items-center justify-center gap-3 w-full sm:w-auto">
                               <div className="text-xs sm:text-base font-bold text-white tracking-tight font-mono text-center">
-                                {(() => {
-                                  let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-                                  let rialVal = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-                                  return toPersianDigits(rialVal.toLocaleString()) + ' ریال';
-                                })()}
+                                {toPersianDigits((totalToman * 10).toLocaleString()) + ' ریال'}
                               </div>
                               <button
                                 type="button"
                                 onClick={() => {
-                                  let rawPrice = currentTourDetails ? p2e(currentTourDetails.price).replace(/[^0-9]/g, '') : '0';
-                                  let numericRial = (parseInt(rawPrice, 10) * parseInt(seatsCount || '1', 10)) * 10;
-                                  navigator.clipboard.writeText(numericRial.toString());
+                                  navigator.clipboard.writeText((totalToman * 10).toString());
                                   alert('مبلغ ریالی برای کارت‌به‌کارت کپی شد!');
                                 }}
                                 className="text-[10px] sm:text-[11px] bg-neutral-800 border border-[#F9704E] text-white px-2.5 py-1.5 rounded-lg font-medium hover:bg-[#F9704E] transition-colors"
