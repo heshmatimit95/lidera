@@ -749,22 +749,23 @@ const allImages = currentTourDetails?.images?.length > 0
             </div>
           )}
 {/* اطلاعات حمل‌ونقل، خدمات و هتل‌ها متصل به پنل لیدر */}
+{/* اطلاعات حمل‌ونقل، خدمات و هتل‌ها (متصل به دیتابیس واقعی) */}
                   {matchedTour && (
                     <div className="bg-black/30 border border-white/10 rounded-xl p-4 space-y-3 mt-4 text-right" dir="rtl">
                       
-                      {/* نوع حمل‌ونقل ثبت‌شده در پنل لیدر */}
+                      {/* نوع حمل‌ونقل */}
                       {(matchedTour.transport || matchedTour.transportType) && (
                         <div className="flex items-center justify-between text-xs text-zinc-300 border-b border-white/10 pb-2">
                           <span>نوع سفر / حمل‌ونقل: <strong className="text-[#F9704E]">{matchedTour.transport || matchedTour.transportType}</strong></span>
                         </div>
                       )}
 
-                      {/* خدمات ثبت‌شده در پنل لیدر */}
-                      {Array.isArray(matchedTour.services) && matchedTour.services.length > 0 && (
+                      {/* خدمات تور */}
+                      {((Array.isArray(matchedTour.services) && matchedTour.services.length > 0) || (Array.isArray(matchedTour.customServices) && matchedTour.customServices.length > 0)) && (
                         <div>
                           <span className="text-xs text-zinc-400 block mb-1.5">خدمات این تور:</span>
                           <div className="flex flex-wrap gap-1.5">
-                            {matchedTour.services.map((srv: any, idx: number) => {
+                            {(matchedTour.services || matchedTour.customServices).map((srv: any, idx: number) => {
                               const srvName = typeof srv === 'string' ? srv : (srv.name || srv.title);
                               if (!srvName) return null;
                               return (
@@ -777,39 +778,43 @@ const allImages = currentTourDetails?.images?.length > 0
                         </div>
                       )}
 
-                      {/* نرخ‌نامه هتل‌ها ثبت‌شده در پنل لیدر */}
-                      {Array.isArray(matchedTour.hotels) && matchedTour.hotels.length > 0 && (
-                        <div className="border-t border-white/10 pt-3">
-                          <label className="text-xs text-zinc-400 block mb-2">انتخاب هتل و نرخ‌نامه:</label>
-                          <div className="space-y-2">
-                            {matchedTour.hotels.map((hotel: any, idx: number) => {
-                              const hotelName = hotel.name || hotel.hotelName;
-                              const hotelPrice = hotel.price || 0;
-                              const hotelDesc = hotel.desc || hotel.description || '';
-                              if (!hotelName) return null;
+                      {/* نرخ‌نامه هتل‌ها (پشتیبانی از جدول Hotel و آرایه هتل‌ها) */}
+                      {(() => {
+                        const hotelList = matchedTour.hotels || matchedTour.Hotel || matchedTour.newTourHotels || [];
+                        if (!Array.isArray(hotelList) || hotelList.length === 0) return null;
+                        return (
+                          <div className="border-t border-white/10 pt-3">
+                            <label className="text-xs text-zinc-400 block mb-2">انتخاب هتل و نرخ‌نامه:</label>
+                            <div className="space-y-2">
+                              {hotelList.map((hotel: any, idx: number) => {
+                                const hotelName = hotel.name || hotel.hotelName;
+                                const hotelPrice = hotel.price || 0;
+                                const hotelDesc = hotel.desc || hotel.description || '';
+                                if (!hotelName) return null;
 
-                              return (
-                                <label key={idx} className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${selectedHotel?.name === hotelName ? 'border-[#F9704E] bg-[#F9704E]/10' : 'border-white/10 bg-black/20 hover:bg-black/40'}`}>
-                                  <div className="flex items-center gap-2">
-                                    <input 
-                                      type="radio" 
-                                      name="tourHotel" 
-                                      checked={selectedHotel?.name === hotelName}
-                                      onChange={() => setSelectedHotel(hotel)}
-                                      className="accent-[#F9704E]"
-                                    />
-                                    <div>
-                                      <span className="text-xs font-bold text-white block">{hotelName}</span>
-                                      {hotelDesc && <span className="text-[10px] text-zinc-400">{hotelDesc}</span>}
+                                return (
+                                  <label key={idx} className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${selectedHotel?.name === hotelName ? 'border-[#F9704E] bg-[#F9704E]/10' : 'border-white/10 bg-black/20 hover:bg-black/40'}`}>
+                                    <div className="flex items-center gap-2">
+                                      <input 
+                                        type="radio" 
+                                        name="tourHotel" 
+                                        checked={selectedHotel?.name === hotelName}
+                                        onChange={() => setSelectedHotel(hotel)}
+                                        className="accent-[#F9704E]"
+                                      />
+                                      <div>
+                                        <span className="text-xs font-bold text-white block">{hotelName}</span>
+                                        {hotelDesc && <span className="text-[10px] text-zinc-400">{hotelDesc}</span>}
+                                      </div>
                                     </div>
-                                  </div>
-                                  <span className="text-xs font-bold text-[#F9704E]">{Number(hotelPrice).toLocaleString()} تومان</span>
-                                </label>
-                              );
-                            })}
+                                    <span className="text-xs font-bold text-[#F9704E]">{Number(hotelPrice).toLocaleString()} تومان</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        );
+                      })()}
 
                     </div>
                   )}
