@@ -749,7 +749,10 @@ const allImages = currentTourDetails?.images?.length > 0
             </div>
           )}
 {/* حمل و نقل، خدمات و هتل‌ها */}
-                  {currentTourObj && Object.keys(currentTourObj).length > 0 && (
+{/* نمایش نوع حمل‌ونقل، خدمات و هتل‌ها */}
+
+
+                  {(matchedTour && Object.keys(matchedTour).length > 0) && (
                     <div className="bg-black/30 border border-white/10 rounded-xl p-4 space-y-3 mt-4 text-right" dir="rtl">
                       <div className="flex items-center justify-between text-xs text-zinc-300 border-b border-white/10 pb-2">
                         <span>نوع سفر / حمل‌ونقل: <strong className="text-[#F9704E]">{matchedTour.transportType || matchedTour.transport || 'قطار ۴ تخته'}</strong></span>
@@ -795,8 +798,6 @@ const allImages = currentTourDetails?.images?.length > 0
                       )}
                     </div>
                   )}
-
-
 
                      {/* تعداد صندلی مورد نیاز */}
                 <div className="mb-4">
