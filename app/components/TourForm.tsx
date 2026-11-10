@@ -748,58 +748,65 @@ const allImages = currentTourDetails?.images?.length > 0
               </div>
             </div>
           )}
-{/* حمل و نقل، خدمات و هتل‌ها */}
-{/* نمایش نوع حمل‌ونقل، خدمات و هتل‌ها */}
-
-
-{/* اطلاعات حمل‌ونقل، خدمات و هتل‌ها (پویا متصل به پنل لیدر) */}
+{/* اطلاعات حمل‌ونقل، خدمات و هتل‌ها متصل به پنل لیدر */}
                   {matchedTour && (
                     <div className="bg-black/30 border border-white/10 rounded-xl p-4 space-y-3 mt-4 text-right" dir="rtl">
                       
-                      {/* نوع حمل‌ونقل (اگر لیدر وارد کرده باشد) */}
-                      {(matchedTour.transportType || matchedTour.transport) && (
+                      {/* نوع حمل‌ونقل ثبت‌شده در پنل لیدر */}
+                      {(matchedTour.transport || matchedTour.transportType) && (
                         <div className="flex items-center justify-between text-xs text-zinc-300 border-b border-white/10 pb-2">
-                          <span>نوع سفر / حمل‌ونقل: <strong className="text-[#F9704E]">{matchedTour.transportType || matchedTour.transport}</strong></span>
+                          <span>نوع سفر / حمل‌ونقل: <strong className="text-[#F9704E]">{matchedTour.transport || matchedTour.transportType}</strong></span>
                         </div>
                       )}
 
-                      {/* خدمات تور (اگر از پنل ثبت شده باشد) */}
-                      {tourServices.length > 0 && (
+                      {/* خدمات ثبت‌شده در پنل لیدر */}
+                      {Array.isArray(matchedTour.services) && matchedTour.services.length > 0 && (
                         <div>
                           <span className="text-xs text-zinc-400 block mb-1.5">خدمات این تور:</span>
                           <div className="flex flex-wrap gap-1.5">
-                            {tourServices.map((srv: string, idx: number) => (
-                              <span key={idx} className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-lg text-[11px]">
-                                ✓ {srv}
-                              </span>
-                            ))}
+                            {matchedTour.services.map((srv: any, idx: number) => {
+                              const srvName = typeof srv === 'string' ? srv : (srv.name || srv.title);
+                              if (!srvName) return null;
+                              return (
+                                <span key={idx} className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-lg text-[11px]">
+                                  ✓ {srvName}
+                                </span>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
 
-                      {/* نرخ‌نامه هتل‌ها (اگر لیدر در پنل هتل اضافه کرده باشد) */}
-                      {tourHotels.length > 0 && (
+                      {/* نرخ‌نامه هتل‌ها ثبت‌شده در پنل لیدر */}
+                      {Array.isArray(matchedTour.hotels) && matchedTour.hotels.length > 0 && (
                         <div className="border-t border-white/10 pt-3">
                           <label className="text-xs text-zinc-400 block mb-2">انتخاب هتل و نرخ‌نامه:</label>
                           <div className="space-y-2">
-                            {tourHotels.map((hotel: any, idx: number) => (
-                              <label key={idx} className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${selectedHotel?.name === hotel.name ? 'border-[#F9704E] bg-[#F9704E]/10' : 'border-white/10 bg-black/20 hover:bg-black/40'}`}>
-                                <div className="flex items-center gap-2">
-                                  <input 
-                                    type="radio" 
-                                    name="tourHotel" 
-                                    checked={selectedHotel?.name === hotel.name}
-                                    onChange={() => setSelectedHotel(hotel)}
-                                    className="accent-[#F9704E]"
-                                  />
-                                  <div>
-                                    <span className="text-xs font-bold text-white block">{hotel.name || hotel.hotelName}</span>
-                                    <span className="text-[10px] text-zinc-400">{hotel.desc || hotel.description || ''}</span>
+                            {matchedTour.hotels.map((hotel: any, idx: number) => {
+                              const hotelName = hotel.name || hotel.hotelName;
+                              const hotelPrice = hotel.price || 0;
+                              const hotelDesc = hotel.desc || hotel.description || '';
+                              if (!hotelName) return null;
+
+                              return (
+                                <label key={idx} className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${selectedHotel?.name === hotelName ? 'border-[#F9704E] bg-[#F9704E]/10' : 'border-white/10 bg-black/20 hover:bg-black/40'}`}>
+                                  <div className="flex items-center gap-2">
+                                    <input 
+                                      type="radio" 
+                                      name="tourHotel" 
+                                      checked={selectedHotel?.name === hotelName}
+                                      onChange={() => setSelectedHotel(hotel)}
+                                      className="accent-[#F9704E]"
+                                    />
+                                    <div>
+                                      <span className="text-xs font-bold text-white block">{hotelName}</span>
+                                      {hotelDesc && <span className="text-[10px] text-zinc-400">{hotelDesc}</span>}
+                                    </div>
                                   </div>
-                                </div>
-                                <span className="text-xs font-bold text-[#F9704E]">{Number(hotel.price || 0).toLocaleString()} تومان</span>
-                              </label>
-                            ))}
+                                  <span className="text-xs font-bold text-[#F9704E]">{Number(hotelPrice).toLocaleString()} تومان</span>
+                                </label>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
