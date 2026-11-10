@@ -4,8 +4,6 @@ import React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { submitPassengerAction } from '@/app/actions/admin-actions';
-const [selectedHotel, setSelectedHotel] = useState<any>(null);
-const [selectedTour, setSelectedTour] = useState<any>(null);
 
 const p2e = (s: any) => (s != null && typeof s === 'string' ? s.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString()) : '');
 
@@ -30,17 +28,22 @@ interface TourFormProps {
 }
 
 export default function TourForm({ leader: initialLeader }: TourFormProps) {
-  const [currentLider, setCurrentLider] = useState<any>(initialLeader || null);
-  const [selectedTour, setSelectedTour] = useState<string>(
-    initialLeader?.tours?.[0]?.id ?? ''
-  );
-const [isloadingLeader, setIsLoadingLeader] = useState(!initialLeader);
+ const [currentLider, setCurrentLider] = useState<any>(initialLeader || null);
+  const [selectedTour, setSelectedTour] = useState<any>('');
+  const [selectedHotel, setSelectedHotel] = useState<any>(null);
+    const [isloadingLeader, setIsLoadingLeader] = useState(!initialLeader);
   const router = useRouter();
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
   const searchParams = useSearchParams();
-  const [isMounted, setIsMounted] = useState(false);
-  const [tenantSlug, setTenantSlug] = useState<string | null>(null);
-  const [activeImageModal, setActiveImageModal] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);const [tenantSlug, setTenantSlug] = useState<string | null>(null);
+  const currentTourObj = (typeof selectedTour === 'object' && selectedTour !== null) 
+    ? selectedTour 
+    : ((currentLider?.tours || []).find((t: any) => t === selectedTour || t?.name === selectedTour || t?.title === selectedTour) || {});
+  const matchedTour: any = currentTourObj || {};
+  const tourServices: string[] = Array.isArray(matchedTour.services) ? matchedTour.services : [];
+  const tourHotels: any[] = Array.isArray(matchedTour.hotels) ? matchedTour.hotels : [];
+
+   const [activeImageModal, setActiveImageModal] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [step, setStep] = useState(1);
@@ -527,14 +530,8 @@ async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
   }
 }
 
-// استخراج ایمن تور انتخاب شده
-  const currentTourObj = (typeof selectedTour === 'object' && selectedTour !== null) 
-    ? selectedTour 
-    : ((currentLider?.tours || []).find((t: any) => t === selectedTour || t?.name === selectedTour || t?.title === selectedTour) || {});
 
-  const matchedTour: any = currentTourObj || {};
-  const tourServices: string[] = Array.isArray(matchedTour.services) ? matchedTour.services : [];
-  const tourHotels: any[] = Array.isArray(matchedTour.hotels) ? matchedTour.hotels : [];
+
 
   // ۲. اگر لودینگ تمام شد اما لیدر یافت نشد
   if (!currentLider) {
@@ -722,10 +719,7 @@ return (
     )}
   </div>
 )}
-
-
-
-                 
+               
 {/* گالری تصاویر تور انتخابی (طراحی مدرن با قابلیت بزرگنمایی) */}
 {currentTourDetails && (() => {
 const allImages = currentTourDetails?.images?.length > 0
