@@ -28,22 +28,18 @@ interface TourFormProps {
 }
 
 export default function TourForm({ leader: initialLeader }: TourFormProps) {
- const [currentLider, setCurrentLider] = useState<any>(initialLeader || null);
-  const [selectedTour, setSelectedTour] = useState<any>('');
-  const [selectedHotel, setSelectedHotel] = useState<any>(null);
-    const [isloadingLeader, setIsLoadingLeader] = useState(!initialLeader);
+  const [currentLider, setCurrentLider] = useState<any>(initialLeader || null);
+  const [selectedTour, setSelectedTour] = useState<string>(
+    initialLeader?.tours?.[0]?.id ?? ''
+  );
+const [isloadingLeader, setIsLoadingLeader] = useState(!initialLeader);
   const router = useRouter();
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
   const searchParams = useSearchParams();
-  const [isMounted, setIsMounted] = useState(false);const [tenantSlug, setTenantSlug] = useState<string | null>(null);
-  const currentTourObj = (typeof selectedTour === 'object' && selectedTour !== null) 
-    ? selectedTour 
-    : ((currentLider?.tours || []).find((t: any) => t === selectedTour || t?.name === selectedTour || t?.title === selectedTour) || {});
-  const matchedTour: any = currentTourObj || {};
-  const tourServices: string[] = Array.isArray(matchedTour.services) ? matchedTour.services : [];
-  const tourHotels: any[] = Array.isArray(matchedTour.hotels) ? matchedTour.hotels : [];
+  const [isMounted, setIsMounted] = useState(false);
+  const [tenantSlug, setTenantSlug] = useState<string | null>(null);
 
-   const [activeImageModal, setActiveImageModal] = useState<string | null>(null);
+  const [activeImageModal, setActiveImageModal] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [step, setStep] = useState(1);
@@ -533,6 +529,10 @@ async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
 
 
 
+
+
+
+
   // ۲. اگر لودینگ تمام شد اما لیدر یافت نشد
   if (!currentLider) {
     return (
@@ -671,54 +671,6 @@ return (
                   )}
                 </div>
 
-{/* نمایش نوع حمل‌ونقل و خدمات تور */}
-
-{currentTourObj && Object.keys(currentTourObj).length > 0 && (
-  <div className="bg-black/30 border border-white/10 rounded-xl p-4 space-y-3 mt-4 text-right" dir="rtl">
-    <div className="flex items-center justify-between text-xs text-zinc-300 border-b border-white/10 pb-2">
-      <span>نوع سفر / حمل‌ونقل: <strong className="text-[#F9704E]">{matchedTour.transportType || matchedTour.transport || 'قطار ۴ تخته'}</strong></span>
-    </div>
-
-    {tourServices.length > 0 && (
-      <div>
-        <span className="text-xs text-zinc-400 block mb-1.5">خدمات این تور:</span>
-        <div className="flex flex-wrap gap-1.5">
-          {tourServices.map((srv: string, idx: number) => (
-            <span key={idx} className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-lg text-[11px]">
-              ✓ {srv}
-            </span>
-          ))}
-        </div>
-      </div>
-    )}
-
-    {tourHotels.length > 0 && (
-      <div className="border-t border-white/10 pt-3">
-        <label className="text-xs text-zinc-400 block mb-2">انتخاب هتل و نرخ‌نامه:</label>
-        <div className="space-y-2">
-          {tourHotels.map((hotel: any, idx: number) => (
-            <label key={idx} className={`flex items-center justify-between p-2.5 rounded-xl border cursor-pointer transition-all ${selectedHotel?.name === hotel.name ? 'border-[#F9704E] bg-[#F9704E]/10' : 'border-white/10 bg-black/20 hover:bg-black/40'}`}>
-              <div className="flex items-center gap-2">
-                <input 
-                  type="radio" 
-                  name="tourHotel" 
-                  checked={selectedHotel?.name === hotel.name}
-                  onChange={() => setSelectedHotel(hotel)}
-                  className="accent-[#F9704E]"
-                />
-                <div>
-                  <span className="text-xs font-bold text-white block">{hotel.name || hotel.hotelName}</span>
-                  <span className="text-[10px] text-zinc-400">{hotel.desc || hotel.description || ''}</span>
-                </div>
-              </div>
-              <span className="text-xs font-bold text-[#F9704E]">{Number(hotel.price || 0).toLocaleString()} تومان</span>
-            </label>
-          ))}
-        </div>
-      </div>
-    )}
-  </div>
-)}
                
 {/* گالری تصاویر تور انتخابی (طراحی مدرن با قابلیت بزرگنمایی) */}
 {currentTourDetails && (() => {
@@ -918,7 +870,7 @@ const allImages = currentTourDetails?.images?.length > 0
         </div>
       )}
 <div>
-{/*<label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
+<label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
   <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
   {idCardPreview ? (
     <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] bg-neutral-900">
@@ -933,7 +885,7 @@ const allImages = currentTourDetails?.images?.length > 0
       <span className="text-lg">🪪</span>
       <span>برای آپلود عکس کارت ملی کلیک کنید</span>
     </button>
-  )}*/}
+  )}
   {idCardError && <p className="text-xs text-red-400 mt-2 font-medium">{idCardError}</p>}
                       </div>
                     </div>
