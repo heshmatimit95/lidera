@@ -642,9 +642,13 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                           // پشتیبانی از id و _id
                           const tourId = tour.id || tour._id || idx;
                           return (
-                            <option key={tourId} value={tourId}>
-                              {toPersianNumbers(tour.name || tour.title || 'بدون عنوان')} | تاریخ: {toPersianNumbers(tour.date || 'تعیین نشده')} | {tour.price ? Number(tour.price).toLocaleString('fa-IR') : ''} تومان
-                            </option>
+<option key={tourId} value={tourId}>
+  {toPersianNumbers(tour.name || tour.title || 'بدون عنوان')} 
+  {' | '} 
+  تاریخ: {toPersianNumbers(tour.date || tour.startDate || 'تعیین نشده')} 
+  {' | '} 
+  {tour.price ? Number(String(tour.price).replace(/[^0-9]/g, '')).toLocaleString('fa-IR') : '۰'} تومان
+</option>
                           );
                         })}
                       </select>
