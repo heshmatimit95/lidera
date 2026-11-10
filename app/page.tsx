@@ -21,24 +21,36 @@ const leader = await prisma.leader.findFirst({
     slug: true,
     name: true,
     fullName: true,
-    mobile: true, 
-    zarinpalMerchantId: true,
       paymentMethod: true,
       cards: true,
       status: true,
  tours: {
+  orderBy: { createdAt: 'desc' },
   select: {
     id: true,
     name: true,
     title: true,
     price: true,
     date: true,
+    duration: true,
+    startDate: true,
+    endDate: true,
+    services: true,
+    transportType: true,
     images: true,
     image1: true,
     image2: true,
     image3: true,
     image4: true,
     tourImages: { select: { url: true } },
+    hotels: {
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        description: true,
+      },
+    },
   },
 },
   }
@@ -46,7 +58,7 @@ const leader = await prisma.leader.findFirst({
 
   if (!leader) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '[#F9704E]', color: '#ff4d4d', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F9704E', color: '#ff4d4d', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
         <h2>❌ لیدر یا تور مورد نظر یافت نشد.</h2>
       </div>
     );
