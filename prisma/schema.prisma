@@ -34,8 +34,10 @@ model Leader {
    zarinpalMerchantId String?
   hasOnlinePayment   Boolean  @default(false)
   mustChangePassword Boolean @default(false)
+  status:             true,
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+  blockedAt:           true,
 }
 
 model BankCard {
@@ -127,6 +129,10 @@ hasAcceptedWaiver Boolean   @default(false) // وضعیت پذیرش تعهدن�
   leader         Leader   @relation(fields: [leaderId], references: [id], onDelete: Cascade)
   createdAt      DateTime @default(now())
   tenantId       String
+  paymentAuthority String?  @unique
+  paymentRefId     String?
+
+
 }
 model Admin {
   id       String @id @default(uuid())

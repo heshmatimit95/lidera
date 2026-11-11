@@ -1,64 +1,103 @@
 import { prisma } from '../../../lib/db';
 import { NextResponse, NextRequest } from "next/server";
+import { checkRateLimit } from '../../../lib/rate-limit';
+
+const SITE_URL = (process.env.SITE_URL || 'https://lidera.ir').replace(/\/$/, '');
+const IS_SANDBOX = process.env.ZARINPAL_SANDBOX !== 'false';
+const ZP_HOST = IS_SANDBOX ? 'https://sandbox.zarinpal.com' : 'https://payment.zarinpal.com';
+const STATUS_PAID = 'پرداخت شده آنلاین';
+
+const clientIp = (req: Request) =>
+  req.headers.get('x-forwarded-for')?.split(',').pop()?.trim() || 'unknown';
+
+// تماس با زرین‌پال با مهلت ۱۰ ثانیه
+async function zarinpalPost(path: string, payload: object) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 10_000);
+  try {
+    const res = await fetch(`${ZP_HOST}/pg/v4/payment/${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
+      signal: ctrl.signal,
+      cache: 'no-store',
+    });
+    return await res.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// آدرس بازگشت همیشه روی دامنه‌ی خودمان است (بدون Open Redirect)
+const goBack = (slug: string | null, result: 'success' | 'canceled' | 'failed' | 'error') =>
+  NextResponse.redirect(
+    `${SITE_URL}/?${slug ? `slug=${encodeURIComponent(slug)}&` : ''}payment=${result}`
+  );
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const authority = url.searchParams.get("Authority");
+  const authority = (url.searchParams.get("Authority") || '').trim().slice(0, 64);
   const status = url.searchParams.get("Status");
-  const leaderIdentifier = url.searchParams.get("leaderId");
-  const passengerId = url.searchParams.get("passengerId");
-  const amountInRial = Number(url.searchParams.get("amount") || 0);
 
-  // تعیین آدرس بازگشت (CallbackURL) برای ارسال به زرین‌پال
-  const callbackUrl = `https://lidera.ir/?slug=${leaderIdentifier}&step=form&payment=success`;
+  // 🔒 فقط Authority خوانده می‌شود؛ مبلغ، مسافر و لیدر از دیتابیس می‌آیند نه از آدرس
+  const rl = checkRateLimit(`payverify:${clientIp(request)}`, 30, 60_000);
+  if (!rl.success) return goBack(null, 'error');
 
-  // اگر پرداخت لغو شد، برگرد به صفحه فرم ثبت‌نام (نه پنل لیدر) با پارامتر canceled
-  if (status !== "OK" || !authority) {
-    return NextResponse.redirect(`https://lidera.ir/?slug=${leaderIdentifier}&payment=canceled`);
-  }
+  if (!/^[A-Za-z0-9]{10,64}$/.test(authority)) return goBack(null, 'error');
 
   try {
-    const leader = await prisma.leader.findFirst({
-      where: { OR: [{ id: leaderIdentifier || "" }, { slug: leaderIdentifier || "" }] },
+    const passenger = await prisma.passenger.findUnique({
+      where: { paymentAuthority: authority },
+      select: {
+        id: true,
+        amount: true,
+        paymentStatus: true,
+        leader: { select: { slug: true, zarinpalMerchantId: true } },
+      },
     });
 
-    if (!leader) {
-      return NextResponse.redirect(`https://lidera.ir/?slug=${leaderIdentifier}&payment=error`);
-    }
+    if (!passenger) return goBack(null, 'error');
+    const slug = passenger.leader.slug;
 
-    const ZARINPAL_MERCHANT =
-      leader?.zarinpalMerchantId ||
+    // پرداخت لغو شد
+    if (status !== "OK") return goBack(slug, 'canceled');
+
+    // اگر قبلاً تأیید شده، دوباره به زرین‌پال درخواست نمی‌دهیم (idempotent)
+    if (passenger.paymentStatus === STATUS_PAID) return goBack(slug, 'success');
+
+    const merchant =
+      passenger.leader.zarinpalMerchantId ||
       process.env.ZARINPAL_MERCHANT ||
-      "00000000-0000-0000-0000-000000000000";
+      (IS_SANDBOX ? '00000000-0000-0000-0000-000000000000' : '');
+    if (!merchant) return goBack(slug, 'error');
 
-    const response = await fetch('https://sandbox.zarinpal.com/pg/v4/payment/verify.json', {
-      method: 'POST',
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        merchant_id: ZARINPAL_MERCHANT,
-        amount: amountInRial,
-        authority: authority,
-      }),
+    // مبلغ فقط از دیتابیس (تومان × ۱۰ = ریال)
+    const amountRial = Math.round(Number(passenger.amount) * 10);
+    if (!Number.isFinite(amountRial) || amountRial < 10_000) return goBack(slug, 'error');
+
+    const data = await zarinpalPost('verify.json', {
+      merchant_id: merchant,
+      amount: amountRial,
+      authority,
     });
 
-    const data = await response.json();
-
-    if (data.data && (data.data.code === 100 || data.data.code === 101)) {
-      // آپدیت وضعیت مسافر به پرداخت شده آنلاین
-      if (passengerId) {
-        await prisma.passenger.update({
-          where: { id: passengerId },
-          data: { paymentStatus: "پرداخت شده آنلاین" },
-        }).catch(() => {});
-      }
-
-      // هدایت مسافر به صفحه فرم ثبت‌نام (ریشه سایت) با پارامتر موفقیت برای نمایش باکس موفقیت و دکمه ثبت‌نام جدید
-      return NextResponse.redirect(`https://lidera.ir/?slug=${leader.slug || leaderIdentifier}&payment=success`);
+    const code = data?.data?.code;
+    if (code === 100 || code === 101) {
+      // به‌روزرسانی اتمیک: فقط اگر هنوز پرداخت‌شده نیست؛ و خطا دیگر بلعیده نمی‌شود
+      await prisma.passenger.updateMany({
+        where: { id: passenger.id, paymentStatus: { not: STATUS_PAID } },
+        data: {
+          paymentStatus: STATUS_PAID,
+          paymentRefId: data?.data?.ref_id != null ? String(data.data.ref_id) : null,
+          receiptDate: new Date().toLocaleDateString('fa-IR'),
+        },
+      });
+      return goBack(slug, 'success');
     }
 
-    return NextResponse.redirect(`https://lidera.ir/?slug=${leaderIdentifier}&payment=failed`);
+    return goBack(slug, 'failed');
   } catch (error) {
     console.error("Verification Error:", error);
-    return NextResponse.redirect(`https://lidera.ir/?slug=${leaderIdentifier}&payment=error`);
+    return goBack(null, 'error');
   }
 }

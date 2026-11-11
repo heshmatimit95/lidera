@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
 import { prisma } from '../../../lib/db';
+import { requireActiveLeader } from '../../../lib/auth';
 import { checkRateLimit } from '../../../lib/rate-limit';
 import bcrypt from 'bcryptjs';
 
@@ -15,6 +14,9 @@ function validateStrongPassword(password: string) {
 
   if (password.length < minLength) {
     return 'رمز عبور باید حداقل شامل ۸ کاراکتر باشد.';
+  }
+  if (password.length > 72) {
+    return 'رمز عبور حداکثر می‌تواند ۷۲ کاراکتر باشد.';
   }
   if (!hasUpperCase || !hasLowerCase) {
     return 'رمز عبور باید شامل حروف بزرگ و کوچک انگلیسی باشد.';
@@ -30,26 +32,12 @@ function validateStrongPassword(password: string) {
 
 export async function PUT(request: Request) {
   try {
-    // ۱. احراز هویت لیدر از طریق کوکی
-    const token = (await cookies()).get('leader_token')?.value;
-    const secret = process.env.JWT_SECRET;
-    if (!token || !secret) {
-      return NextResponse.json({ message: 'ابتدا وارد شوید' }, { status: 401 });
+    // ۱. احراز هویت لیدر (وضعیت فعال از دیتابیس بررسی می‌شود؛ لیدرِ ملزم به تغییر رمز هم مجاز است)
+    const auth = await requireActiveLeader({ allowMustChange: true });
+    if (!auth.ok) {
+      return NextResponse.json({ message: auth.message }, { status: auth.status });
     }
-
-    let payload: any;
-    try {
-      const verified = await jwtVerify(token, new TextEncoder().encode(secret));
-      payload = verified.payload;
-    } catch (e) {
-      return NextResponse.json({ message: 'توکن نامعتبر است' }, { status: 401 });
-    }
-
-    if (payload.role !== 'leader' || typeof payload.leaderId !== 'string') {
-      return NextResponse.json({ message: 'دسترسی غیرمجاز' }, { status: 403 });
-    }
-
-    const leaderId = payload.leaderId;
+    const leaderId = auth.leader.id;
 
     // ۲. محدودیت تلاش (Rate Limit) برای امنیت بیشتر
     const r1 = checkRateLimit(`chpw:${leaderId}`, 5, 15 * 60_000);
@@ -59,7 +47,7 @@ export async function PUT(request: Request) {
 
     // ۳. خواندن اطلاعات ارسالی از فرانت‌اند
     const body = await request.json().catch(() => ({}));
-    const currentPassword = String(body.currentPassword ?? '');
+    const currentPassword = String(body.currentPassword ?? '').slice(0, 200);
     const newPassword = String(body.newPassword ?? '');
 
     // بررسی قدرت رمز عبور جدید
@@ -73,7 +61,10 @@ export async function PUT(request: Request) {
     }
 
     // ۴. بررسی صحت رمز فعلی در دیتابیس
-    const leader = await prisma.leader.findUnique({ where: { id: leaderId } });
+    const leader = await prisma.leader.findUnique({
+      where: { id: leaderId },
+      select: { id: true, password: true },
+    });
     if (!leader || !(await bcrypt.compare(currentPassword, leader.password ?? ''))) {
       return NextResponse.json({ message: 'رمز فعلی اشتباه است' }, { status: 400 });
     }

@@ -369,6 +369,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
             tourName: tourTitle,
             seatsCount: seatsCount,
             birthDate: birthDate,
+
           }
         }),
       });
@@ -487,6 +488,8 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
           phone: finalPhone,
           nationalId: finalNationalId,
           seatsCount: finalSeats,
+           birthDate: birthDate,
+          hasAcceptedWaiver: isTermsAccepted,
           passengerData: {
             fullName: finalFullName,
             phone: finalPhone,

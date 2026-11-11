@@ -39,7 +39,6 @@ interface Leader {
   mobile: string | null; 
   nationalId: string | null; 
   address?: string | null; 
-  password?: string | null;
   instagram?: string | null;
   telegram?: string | null;
   whatsapp?: string | null;
@@ -124,7 +123,7 @@ const handleLogout = async () => {
     const res = await createLeaderInDb(newLeader, window.location.pathname);
 
     if (res.success) {
-      alert(`✅ لیدر با موفقیت در دیتابیس ثبت شد.`);
+            alert(`✅ لیدر با موفقیت ثبت شد.\nرمز موقت (فقط همین یک بار نمایش داده می‌شود):\n${(res as any).initialPassword}`);
       const updatedData = await getLeadersFromDb();
       setGuides(updatedData as any);
       setNewLeader({
@@ -136,20 +135,6 @@ const handleLogout = async () => {
       alert(res.message || '❌ خطا در ثبت لیدر.');
     }
   };
-
-const [formData, setFormData] = useState({
-  fullName: "",
-  username: "",
-  mobile: "",
-  nationalId: "",
-  // فیلدهای شبکه‌های اجتماعی:
-  instagram: "",
-  telegram: "",
-  whatsapp: "",
-  rubika: "",
-  // بقیه فیلدها...
-});
-
 
   // باز کردن مودال ویرایش
   const handleOpenEditModal = (leader: Leader) => {
@@ -210,8 +195,8 @@ const [formData, setFormData] = useState({
   // تغییر پسورد مدیریت در دیتابیس
   const handleChangeAdminPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPasswordInput.trim().length < 4) {
-      alert('⚠️ رمز عبور باید حداقل ۴ کاراکتر باشد!');
+    if (newPasswordInput.trim().length < 8) {
+      alert('⚠️ رمز عبور باید حداقل ۸ کاراکتر باشد!');
       return;
     }
     if (newPasswordInput !== confirmPasswordInput) {
@@ -238,17 +223,17 @@ if (res.ok) {
   };
 
   // ریست پسورد لیدر به 123456
+  // ریست پسورد لیدر (رمز موقت تصادفی ساخته می‌شود و فقط یک بار به ادمین نمایش داده می‌شود)
   const handleResetLeaderPassword = async (leaderId: string) => {
-    if (confirm("آیا از ریست رمز عبور به 123456 مطمئن هستید؟")) {
+    if (confirm("آیا از ریست رمز عبور این لیدر مطمئن هستید؟")) {
       const res = await resetLeaderPasswordInDb(leaderId, window.location.pathname);
       if (res.success) {
-        alert("🔑 رمز عبور با موفقیت در دیتابیس ریست شد!");
+        alert(`🔑 رمز موقت جدید (به لیدر بدهید):\n${(res as any).newPassword}`);
       } else {
         alert(res.message);
       }
     }
   };
-
   // حذف تک‌تک لیدرها از دیتابیس
   const handleDelete = async (id: string) => {
     if (confirm('آیا از حذف این لیدر از دیتابیس اطمینان دارید؟')) {
@@ -411,7 +396,7 @@ const filteredGuides = guides.filter(guide => {
   {hasPendingChanges && (
     <button
       onClick={handleSaveStatusChanges}
-      title={`ذخیره تغییرات جدید (${Object.keys(hasPendingChanges).length})`}
+            title={`ذخیره تغییرات جدید (${Object.keys(pendingStatusChanges).length})`}
       className="flex items-center justify-center  h-8 w-8 sm:h-9 sm:w-9 bg-amber-500 hover:bg-amber-600 text-black rounded-xl transition-all shadow-md active:scale-95 cursor-pointer animate-pulse"
     >
       <FaSave className="text-[18px] sm:text-[14px]" />
@@ -816,7 +801,7 @@ const filteredGuides = guides.filter(guide => {
             value={newLeader.password}
             onChange={e => setNewLeader({ ...newLeader, password: e.target.value })}
             className="w-full bg-zinc-300 border border-orange-600 rounded-xl px-3.5 py-2 text-xs text-black placeholder-#F9704E focus:outline-none font-mono text-left"
-            placeholder="پیش‌فرض: 123456"
+           placeholder="خالی = رمز تصادفی ساخته می‌شود"
           />
         </div>
 
@@ -1011,7 +996,7 @@ const filteredGuides = guides.filter(guide => {
                     required
                     value={confirmPasswordInput}
                     onChange={e => setConfirmPasswordInput(e.target.value)}
-                    className="w-full bg-zinc-900 border border[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#E5C060]"
+                     className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#E5C060]"
                   />
                 </div>
 
