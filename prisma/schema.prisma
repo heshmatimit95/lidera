@@ -33,11 +33,10 @@ model Leader {
   passengers         Passenger[]
    zarinpalMerchantId String?
   hasOnlinePayment   Boolean  @default(false)
-  mustChangePassword Boolean @default(false)
-  status:             true,
-  createdAt          DateTime @default(now())
+mustChangePassword Boolean @default(false)
+    createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
-  blockedAt:           true,
+  blockedAt          Boolean @default(false)
 }
 
 model BankCard {
