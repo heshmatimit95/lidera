@@ -1,63 +1,55 @@
-'use server'
-import { prisma } from "../../lib/db";
-import { requireActiveLeader } from "../../lib/auth";
+import { NextResponse, NextRequest } from 'next/server';
 
-const cleanStr = (v: unknown, max: number) => String(v ?? '').trim().slice(0, max);
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
-// فقط تصاویر Cloudinary خودمان
-const cleanImageUrl = (v: unknown): string | null => {
-  const s = String(v ?? '').trim();
-  if (!s || s.length > 500) return null;
+const MAX_SIZE = 5 * 1024 * 1024; // ۵ مگابایت
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+export async function POST(req: NextRequest) {
   try {
-    const u = new URL(s);
-    return u.protocol === 'https:' && u.hostname === 'res.cloudinary.com' ? s : null;
-  } catch {
-    return null;
-  }
-};
+    const formData = await req.formData();
+    const file = formData.get('file') as File | null;
 
-export async function uploadTourImages(formData: FormData) {
-  // 🔒 فقط لیدر واردشده و فعال
-  const auth = await requireActiveLeader();
-  if (!auth.ok) return { success: false, message: "دسترسی غیرمجاز." };
-
-  const tourId = cleanStr(formData.get("tourId"), 64);
-  if (!tourId) return { success: false, message: "شناسه تور نامعتبر است." };
-
-  // 🔒 تور باید متعلق به همین لیدر باشد
-  const tour = await prisma.tour.findFirst({
-    where: { id: tourId, leaderId: auth.leader.id },
-    select: { id: true },
-  });
-  if (!tour) return { success: false, message: "تور یافت نشد." };
-
-  const dataToUpdate: any = {};
-
-  // چک کردن هر ۴ تصویر: فقط لینک Cloudinary (نوشتن فایل روی دیسک سرور حذف شد)
-  for (let i = 1; i <= 4; i++) {
-    const value = formData.get(`image${i}`);
-    if (typeof value === 'string' && value.trim()) {
-      const url = cleanImageUrl(value);
-      if (!url) return { success: false, message: `لینک تصویر ${i} نامعتبر است.` };
-      dataToUpdate[`image${i}`] = url;
-    } else if (value && typeof value !== 'string' && (value as File).size > 0) {
-      return { success: false, message: "ابتدا تصاویر را از طریق آپلود امن ارسال کنید و لینک آن‌ها را بفرستید." };
+    if (!file) {
+      return NextResponse.json({ success: false, message: 'فایلی ارسال نشده است' }, { status: 400 });
     }
-  }
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json({ success: false, message: 'مجاز است JPG, PNG یا WEBP فقط تصویر ' }, { status: 400 });
+    }
+    if (file.size > MAX_SIZE) {
+      return NextResponse.json({ success: false, message: 'حجم تصویر نباید بیشتر از ۵ مگابایت باشد' }, { status: 400 });
+    }
 
-  if (Object.keys(dataToUpdate).length === 0) {
-    return { success: false, message: "تصویری ارسال نشد." };
-  }
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const fileBase64 = `data:${file.type};base64,${buffer.toString('base64')}`;
 
-  try {
-    await prisma.tour.update({
-      where: { id: tour.id },
-      data: dataToUpdate,
+    // ارسال مستقیم به API عمومی کلودینری با فچ (بدون نیاز به کتابخانه و Secret)
+    const cloudinaryData = new URLSearchParams();
+    cloudinaryData.append('file', fileBase64);
+    cloudinaryData.append('upload_preset', 'lidera_preset'); // همان پریستی که ساختی
+    cloudinaryData.append('folder', 'lidera_uploads');
+
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/vkuhspb3/image/upload`,
+      {
+        method: 'POST',
+        body: cloudinaryData,
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'خطا در ارتباط با کلودینری');
+    }
+
+    return NextResponse.json({
+      success: true,
+      url: data.secure_url,
     });
-
-    return { success: true, message: "عکس‌ها با موفقیت آپلود شدند." };
-  } catch (error) {
-    console.error("Upload Error:", error);
-    return { success: false, message: "خطا در آپلود عکس‌ها" };
+  } catch (error: any) {
+    console.error('Cloudinary Upload Error Details:', error);
+    return NextResponse.json({ success: false, message: 'خطا در آپلود تصویر: ' + (error.message || '') }, { status: 500 });
   }
 }

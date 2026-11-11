@@ -8,21 +8,21 @@ generator client {
 }
 
 model Leader {
-  id                 String   @id @default(uuid())
-  slug               String   @unique
+  id                 String      @id @default(uuid())
+  slug               String      @unique
   name               String?
   lastName           String?
   fullName           String?
-  username           String?  @unique
-  mobile             String?  @unique
-  nationalId         String?  @unique
+  username           String?     @unique
+  mobile             String?     @unique
+  nationalId         String?     @unique
   password           String
   brandName          String?
   logoUrl            String?
-  primaryColor       String   @default("#0070f3")
-  status             String   @default("ACTIVE")
+  primaryColor       String      @default("#0070f3")
+  status             String      @default("pending") // مقادیر مجاز: pending | active | blocked (حروف کوچک)
   title              String?
-  paymentMethod      String   @default("card")
+  paymentMethod      String      @default("card")    // card | gateway | both
   address            String?
   instagram          String?
   telegram           String?
@@ -31,12 +31,12 @@ model Leader {
   cards              BankCard[]
   tours              Tour[]
   passengers         Passenger[]
-   zarinpalMerchantId String?
-  hasOnlinePayment   Boolean  @default(false)
-mustChangePassword Boolean @default(false)
-    createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  blockedAt          Boolean @default(false)
+  zarinpalMerchantId String?
+  hasOnlinePayment   Boolean     @default(false)
+  mustChangePassword Boolean     @default(false)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+    blockedAt          DateTime?
 }
 
 model BankCard {
@@ -46,52 +46,57 @@ model BankCard {
   cardHolder  String?
   leaderId    String
   leader      Leader   @relation(fields: [leaderId], references: [id], onDelete: Cascade)
+
+  @@index([leaderId])
 }
 
 
 model Tour {
-  id           String        @id @default(uuid())
-  name         String?
-  title        String?
-  date         String?
-  price        String?
-  images       String[]
-  tenantId     String
-  
-  image1       String?
-  image2       String?
-  image3       String?
-  image4       String?
+  id            String        @id @default(uuid())
+  name          String?
+  title         String?
+  date          String?
+  price         String?
+  images        String[]
+  tenantId      String
 
-  duration     String?       
-  startDate    String?       
-  endDate      String? 
-   services     String[]      
- transportType String? 
-  leaderId     String
-  leader       Leader        @relation(fields: [leaderId], references: [id], onDelete: Cascade)
-  
-  tourImages   TourImage[]
-  passengers   Passenger[]
-  
+  image1        String?
+  image2        String?
+  image3        String?
+  image4        String?
 
-  hotels       Hotel[]       @relation("TourHotels")
+  duration      String?
+  startDate     String?
+  endDate       String?
+  services      String[]
+  transportType String?
+  leaderId      String
+  leader        Leader        @relation(fields: [leaderId], references: [id], onDelete: Cascade)
 
-  aiItinerary  AiItinerary?  @relation(fields: [aiItineraryId], references: [id])
-  aiItineraryId String?      @unique
+  tourImages    TourImage[]
+  passengers    Passenger[]
 
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  hotels        Hotel[]       @relation("TourHotels")
+
+  aiItinerary   AiItinerary?  @relation(fields: [aiItineraryId], references: [id])
+  aiItineraryId String?       @unique
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([leaderId])
 }
 
 model Hotel {
   id          String   @id @default(uuid())
   tourId      String
-  name        String   
-  price       Float    
-  description String?  
-  
+  name        String
+  price       Float
+  description String?
+
   tour        Tour     @relation("TourHotels", fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@index([tourId])
 }
 
 
@@ -101,43 +106,48 @@ model TourImage {
   tourId    String
   tour      Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+
+  @@index([tourId])
 }
 
 
 
 // بخش اصلاح شده مدل Passenger
 model Passenger {
-  id             String   @id @default(uuid())
-  fullName       String
-  mobile         String
-  nationalId     String?
-  birthDate       String?   // <--- اضافه کردن فیلد تاریخ تولد
-  tourName       String
-  paymentStatus  String   @default("در انتظار پرداخت")
-  insurance      Boolean  @default(false)
-  receiptDate    String?
-  amount         String?
- receiptImage String?
-  idCardImage    String?  // این فیلد اضافه شد تا خطای تایپ اسکریپت برطرف شود
-  seatsCount     Int      @default(1)
-  tourId         String?
-  tour           Tour?    @relation(fields: [tourId], references: [id], onDelete: SetNull)
-hasAcceptedWaiver Boolean   @default(false) // وضعیت پذیرش تعهدنامه
-  waiverSignedAt    DateTime?                  // تاریخ و ساعت امضا
-  leaderId       String
-  leader         Leader   @relation(fields: [leaderId], references: [id], onDelete: Cascade)
-  createdAt      DateTime @default(now())
-  tenantId       String
-  paymentAuthority String?  @unique
-  paymentRefId     String?
+  id                String    @id @default(uuid())
+  fullName          String
+  mobile            String
+  nationalId        String?
+  birthDate         String?   // تاریخ تولد
+  tourName          String
+  paymentStatus     String    @default("در انتظار پرداخت")
+  insurance         Boolean   @default(false)
+  receiptDate       String?
+  amount            String?
+  receiptImage      String?
+  idCardImage       String?   // این فیلد اضافه شد تا خطای تایپ اسکریپت برطرف شود
+  seatsCount        Int       @default(1)
+  tourId            String?
+  tour              Tour?     @relation(fields: [tourId], references: [id], onDelete: SetNull)
+  hasAcceptedWaiver Boolean   @default(false) // وضعیت پذیرش تعهدنامه
+  waiverSignedAt    DateTime?                 // تاریخ و ساعت امضا
+  leaderId          String
+  leader            Leader    @relation(fields: [leaderId], references: [id], onDelete: Cascade)
+  createdAt         DateTime  @default(now())
+  tenantId          String
+  paymentAuthority  String?   @unique         // شناسه‌ی Authority زرین‌پال (برای تأیید پرداخت)
+  paymentRefId      String?                   // کد پیگیری زرین‌پال بعد از پرداخت موفق
 
-
+  @@index([leaderId])
+  @@index([tourId])
 }
+
 model Admin {
   id       String @id @default(uuid())
   username String @unique
   password String
 }
+
 model AiItinerary {
   id          String   @id @default(uuid())
   dayByDay    String   @db.Text // برنامه‌ی روزانه تولید شده توسط هوش مصنوعی
@@ -146,6 +156,7 @@ model AiItinerary {
   tour        Tour?
   createdAt   DateTime @default(now())
 }
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique

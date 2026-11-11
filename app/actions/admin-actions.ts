@@ -57,7 +57,7 @@ const FAIL_FORBIDDEN = { success: false, message: 'دسترسی غیرمجاز' 
 export async function getLeadersFromDb() {
   await requireAdmin();
   // 🔒 هرگز password به مرورگر برگردانده نمی‌شود
-  return await prisma.leader.findMany({
+  const leaders = await prisma.leader.findMany({
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
@@ -72,9 +72,15 @@ export async function getLeadersFromDb() {
       whatsapp: true,
       rubika: true,
       status: true,
+      blockedAt: true,
       createdAt: true,
     },
   });
+  // تاریخ مسدودی به رشته تبدیل می‌شود تا در مرورگر مشکل سریالایز نداشته باشد
+  return leaders.map((l) => ({
+    ...l,
+    blockedAt: l.blockedAt ? l.blockedAt.toISOString() : null,
+  }));
 }
 
 export async function createLeaderInDb(data: any, pathName: string) {
@@ -257,6 +263,7 @@ export async function deleteAllRecordsForLeader(tenantSlug: string, pathName: st
     return { success: false, message: "خطا در حذف رکوردها از دیتابیس." };
   }
 }
+
 export async function updateAdminPassword(newPass: string, pathName: string) {
   await requireAdmin();
   // رمز ادمین در متغیر محیطی (ADMIN_PASSWORD_HASH) نگه‌داری می‌شود و از مسیر API تغییر می‌کند
@@ -269,7 +276,21 @@ export async function updateLeaderStatusInDb(id: string, status: string, pathNam
   if (!ALLOWED_STATUSES.includes(status)) {
     return { success: false, message: 'وضعیت نامعتبر است.' };
   }
-  await prisma.leader.update({ where: { id: cleanStr(id, 64) }, data: { status } });
+  const leaderId = cleanStr(id, 64);
+  const current = await prisma.leader.findUnique({
+    where: { id: leaderId },
+    select: { blockedAt: true },
+  });
+  if (!current) return { success: false, message: 'لیدر یافت نشد.' };
+
+  await prisma.leader.update({
+    where: { id: leaderId },
+    data: {
+      status,
+      // اگر تازه مسدود شد تاریخ ثبت شود؛ اگر از مسدودی درآمد پاک شود
+      blockedAt: status === 'blocked' ? (current.blockedAt ?? new Date()) : null,
+    },
+  });
   revalidatePath(pathName);
   return { success: true, message: "" };
 }
