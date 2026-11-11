@@ -731,7 +731,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
 
                   {/* کشوی حمل‌ونقل و خدمات (بسته به‌صورت پیش‌فرض) */}
                   {(tourTransport || tourServices.length > 0) && (
-                    <div className="rounded-xl border border-white/10 bg-[#1c1c21] overflow-hidden">
+                    <div className="rounded-xl border border-[#F9704E] bg-[#1c1c21] overflow-hidden">
                       <button
                         type="button"
                         onClick={() => setShowTransport(!showTransport)}
@@ -744,7 +744,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                       </button>
 
                       {showTransport && (
-                        <div className="px-3 pb-3 pt-2 border-t border-white/10 space-y-2 animate-fadeIn">
+                        <div className="px-3 pb-3 pt-2 border-t border-[#F9704E] space-y-2 animate-fadeIn">
                           {tourTransport && (
                             <div className="text-[11px] text-zinc-300">
                               نوع سفر: <strong className="text-[#F9704E]">{tourTransport}</strong>
@@ -756,7 +756,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                                 const srvName = typeof srv === 'string' ? srv : (srv?.name || srv?.title);
                                 if (!srvName) return null;
                                 return (
-                                  <span key={idx} className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg text-[11px]">
+                                  <span key={idx} className="bg-emerald-500/10 text-emerald-400 border border-[#F9704E] px-2 py-0.5 rounded-lg text-[11px]">
                                     ✓ {srvName}
                                   </span>
                                 );
@@ -770,7 +770,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
 
                   {/* کشوی انتخاب هتل (اجباری اگر تور هتل دارد) */}
                   {tourHotels.length > 0 && (
-                    <div className={`rounded-xl border bg-[#1c1c21] overflow-hidden transition-colors ${selectedHotel ? 'border-[#F9704E]/60' : 'border-white/10'}`}>
+                    <div className={`rounded-xl border bg-[#1c1c21] overflow-hidden transition-colors ${selectedHotel ? 'border-[#F9704E]/60' : 'border-[#F9704E]'}`}>
                       <button
                         type="button"
                         onClick={() => setShowHotels(!showHotels)}
@@ -796,7 +796,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                             return (
                               <label
                                 key={hotel.id || idx}
-                                className={`flex items-center justify-between gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${isChosen ? 'border-[#F9704E] bg-[#F9704E]/10' : 'border-white/10 bg-black/20 hover:bg-black/40'}`}
+                                className={`flex items-center justify-between gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${isChosen ? 'border-[#F9704E] bg-[#F9704E]/10' : 'border-[#F9704E] bg-black/20 hover:bg-black/40'}`}
                               >
                                 <div className="flex items-center gap-2 min-w-0">
                                   <input
@@ -855,7 +855,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
 
                   {/* راهنمای تکمیل مرحله (مثلاً انتخاب هتل) */}
                   {!isStepValid() && getValidationHint() && (
-                    <div className="text-[11px] font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-xl text-center">
+                    <div className="text-[11px] font-medium text-amber-400 bg-amber-500/10 border border-[#F9704E] px-3 py-2 rounded-xl text-center">
                       {getValidationHint()}
                     </div>
                   )}
@@ -959,7 +959,8 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                       )}
                       
                       <div>
-                        <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
+                       
+                       {/* <label className="block text-sm text-white mb-2 font-medium">بارگذاری تصویر کارت ملی (اختیاری)</label>
                         <input type="file" ref={idCardInputRef} accept="image/*" onChange={handleIdCardChange} className="hidden" />
                         {idCardPreview ? (
                           <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] bg-neutral-900">
@@ -974,7 +975,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                             <span className="text-lg">🪪</span>
                             <span>برای آپلود عکس کارت ملی کلیک کنید</span>
                           </button>
-                        )}
+                        )}*/}
                         {idCardError && <p className="text-xs text-red-400 mt-2 font-medium">{idCardError}</p>}
                       </div>
                     </div>
