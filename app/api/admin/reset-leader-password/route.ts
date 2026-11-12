@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'لیدری با این مشخصات یافت نشد' }, { status: 404 });
     }
 
-    const newPassword = generatePassword(10);
+  const newPassword = generatePassword();
     await prisma.leader.update({
       where: { id: target.id },
       data: {
