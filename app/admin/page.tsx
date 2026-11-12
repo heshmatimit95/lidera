@@ -245,6 +245,10 @@ export default function AdminDashboard() {
   // تغییر پسورد مدیریت
   const handleChangeAdminPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!oldPasswordInput) {
+      alert('⚠️ رمز فعلی را وارد کنید!');
+      return;
+    }
     if (newPasswordInput.trim().length < 8) {
       alert('⚠️ رمز عبور باید حداقل ۸ کاراکتر باشد!');
       return;
@@ -257,7 +261,7 @@ export default function AdminDashboard() {
     const res = await fetch('/api/admin/change-password', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ newPassword: newPasswordInput }),
+      body: JSON.stringify({ currentPassword: oldPasswordInput, newPassword: newPasswordInput }),
     });
     const data = await res.json();
 
@@ -1023,7 +1027,18 @@ export default function AdminDashboard() {
 
               <form onSubmit={handleChangeAdminPassword} className="space-y-4">
                 <div>
-                  <label className="block text-xs text-zinc-400 mb-1">رمز عبور جدید *</label>
+                  <label className="block text-xs text-zinc-400 mb-1">رمز عبور فعلی *</label>
+                  <input
+                    type="password"
+                    required
+                    value={oldPasswordInput}
+                    onChange={e => setOldPasswordInput(e.target.value)}
+                    className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#E5C060]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1">رمز عبور جدید * (حداقل ۸ کاراکتر، حروف بزرگ و کوچک، عدد و علامت خاص)</label>
                   <input
                     type="password"
                     required
@@ -1066,7 +1081,7 @@ export default function AdminDashboard() {
 
         {/* ----------------- 🔑 مودال نمایش و کپی رمز موقت ----------------- */}
         {tempCred && (
-          <div className="fixed inset-0 z-60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" dir="rtl">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" dir="rtl">
             <div className="bg-[#1e1e1e] border-2 border-[#E5C060] rounded-2xl w-full max-w-md p-6 shadow-2xl">
               <h2 className="text-base font-bold mb-3 text-[#E5C060] border-b border-[#F9704E] pb-3">
                 {tempCred.title}

@@ -45,9 +45,9 @@ export async function PUT(request: Request) {
       return NextResponse.json({ message: 'تلاش بیش از حد. بعداً امتحان کنید.' }, { status: 429 });
     }
 
-    // ۳. خواندن اطلاعات ارسالی از فرانت‌اند
+    // ۳. خواندن اطلاعات ارسالی از فرانت‌اند (فاصله‌ی اول/آخر رمز موقتِ کپی‌شده نادیده گرفته می‌شود)
     const body = await request.json().catch(() => ({}));
-    const currentPassword = String(body.currentPassword ?? '').slice(0, 200);
+    const currentPassword = String(body.currentPassword ?? '').trim().slice(0, 200);
     const newPassword = String(body.newPassword ?? '');
 
     // بررسی قدرت رمز عبور جدید
@@ -79,7 +79,17 @@ export async function PUT(request: Request) {
       },
     });
 
-    return NextResponse.json({ message: 'رمز عبور با موفقیت تغییر کرد' }, { status: 200 });
+    // ۶. کوکی قدیمیِ must_change_password هم پاک شود
+    const response = NextResponse.json({ message: 'رمز عبور با موفقیت تغییر کرد' }, { status: 200 });
+    response.cookies.set({
+      name: 'must_change_password',
+      value: 'false',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+    return response;
 
   } catch (error) {
     console.error('Leader change password error:', error);

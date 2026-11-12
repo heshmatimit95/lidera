@@ -2,13 +2,15 @@ import { prisma } from './db'; // یا مسیر صحیح فایل پرایزما
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { isActive } from './leader-status';
+
 export async function getActiveLeader(leaderId: string) {
   const leader = await prisma.leader.findUnique({
     where: { id: leaderId },
     select: { id: true, status: true },
   });
-  
-  if (!leader || leader.status !== 'ACTIVE') return null;
+
+  // قبلاً با 'ACTIVE' (حروف بزرگ) مقایسه می‌شد و چون وضعیت در دیتابیس 'active' است، همیشه null برمی‌گرداند
+  if (!leader || !isActive(leader.status)) return null;
   return leader;
 }
 
@@ -21,11 +23,14 @@ export async function requireActiveLeader(
 ): Promise<LeaderAuthResult> {
   const token = (await cookies()).get('leader_token')?.value;
   const secret = process.env.JWT_SECRET;
-  if (!token || !secret) return { ok: false, status: 401, message: 'ابتدا وارد شوید' };
+  // همان شرط middleware و requireAdmin: کلید کوتاه‌تر از ۳۲ کاراکتر پذیرفته نمی‌شود
+  if (!token || !secret || secret.length < 32) return { ok: false, status: 401, message: 'ابتدا وارد شوید' };
 
   let leaderId: string;
   try {
-    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret), {
+      algorithms: ['HS256'],
+    });
     if (payload.role !== 'leader' || typeof payload.leaderId !== 'string') throw new Error();
     leaderId = payload.leaderId;
   } catch {
