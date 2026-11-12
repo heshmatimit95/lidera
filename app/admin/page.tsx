@@ -81,6 +81,10 @@ export default function AdminDashboard() {
   // 5. تغییرات وضعیت معلق (پیش از ذخیره)
   const [pendingStatusChanges, setPendingStatusChanges] = useState<Record<string, string>>({});
 
+  // 6. رمز موقت تازه ساخته‌شده (برای نمایش و کپی؛ فقط یک بار دیده می‌شود)
+  const [tempCred, setTempCred] = useState<{ title: string; fullName: string; username: string; password: string } | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchGuides = async () => {
       try {
@@ -112,6 +116,33 @@ export default function AdminDashboard() {
     }
   };
 
+  // کپی متن در کلیپ‌بورد (با راه‌حل جایگزین برای مرورگرهای قدیمی/غیر HTTPS)
+  const copyToClipboard = async (text: string, key: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+
+  // پیام آماده برای ارسال به تورلیدر
+  const buildCredMessage = (c: { fullName: string; username: string; password: string }) =>
+    `سلام ${c.fullName || ''} عزیز 🌟\n` +
+    `اطلاعات ورود شما به پنل لیدرا:\n` +
+    `🔗 لینک ورود: ${window.location.origin}/login?slug=${c.username}\n` +
+    `👤 نام کاربری: ${c.username}\n` +
+    `🔑 رمز موقت: ${c.password}\n` +
+    `⚠️ در اولین ورود باید رمز عبور خود را تغییر دهید.`;
+
   // افزودن لیدر جدید در دیتابیس
   const handleAddLeaderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +155,12 @@ export default function AdminDashboard() {
     const res = await createLeaderInDb(newLeader, window.location.pathname);
 
     if (res.success) {
-      alert(`✅ لیدر با موفقیت ثبت شد.\nرمز موقت (فقط همین یک بار نمایش داده می‌شود):\n${(res as any).initialPassword}`);
+      setTempCred({
+        title: '✅ لیدر با موفقیت ثبت شد',
+        fullName: newLeader.fullName,
+        username: newLeader.username,
+        password: String((res as any).initialPassword ?? ''),
+      });
       const updatedData = await getLeadersFromDb();
       setGuides(updatedData as any);
       setNewLeader({
@@ -241,7 +277,13 @@ export default function AdminDashboard() {
     if (confirm("آیا از ریست رمز عبور این لیدر مطمئن هستید؟")) {
       const res = await resetLeaderPasswordInDb(leaderId, window.location.pathname);
       if (res.success) {
-        alert(`🔑 رمز موقت جدید (به لیدر بدهید):\n${(res as any).newPassword}`);
+        const target = guides.find((g) => g.id === leaderId);
+        setTempCred({
+          title: '🔑 رمز موقت جدید ساخته شد',
+          fullName: target?.fullName || '',
+          username: target?.username || target?.slug || '',
+          password: String((res as any).newPassword ?? ''),
+        });
       } else {
         alert(res.message);
       }
@@ -1018,6 +1060,61 @@ export default function AdminDashboard() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* ----------------- 🔑 مودال نمایش و کپی رمز موقت ----------------- */}
+        {tempCred && (
+          <div className="fixed inset-0 z-60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" dir="rtl">
+            <div className="bg-[#1e1e1e] border-2 border-[#E5C060] rounded-2xl w-full max-w-md p-6 shadow-2xl">
+              <h2 className="text-base font-bold mb-3 text-[#E5C060] border-b border-[#F9704E] pb-3">
+                {tempCred.title}
+              </h2>
+
+              <p className="text-[11px] text-amber-400 mb-3 leading-relaxed">
+                ⚠️ این رمز فقط همین یک بار نمایش داده می‌شود. لیدر در اولین ورود مجبور به تغییر آن است.
+              </p>
+
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between bg-zinc-900 rounded-xl px-3 py-2">
+                  <span className="text-zinc-400">لیدر:</span>
+                  <span className="text-white">{tempCred.fullName || '---'}</span>
+                </div>
+                <div className="flex justify-between bg-zinc-900 rounded-xl px-3 py-2">
+                  <span className="text-zinc-400">نام کاربری:</span>
+                  <span className="text-[#F9704E] font-mono">{tempCred.username}</span>
+                </div>
+                <div className="flex justify-between items-center bg-zinc-900 rounded-xl px-3 py-2 border border-[#F9704E]">
+                  <span className="text-zinc-400">رمز موقت:</span>
+                  <span className="text-emerald-400 font-mono text-sm tracking-wider select-all" dir="ltr">{tempCred.password}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 mt-4">
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(tempCred.password, 'pass')}
+                  className="bg-zinc-800 hover:bg-zinc-700 text-white py-2.5 rounded-xl text-xs font-bold cursor-pointer"
+                >
+                  {copiedKey === 'pass' ? '✓ کپی شد' : 'کپی رمز'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(buildCredMessage(tempCred), 'msg')}
+                  className="bg-[#F9704E] hover:bg-[#e05b3a] text-white py-2.5 rounded-xl text-xs font-bold cursor-pointer"
+                >
+                  {copiedKey === 'msg' ? '✓ کپی شد' : 'کپی پیام کامل'}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setTempCred(null)}
+                className="w-full mt-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 py-2 rounded-xl text-xs cursor-pointer"
+              >
+                بستن
+              </button>
             </div>
           </div>
         )}

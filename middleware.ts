@@ -18,7 +18,9 @@ async function getPayload(token?: string) {
   const secret = process.env.JWT_SECRET;
   if (!token || !secret || secret.length < 32) return null;
   try {
-    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret), {
+      algorithms: ['HS256'],
+    });
     return payload;
   } catch {
     return null;
@@ -38,28 +40,20 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
   }
-// محافظ از پنل لیدر ۲. //
-// محافظ از پنل لیدر
+
+  // ۲. محافظت از پنل لیدر: فقط توکن JWT معتبر کافی است
+  // (کوکی leader_slug به‌تنهایی قابل جعل است و دیگر ملاک ورود نیست)
+  // اجبار تغییر رمز در خود صفحه‌ی /leader از روی دیتابیس انجام می‌شود (ForceChangePassword)
   if (isLeaderPath) {
-    const leaderToken = request.cookies.get('leader_token')?.value;
-    const leaderSlug = request.cookies.get('leader_slug')?.value;
-    
-    // ۱. اگر لاگین نکرده باشد، هدایت به صفحه لاگین
-    if (!leaderToken && !leaderSlug) {
+    const p = await getPayload(request.cookies.get('leader_token')?.value);
+    if (!p || p.role !== 'leader') {
       const url = new URL('/login', request.url);
       const slug = request.nextUrl.searchParams.get('slug');
       if (slug) url.searchParams.set('slug', slug);
       return NextResponse.redirect(url);
     }
-
-    // ۲. بررسی اجبار تغییر رمز از روی کوکی must_change_password
-    const mustChangePasswordCookie = request.cookies.get('must_change_password')?.value;
-    
-  
-    if (mustChangePasswordCookie === 'true' && !pathname.includes('/change-password')) {
-    
-    }
   }
+
   // ۳. لینک اختصاصی لیدر (lidera.ir/username)
   const segments = pathname.split('/').filter(Boolean);
   if (segments.length === 1) {

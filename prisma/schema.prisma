@@ -97,6 +97,7 @@ model Hotel {
   tour        Tour     @relation("TourHotels", fields: [tourId], references: [id], onDelete: Cascade)
 
   @@index([tourId])
+  
 }
 
 
@@ -140,12 +141,17 @@ model Passenger {
 
   @@index([leaderId])
   @@index([tourId])
+
+  hotelId           String?
+  hotelName         String?
+  hotelPrice        Float?   // قیمت هر نفر هتل در لحظه‌ی ثبت
 }
 
 model Admin {
   id       String @id @default(uuid())
   username String @unique
   password String
+
 }
 
 model AiItinerary {

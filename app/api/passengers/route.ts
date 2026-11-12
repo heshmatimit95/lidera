@@ -60,6 +60,11 @@ export async function GET(request: Request) {
           receiptDate: true,
           amount: true,
           seatsCount: true,
+          birthDate: true,
+          tourId: true,
+          hotelId: true,
+          hotelName: true,
+          hotelPrice: true,
           createdAt: true,
         }
       });
@@ -89,6 +94,11 @@ export async function GET(request: Request) {
         receiptDate: true,
         amount: true,
         seatsCount: true,
+        birthDate: true,
+        tourId: true,
+        hotelId: true,
+        hotelName: true,
+        hotelPrice: true,
         createdAt: true,
       }
     });
@@ -189,6 +199,9 @@ export async function POST(request: Request) {
         birthDate,
         tourName,
         tourId: tour.id,
+        hotelId: hotel ? hotel.id : null,
+        hotelName: hotel ? hotel.name : null,
+        hotelPrice: hotel ? hotel.price : null,
         seatsCount: seats,
         paymentStatus: 'در انتظار تایید فیش',
         insurance: false,
@@ -219,22 +232,51 @@ export async function POST(request: Request) {
     const seatsValue = Math.min(Math.max(Math.floor(Number(body.seatsCount || body.seats) || 1), 1), MAX_SEATS);
     const leaderId = auth.leader.id;
 
+    // تور و هتل (اختیاری برای سازگاری با نسخه‌ی قبلی): اگر tourId آمد باید متعلق به همین لیدر باشد
+    const tourIdIn = body.tourId ? cleanStr(body.tourId, 64) : '';
+    let tourRef: { id: string; price: string | null; hotels: { id: string; name: string; price: number }[] } | null = null;
+    if (tourIdIn) {
+      tourRef = await prisma.tour.findFirst({
+        where: { id: tourIdIn, leaderId },
+        select: { id: true, price: true, hotels: { select: { id: true, name: true, price: true } } },
+      });
+      if (!tourRef) return NextResponse.json({ error: 'تور یافت نشد' }, { status: 404 });
+    }
+
+    // اگر تور هتل دارد، انتخاب هتل الزامی است و باید از هتل‌های همین تور باشد
+    let hotel: { id: string; name: string; price: number } | null = null;
+    if (tourRef && tourRef.hotels.length > 0) {
+      const hotelIdIn = cleanStr(body.hotelId, 64);
+      hotel = tourRef.hotels.find((h) => h.id === hotelIdIn) || null;
+      if (!hotel) return NextResponse.json({ error: 'لطفاً هتل را انتخاب کنید' }, { status: 400 });
+    }
+
+    // مبلغ: همان که لیدر وارد کرده؛ اگر خالی/صفر بود (قیمت تور + قیمت هتل) × تعداد نفرات
+    let amountValue = amount ? cleanStr(toEnglishDigits(String(amount)).replace(/[^0-9]/g, ''), 20) : '';
+    if ((!amountValue || amountValue === '0') && tourRef) {
+      const tourPrice = Number(toEnglishDigits(String(tourRef.price ?? '')).replace(/\D/g, '')) || 0;
+      amountValue = String((tourPrice + (hotel ? Math.round(hotel.price) : 0)) * seatsValue);
+    }
+
     const newPassenger = await prisma.passenger.create({
       data: { 
         fullName: cleanStr(fullName, 80) || 'بدون نام', 
         mobile: cleanStr(mobileValue, 20),
         nationalId: cleanStr(nationalId, 20), 
+        birthDate: body.birthDate ? cleanStr(body.birthDate, 12) : null,
         tourName: cleanStr(tourName, 200) || 'تور عمومی', 
+        tourId: tourRef ? tourRef.id : null,
+        hotelId: hotel ? hotel.id : null,
+        hotelName: hotel ? hotel.name : null,
+        hotelPrice: hotel ? hotel.price : null,
         seatsCount: seatsValue, 
         paymentStatus: cleanStr(paymentStatus, 40) || 'ثبت شده توسط لیدر', 
         insurance: Boolean(insurance), 
         receiptDate: cleanStr(receiptDate, 20) || new Date().toLocaleDateString('fa-IR'), 
-        amount: amount ? cleanStr(amount, 20) : '0', 
+        amount: amountValue || '0', 
         receiptImage: cleanImageUrl(receiptImage),
         tenantId: leaderId,
-        leader: {
-          connect: { id: leaderId }
-        }
+        leaderId,
       }
     });
 
@@ -278,10 +320,36 @@ export async function PUT(request: Request) {
     // 🔒 بررسی مالکیت: مسافر باید متعلق به همین لیدر باشد (جلوگیری از IDOR)
     const existing = await prisma.passenger.findFirst({
       where: { id: String(id), leaderId },
-      select: { id: true },
+      select: { id: true, tourId: true },
     });
     if (!existing) {
       return NextResponse.json({ error: 'مسافر یافت نشد' }, { status: 404 });
+    }
+
+    // 🏨 تور و هتل: تور باید متعلق به همین لیدر و هتل باید از هتل‌های همان تور باشد
+    const tourHotelData: { tourId?: string; hotelId?: string | null; hotelName?: string | null; hotelPrice?: number | null } = {};
+    const wantsTour = body.tourId !== undefined && cleanStr(body.tourId, 64) !== '';
+    const wantsHotel = body.hotelId !== undefined;
+    if (wantsTour || wantsHotel) {
+      const effectiveTourId = wantsTour ? cleanStr(body.tourId, 64) : existing.tourId;
+      if (effectiveTourId) {
+        const tourRef = await prisma.tour.findFirst({
+          where: { id: effectiveTourId, leaderId },
+          select: { id: true, hotels: { select: { id: true, name: true, price: true } } },
+        });
+        if (!tourRef) return NextResponse.json({ error: 'تور یافت نشد' }, { status: 404 });
+
+        let hotel: { id: string; name: string; price: number } | null = null;
+        if (tourRef.hotels.length > 0) {
+          const hotelIdIn = cleanStr(body.hotelId, 64);
+          hotel = tourRef.hotels.find((h) => h.id === hotelIdIn) || null;
+          if (!hotel) return NextResponse.json({ error: 'لطفاً هتل را انتخاب کنید' }, { status: 400 });
+        }
+        if (wantsTour) tourHotelData.tourId = tourRef.id;
+        tourHotelData.hotelId = hotel ? hotel.id : null;
+        tourHotelData.hotelName = hotel ? hotel.name : null;
+        tourHotelData.hotelPrice = hotel ? hotel.price : null;
+      }
     }
 
     const updated = await prisma.passenger.update({
@@ -291,6 +359,7 @@ export async function PUT(request: Request) {
         ...(mobileValue !== undefined && { mobile: cleanStr(mobileValue, 20) }),
         ...(nationalId !== undefined && { nationalId: cleanStr(nationalId, 20) }),
         ...(tourName !== undefined && { tourName: cleanStr(tourName, 200) }),
+        ...tourHotelData,
         ...(seatsValue !== undefined && { seatsCount: seatsValue }),
         ...(paymentStatus !== undefined && { paymentStatus: cleanStr(paymentStatus, 40) }),
         ...(insurance !== undefined && { insurance: Boolean(insurance) }),

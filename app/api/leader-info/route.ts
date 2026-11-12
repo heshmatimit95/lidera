@@ -65,7 +65,8 @@ const PRIVATE_SELECT = {
     orderBy: { createdAt: 'desc' },
     take: 200,
     select: {
-      id: true, fullName: true, mobile: true, nationalId: true, tourName: true,
+      id: true, fullName: true, mobile: true, nationalId: true, birthDate: true, tourName: true,
+      tourId: true, hotelId: true, hotelName: true, hotelPrice: true,
       paymentStatus: true, insurance: true, receiptDate: true, amount: true,
       seatsCount: true, receiptImage: true, createdAt: true,
     },

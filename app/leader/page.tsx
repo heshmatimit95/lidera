@@ -31,6 +31,7 @@ const leader = await prisma.leader.findFirst({
       paymentMethod: true,
       cards: true,
       status: true,
+      mustChangePassword: true, // 👈 بدون این فیلد، مودال اجبار تغییر رمز هرگز باز نمی‌شد
  tours: {
   orderBy: { createdAt: 'desc' },
   select: {
@@ -80,7 +81,12 @@ const passengers = await prisma.passenger.findMany({
       fullName: true,
       mobile: true,
       nationalId: true,
+      birthDate: true,
       tourName: true,
+      tourId: true,
+      hotelId: true,
+      hotelName: true,
+      hotelPrice: true,
       paymentStatus: true,
       insurance: true,
       receiptDate: true,

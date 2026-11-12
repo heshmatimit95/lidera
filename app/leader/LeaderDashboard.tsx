@@ -19,6 +19,10 @@ interface Passenger {
  mobile: string;
   nationalId: string;
   tourName: string;
+  tourId?: string;
+  hotelId?: string | null;
+  hotelName?: string | null;
+  hotelPrice?: number | null;
   paymentStatus: string;
   originalPaymentStatus?: string;
   insurance: boolean;
@@ -40,6 +44,9 @@ interface TourItem {
   images: string[];
   price?: string | number;
   date?: string;
+  transportType?: string | null;
+  services?: string[];
+  hotels?: { id?: string; name: string; price: number | string; description?: string | null }[];
 }
 
 interface BankCard {
@@ -231,6 +238,22 @@ useEffect(() => {
       console.error('خطا در ارتباط با سرور:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // بروزرسانی لیست تورها (همراه با هتل‌ها، خدمات و نوع حمل‌ونقل) از سرور
+  // فقط تورها را جایگزین می‌کند و لیست مسافران را دست نمی‌زند
+  const refreshTours = async () => {
+    try {
+      const slug = new URLSearchParams(window.location.search).get('slug') || currentTenantsSlug;
+      if (!slug) return;
+      const res = await fetch(`/api/leader-info?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' });
+      const data = await res.json();
+      if (data?.success && Array.isArray(data.leader?.tours)) {
+        setActiveTours(data.leader.tours);
+      }
+    } catch (e) {
+      console.error('خطا در بروزرسانی تورها:', e);
     }
   };
 
@@ -500,47 +523,73 @@ const handleTourImageUpload = async (tourIndex: number, e: React.ChangeEvent<HTM
     }
   };
 
-// تابع محاسبه و بروزرسانی مبلغ برای فرم "افزودن"
-  const calculateAddAmount = (selectedTourName: string, seatCount: number) => {
-    const foundTour = activeTours.find((t: any) => t.name === selectedTourName);
-    const unitPrice = foundTour ? Number(foundTour.price) || 0 : 0;
-    const total = unitPrice * seatCount;
+// ─── ابزارهای تور، هتل و محاسبه‌ی مبلغ: (قیمت تور + قیمت هتل) × تعداد نفرات ───
+  const parsePrice = (v: any): number => Number(String(v ?? '').replace(/[^0-9]/g, '')) || 0;
 
-    setAddFormData((prev: any) => ({
-      ...prev,
-      tourName: selectedTourName,
-      seats: seatCount,
-      amount: total > 0 ? total.toString() : prev.amount,
-    }));
-  };
-  // تابع محاسبه و بروزرسانی مبلغ برای فرم "ویرایش" (دیتای ثبت‌نامی قبلی را اصلاح می‌کند)
-const calculateEditAmount = (selectedTourName: string, seatCount: number) => {
-    // جستجوی تور در لیست تورهای لیدر
-    const foundTour = activeTours.find((t: any) => 
-      t.name === selectedTourName || 
-      selectedTourName?.includes(t.name) || 
-      t.name?.includes(selectedTourName)
+  const findTourByName = (name: string) => {
+    if (!name) return undefined;
+    return activeTours.find((t: any) =>
+      t.name === name || (t.name && name.includes(t.name)) || (t.name && t.name.includes(name))
     );
-    
-    // اگر قیمت پیدا شد، ضربدر تعداد صندلی کن
-    const unitPrice = foundTour ? Number(String(foundTour.price).replace(/[^0-9]/g, '')) || 0 : 0;
-    const total = unitPrice * seatCount;
+  };
 
-setEditFormData((prev: any) => ({
-      ...prev,
-      tourName: selectedTourName,
-      seats: seatCount,
-      amount: total.toString(), // <--- همیشه مبلغ جدید را به صورت مستقیم ست کن
-    }));
-  };;
+  const getTourHotels = (tour: any): any[] => (Array.isArray(tour?.hotels) ? tour.hotels : []);
+
+  const getHotelDesc = (h: any): string => h?.description ?? h?.desc ?? '';
+
+  const computePricing = (tourName: string, hotelId: string | null | undefined, seats: number) => {
+    const tour: any = findTourByName(tourName);
+    const hotel = getTourHotels(tour).find((h: any) => h.id && h.id === hotelId);
+    const base = parsePrice(tour?.price);
+    const hotelPrice = Number(hotel?.price) || 0;
+    const count = Math.max(1, Number(seats) || 1);
+    return { tour, hotel, base, hotelPrice, count, total: (base + hotelPrice) * count };
+  };
+
+// تابع محاسبه و بروزرسانی مبلغ برای فرم "افزودن"
+// hotelId: اگر داده نشود هتل قبلی حفظ می‌شود؛ با '' هتل پاک می‌شود (مثلاً هنگام تغییر تور)
+  const calculateAddAmount = (selectedTourName: string, seatCount: number, hotelId?: string) => {
+    setAddFormData((prev: any) => {
+      const nextHotelId = hotelId !== undefined ? hotelId : prev.hotelId;
+      const { tour, total } = computePricing(selectedTourName, nextHotelId, seatCount);
+      return {
+        ...prev,
+        tourName: selectedTourName,
+        tourId: tour?.id || '',
+        hotelId: nextHotelId || '',
+        seats: seatCount,
+        amount: total > 0 ? total.toString() : prev.amount,
+      };
+    });
+  };
+
+  // تابع محاسبه و بروزرسانی مبلغ برای فرم "ویرایش" (دیتای ثبت‌نامی قبلی را اصلاح می‌کند)
+  const calculateEditAmount = (selectedTourName: string, seatCount: number, hotelId?: string) => {
+    setEditFormData((prev: any) => {
+      const nextHotelId = hotelId !== undefined ? hotelId : prev.hotelId;
+      const { tour, total } = computePricing(selectedTourName, nextHotelId, seatCount);
+      return {
+        ...prev,
+        tourName: selectedTourName,
+        tourId: tour?.id || '',
+        hotelId: nextHotelId || '',
+        seats: seatCount,
+        amount: total > 0 ? total.toString() : prev.amount,
+      };
+    });
+  };
   const openAddModal = () => {
-    const defaultTourName = activeTours[0]?.name || '';
-    const defaultTourPrice = activeTours[0]?.price ? Number(activeTours[0].price) : 0;
+    const firstTour: any = activeTours[0];
+    const defaultTourName = firstTour?.name || '';
+    const defaultTourPrice = parsePrice(firstTour?.price);
     setAddFormData({
       fullName: '',
       phone: '',
       nationalId: '',
+      birthDate: '',
       tourName: defaultTourName,
+      tourId: firstTour?.id || '',
+      hotelId: '',
       paymentStatus: 'در انتظار پرداخت',
       insurance: false,
       receiptDate: '',
@@ -554,33 +603,36 @@ setEditFormData((prev: any) => ({
 const openEditModal = (passenger: Passenger) => {
     const p = passenger as any; 
     
-    // پیدا کردن نام تور مسافر به صورت انعطاف‌پذیر
+    // پیدا کردن تور مسافر: اول با شناسه، بعد با نام (به صورت انعطاف‌پذیر)
     const rawTourName = p.tourName || p.tourTitle || '';
-    const matchedTour = activeTours.find((t: any) => 
-      t.name === rawTourName || 
-      rawTourName.includes(t.name) || 
-      t.name.includes(rawTourName)
-    );
+    const matchedTour: any =
+      activeTours.find((t: any) => t.id && t.id === p.tourId) || findTourByName(rawTourName);
     const initialTour = matchedTour ? matchedTour.name : (activeTours[0]?.name || '');
+
+    // پیدا کردن هتل مسافر: اول با شناسه، بعد با نام هتل
+    const tourHotels = getTourHotels(matchedTour);
+    const matchedHotel =
+      tourHotels.find((h: any) => h.id && h.id === p.hotelId) ||
+      (p.hotelName ? tourHotels.find((h: any) => h.name === p.hotelName) : undefined);
     
     const initialSeats = Number(p.seatsCount || p.seats) || 1;
     
-setEditId(p.id);
+    setEditId(p.id);
     setEditFormData({
       fullName: p.fullName || '',
-       phone: p.phone || p.mobile || '',
+      phone: p.phone || p.mobile || '',
       nationalId: p.nationalId || p.national_id || p.nationalCode || p.national_code || '',
       tourName: initialTour,
+      tourId: matchedTour?.id || p.tourId || '',
+      hotelId: matchedHotel?.id || '',
       paymentStatus: p.paymentStatus || 'در انتظار پرداخت',
       insurance: Boolean(p.insurance),
       receiptDate: p.receiptDate || '',
+      // مبلغ ثبت‌شده‌ی مسافر حفظ می‌شود؛ فقط با تغییر تور/هتل/تعداد دوباره محاسبه می‌شود
       amount: p.amount ? String(p.amount) : '0',
       receiptImage: p.receiptImage || '',
       seats: initialSeats,
     });
-    
-    // محاسبه اولیه مبلغ با توجه به تور پیدا شده و صندلی مسافر
-    calculateEditAmount(initialTour, initialSeats);
     
     setIsEditModalOpen(true);
   };
@@ -588,12 +640,22 @@ setEditId(p.id);
   // ذخیره اطلاعات مسافر بدون بستن خودکار مودال (طبق درخواست)
   const handleSaveNewPassenger = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // اگر تور هتل دارد، انتخاب هتل الزامی است (مثل فرم ثبت‌نام مسافر)
+    const selectedTour: any = findTourByName(addFormData.tourName);
+    if (getTourHotels(selectedTour).length > 0 && !addFormData.hotelId) {
+      alert('⚠️ لطفاً هتل اقامت را انتخاب کنید.');
+      return;
+    }
+
     try {
       const slugValue = currentTenantSlug || new URLSearchParams(window.location.search).get('slug') || '';
       const payload = { 
         tenantId: slugValue, 
         slug: slugValue, 
         ...addFormData, 
+        tourId: selectedTour?.id || addFormData.tourId || '',
+        hotelId: addFormData.hotelId || '',
         seatsCount: addFormData.seats 
       };
 
@@ -610,7 +672,7 @@ setEditId(p.id);
         alert('✅ مسافر جدید با موفقیت افزوده شد.');
         
       } else {
-        alert('❌ خطا در ثبت اطلاعات: ' + (responseData.error || 'خطای سرور'));
+        alert('❌ خطا در ثبت اطلاعات: ' + (responseData.error || responseData.message || 'خطای سرور'));
       }
     } catch (e: any) {
       console.error(e);
@@ -622,41 +684,48 @@ const handleUpdatePassenger = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editId) return;
 
+    const selectedTour: any = findTourByName(editFormData.tourName);
+    if (getTourHotels(selectedTour).length > 0 && !editFormData.hotelId) {
+      alert('⚠️ لطفاً هتل اقامت را انتخاب کنید.');
+      return;
+    }
+
     try {
-      // پیدا کردن قیمت تور انتخاب شده از لیست تورهای فعال
-const foundTour = activeTours.find((t: any) => 
-      t.name === editFormData.tourName || editFormData.tourName?.includes(t.name) || t.name?.includes(editFormData.tourName)
-    );
-    const unitPrice = foundTour ? Number(String(foundTour.price || 0).replace(/[^0-9]/g, '')) || 0 : 0;
-    const seatCount = Number(editFormData.seats || 1);
-    const calculatedFinalAmount = unitPrice > 0 ? (unitPrice * seatCount).toString() : (editFormData.amount || '0');
-     const response = await fetch(`/api/passengers`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: editId,
-        tourName: editFormData.tourName,
-        seats: Number(editFormData.seats || seatCount || 1), // <--- اصلاح دقیق تعداد صندلی
-        amount: String(calculatedFinalAmount !== '0' ? calculatedFinalAmount : (editFormData.amount || '4100000')),
-        paymentStatus: editFormData.paymentStatus,
-        receiptDate: editFormData.receiptDate,
-        insurance: editFormData.insurance,
-        fullName: editFormData.fullName,
-        mobile: editFormData.mobile,
-        nationalId: editFormData.nationalId,
-      }),
-    });
+      const seatCount = Math.max(1, Number(editFormData.seats || 1));
+      const response = await fetch(`/api/passengers`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editId,
+          tourId: selectedTour?.id || editFormData.tourId || '',
+          tourName: editFormData.tourName,
+          hotelId: editFormData.hotelId || '',
+          seats: seatCount,
+          // مبلغ نهایی: همان که در فرم (خودکار یا دستیِ لیدر) نمایش داده می‌شود
+          amount: String(editFormData.amount || '0'),
+          paymentStatus: editFormData.paymentStatus,
+          receiptDate: editFormData.receiptDate,
+          insurance: editFormData.insurance,
+          fullName: editFormData.fullName,
+          mobile: editFormData.phone,
+          nationalId: editFormData.nationalId,
+        }),
+      });
       const responseData = await response.json();
-if (response.ok) {
-        // استفاده از داده‌های واقعی و جدیدی که سرور برگردانده است
+      if (response.ok) {
+        // داده‌ی جدید سرور روی داده‌ی قبلی ادغام می‌شود تا فیلدهای دیگر (هتل، فیش و...) از بین نروند
         setPassengers((prev: any[]) =>
-          prev.map((p: any) => (p.id === editId ? responseData : p))
+          prev.map((p: any) =>
+            p.id === editId
+              ? { ...p, ...responseData, originalPaymentStatus: responseData.paymentStatus ?? p.paymentStatus }
+              : p
+          )
         );
         setIsEditModalOpen(false);
         alert('ویرایش مسافر با موفقیت انجام شد ✅');
       }
        else {
-        alert('خطا در بروزرسانی ❌: ' + (responseData.error || 'خطای سرور'));
+        alert('خطا در بروزرسانی ❌: ' + (responseData.error || responseData.message || 'خطای سرور'));
       }
     } catch (error) {
       console.error(error);
@@ -773,17 +842,16 @@ const handleAddTour = async (e: React.FormEvent) => {
       // ارسال تاریخ دستی وارد شده توسط لیدر
       formData.append("receiptDate", selectedReceiptPassenger?.receiptDate || "");
       
-      // محاسبه و ارسال مبلغ تور
-// اول چک کن ببین مسافر از قبل مبلغی دارد یا نه؛ اگر داشت همان را حفظ کن، وگرنه محاسبه خودکار کن
+      // مبلغ: اگر برای مسافر ثبت شده همان حفظ می‌شود؛ وگرنه (قیمت تور + قیمت هتل) × تعداد نفرات
+      // (عدد پیش‌فرض ثابت حذف شد تا مبلغ اشتباه ثبت نشود)
     const existingAmount = selectedReceiptPassenger?.amount;
-    const finalAmountToSend = existingAmount && existingAmount !== '0' && existingAmount !== 'NaN' 
-      ? existingAmount 
-      : (() => {
-          const tourPriceRaw = selectedReceiptPassenger?.tourPrice || selectedReceiptPassenger?.price || selectedReceiptPassenger?.tour?.price || 17890000;
-          const rawPrice = parseInt(String(tourPriceRaw).replace(/[^0-9]/g, ''), 10) || 17890000;
-          const seats = parseInt(String(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1), 10);
-          return (rawPrice * seats).toString();
-        })();
+    const hasAmount = existingAmount && existingAmount !== '0' && existingAmount !== 'NaN' && existingAmount !== 'null';
+    const calc = computePricing(
+      selectedReceiptPassenger?.tourName || '',
+      selectedReceiptPassenger?.hotelId,
+      Number(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1)
+    );
+    const finalAmountToSend = hasAmount ? String(existingAmount) : String(calc.total);
 
     formData.append("amount", finalAmountToSend);
       // فراخوانی اکشن سرور برای ذخیره اطلاعات
@@ -794,7 +862,7 @@ const handleAddTour = async (e: React.FormEvent) => {
         sendSmsNotification(
           selectedReceiptPassenger.mobile,
           'APPROVED',
-          selectedReceiptPassenger.name,
+          selectedReceiptPassenger.fullName,
           selectedReceiptPassenger.tourName
         );
 
@@ -854,28 +922,33 @@ const getStatusColorClass = (status: string) => {
 // خروجی اکسل لیست مسافران (بهینه شده با Lazy-load و RTL)
   const exportToExcel = async () => {
     const XLSX = await import('xlsx');
-   const dataToExcel = filteredPassengers.map((p: any, index: any) => ({
-      'ردیف': index + 1,
-      'نام مسافر': p.fullName,
-      'کد ملی': p.nationalId,
-      'تلفن تماس': p.mobile,
-      'نوع تور': p.tourName,
-      'تعداد نفرات': p.seatsCount || p.seats || 1,
-      'تاریخ پرداخت': p.receiptDate || '',
-      'تاریخ و ساعت ثبت': p.createdAt, 
-      'وضعیت پرداخت': p.paymentStatus
-        ? new Date(p.createdAt).toLocaleString('fa-IR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-          })
-        : '',
-      'مبلغ واریزی': p.amount || '',
-      'وضعیت مالی': p.paymentStatus,
-      'بیمه': p.insurance ? 'دارد' : 'ندارد',
-    }));
+   const dataToExcel = filteredPassengers.map((p: any, index: any) => {
+      const tour: any = activeTours.find((t: any) => t.id && t.id === p.tourId) || findTourByName(p.tourName);
+      return {
+        'ردیف': index + 1,
+        'نام مسافر': p.fullName,
+        'کد ملی': p.nationalId,
+        'تلفن تماس': p.mobile,
+        'نوع تور': p.tourName,
+        'هتل': p.hotelName || '',
+        'حمل‌ونقل': tour?.transportType || '',
+        'خدمات': Array.isArray(tour?.services) ? tour.services.join('، ') : '',
+        'تعداد نفرات': p.seatsCount || p.seats || 1,
+        'تاریخ پرداخت': p.receiptDate || '',
+        'تاریخ و ساعت ثبت': p.createdAt
+          ? new Date(p.createdAt).toLocaleString('fa-IR', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+          : '',
+        'مبلغ واریزی': p.amount || '',
+        'وضعیت مالی': p.paymentStatus,
+        'بیمه': p.insurance ? 'دارد' : 'ندارد',
+      };
+    });
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExcel);
     const workbook = XLSX.utils.book_new();
@@ -1051,6 +1124,130 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
   }
 
   setter((prev: any) => ({ ...prev, [fieldName]: value }));
+};
+
+
+// بخش مشترک «تور، هتل، حمل‌ونقل، خدمات و محاسبه‌ی مبلغ» برای فرم‌های افزودن و ویرایش مسافر
+const renderTourPicker = (mode: 'add' | 'edit') => {
+  const form = mode === 'add' ? addFormData : editFormData;
+  const applyPricing = mode === 'add' ? calculateAddAmount : calculateEditAmount;
+  const seats = Math.max(1, Number(form.seats) || 1);
+  const pricing = computePricing(form.tourName, form.hotelId, seats);
+  const hotels = getTourHotels(pricing.tour);
+  const services: string[] = Array.isArray(pricing.tour?.services) ? pricing.tour.services : [];
+  const money = (n: number) => toPersianDigits(n.toLocaleString('en-US')) + ' تومان';
+  const fieldClass = 'w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black font-bold focus:outline-none';
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs text-zinc-300 mb-1.5 font-medium">انتخاب تور:</label>
+          <select
+            value={form.tourName || ''}
+            onChange={(e) => applyPricing(e.target.value, seats, '')}
+            className={fieldClass}
+          >
+            {activeTours.map((t: any, idx: number) => (
+              <option key={t.id || idx} value={t.name}>
+                {t.name}{t.price ? ` - (${t.price} تومان)` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تعداد صندلی/نفرات:</label>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => applyPricing(form.tourName, Math.max(1, seats - 1))}
+              className="bg-zinc-800 hover:bg-zinc-700 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
+            >
+              -
+            </button>
+            <input
+              type="number"
+              min={1}
+              value={seats}
+              onChange={(e) => applyPricing(form.tourName, Math.max(1, Number(e.target.value) || 1))}
+              className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-center focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            />
+            <button
+              type="button"
+              onClick={() => applyPricing(form.tourName, seats + 1)}
+              className="bg-zinc-800 hover:bg-zinc-700 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* انتخاب هتل (فقط اگر تور هتل دارد) */}
+      {hotels.length > 0 && (
+        <div>
+          <label className="block text-xs text-zinc-300 mb-1.5 font-medium">
+            هتل اقامت <span className="text-zinc-500">(قیمت هر نفر به قیمت تور اضافه می‌شود)</span>:
+          </label>
+          <select
+            value={form.hotelId || ''}
+            onChange={(e) => applyPricing(form.tourName, seats, e.target.value)}
+            className={fieldClass}
+          >
+            <option value="">— انتخاب هتل —</option>
+            {hotels.map((h: any, i: number) => (
+              <option key={h.id || i} value={h.id || ''}>
+                {h.name} — {money(Number(h.price) || 0)}{getHotelDesc(h) ? ` (${getHotelDesc(h)})` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* حمل‌ونقل و خدمات تور */}
+      {(pricing.tour?.transportType || services.length > 0) && (
+        <div className="bg-zinc-900/70 border border-zinc-700 rounded-xl p-3 space-y-2 text-[11px]">
+          {pricing.tour?.transportType && (
+            <div className="flex items-center gap-2">
+              <span className="text-zinc-500">حمل‌ونقل:</span>
+              <span className="text-white font-bold">🚆 {pricing.tour.transportType}</span>
+            </div>
+          )}
+          {services.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-zinc-500">خدمات:</span>
+              {services.map((s: string, i: number) => (
+                <span key={i} className="bg-black/40 border border-zinc-700 text-emerald-400 px-2 py-0.5 rounded-md">{s}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* جزئیات محاسبه‌ی مبلغ */}
+      <div className="bg-[#F9704E]/10 border border-[#F9704E]/40 rounded-xl p-3 text-[11px] space-y-1">
+        <div className="flex justify-between text-zinc-300">
+          <span>قیمت پایه تور (هر نفر)</span>
+          <span className="font-mono">{money(pricing.base)}</span>
+        </div>
+        {hotels.length > 0 && (
+          <div className="flex justify-between text-zinc-300">
+            <span>{pricing.hotel ? `هتل ${pricing.hotel.name} (هر نفر)` : 'هتل (انتخاب نشده)'}</span>
+            <span className="font-mono">{money(pricing.hotelPrice)}</span>
+          </div>
+        )}
+        <div className="flex justify-between text-zinc-300">
+          <span>تعداد نفرات</span>
+          <span className="font-mono">{toPersianDigits(seats)}</span>
+        </div>
+        <div className="flex justify-between border-t border-[#F9704E]/30 pt-1.5 text-xs font-bold">
+          <span className="text-white">جمع نهایی</span>
+          <span className="text-emerald-400 font-mono">{money(pricing.total)}</span>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 
@@ -1267,7 +1464,7 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
         <tr>
           <th className="p-3 sm:p-4 font-bold text-right">نام مسافر و کد ملی</th>
           <th className="p-3 sm:p-4 font-bold text-center">تلفن تماس</th>
-          <th className="p-3 sm:p-4 font-bold text-center">عنوان تور</th>
+          <th className="p-3 sm:p-4 font-bold text-center">تور، هتل و خدمات</th>
           <th className="p-3 sm:p-4 font-bold text-center">تاریخ، مبلغ و تصویر فیش</th>
           <th className="p-3 sm:p-4 font-bold text-center">عملیات</th>
           <th className="p-3 sm:p-4 font-bold text-center">وضعیت مالی</th>
@@ -1318,8 +1515,37 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
                   </div>
                 </td>
 
-                {/* ستون ۳: عنوان تور */}
-                <td className="p-3 sm:p-4 text-center font-medium">{p.tourName}</td>
+                {/* ستون ۳: عنوان تور، هتل، حمل‌ونقل و خدمات */}
+                <td className="p-3 sm:p-4 text-center">
+                  <div className="font-medium">{p.tourName}</div>
+                  {(() => {
+                    const tour: any = activeTours.find((t: any) => t.id && t.id === p.tourId) || findTourByName(p.tourName);
+                    const services: string[] = Array.isArray(tour?.services) ? tour.services : [];
+                    return (
+                      <div className="mt-1.5 flex flex-col items-center gap-1">
+                        {p.hotelName && (
+                          <span className="text-[10px] bg-amber-500/10 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-md">
+                            🏨 {p.hotelName}
+                            {p.hotelPrice ? ` (${toPersianDigits(Number(p.hotelPrice).toLocaleString('en-US'))} تومان)` : ''}
+                          </span>
+                        )}
+                        {tour?.transportType && (
+                          <span className="text-[10px] bg-sky-500/10 text-sky-300 border border-sky-500/30 px-2 py-0.5 rounded-md">
+                            🚆 {tour.transportType}
+                          </span>
+                        )}
+                        {services.length > 0 && (
+                          <span
+                            className="text-[10px] bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md max-w-180px] truncate"
+                            title={services.join('، ')}
+                          >
+                            🍽️ {services.slice(0, 2).join('، ')}{services.length > 2 ? ` +${toPersianDigits(services.length - 2)}` : ''}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </td>
                 
                 {/* ستون ۴: تاریخ، مبلغ و تصویر فیش */}
            {/* ستون ۴: تاریخ، مبلغ و تصویر فیش */}
@@ -1409,8 +1635,7 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
     </table>
   </div>
 </div>
-{/* --- مودال افزودن مسافر (با فیش واریزی کامل) --- */}
-        {/* --- مودال افزودن مسافر (با فیش واریزی کامل) --- */}
+{/* --- مودال افزودن مسافر (تور، هتل، حمل‌ونقل، خدمات و فیش واریزی) --- */}
 {isAddModalOpen && (
   <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" dir="rtl">
  <div className="w-full max-w-lg bg-[#121214] border-2 border-[#E5C060] rounded-[28px] p-6 shadow-2xl overflow-y-auto max-h-[90vh] overflow-hidden relative isolate">
@@ -1431,96 +1656,33 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-
-                <div>
-
-  <label className="block text-xs text-zinc-300 mb-1.5 font-medium">شماره موبایل:</label>
-  <input 
-    type="text"
-    maxLength={11}
-    dir="ltr"
-    required
-    value={addFormData.phone}
-    onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })}
-   
-  />
-</div>
-
-
-  <label className="block text-xs text-zinc-300 mb-1.5 font-medium">کد ملی:</label>
-  <input 
-    type="text"
-    maxLength={10}
-    dir="ltr"
-    required
-    value={addFormData.nationalId}
-    onChange={(e) => setAddFormData({ ...addFormData, nationalId: e.target.value })}
-    className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
-  />
-</div>
-</div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-zinc-300 mb-1.5 font-medium">انتخاب تور:</label>
-<select
-  value={editFormData.tourName || ''}
-  onChange={(e) => {
-    const selectedTour = e.target.value;
-    calculateEditAmount(selectedTour, Number(editFormData.seats || 1));
-  }}
-  className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
->
-  {activeTours.map((tour: any, idx: number) => (
-    <option key={idx} value={tour.name}>
-      {tour.name} - ({tour.price} تومان)
-    </option>
-  ))}
-</select>
+                    <label className="block text-xs text-zinc-300 mb-1.5 font-medium">شماره موبایل:</label>
+                    <input 
+                      type="text"
+                      maxLength={11}
+                      dir="ltr"
+                      required
+                      value={addFormData.phone}
+                      onChange={(e) => setAddFormData({ ...addFormData, phone: toEnglishDigits(e.target.value).replace(/\D/g, '') })}
+                      className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
+                    />
                   </div>
-<div>
-  <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تعداد صندلی/نفرات:</label>
-  <div className="flex items-center gap-1.5">
-    {/* دکمه منفی */}
-    <button
-      type="button"
-      onClick={() => {
-        const newVal = Math.max(1, Number(addFormData.seats) - 1);
-        setAddFormData((prev: any) => ({ ...prev, seats: newVal }));
-        calculateAddAmount(addFormData.tourName, newVal);
-      }}
-      className="bg-zinc-800  hover:bg-zinc-300 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
-    >
-      -
-    </button>
+                  <div>
+                    <label className="block text-xs text-zinc-300 mb-1.5 font-medium">کد ملی:</label>
+                    <input 
+                      type="text"
+                      maxLength={10}
+                      dir="ltr"
+                      required
+                      value={addFormData.nationalId}
+                      onChange={(e) => setAddFormData({ ...addFormData, nationalId: toEnglishDigits(e.target.value).replace(/\D/g, '') })}
+                      className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
+                    />
+                  </div>
+                </div>
 
-    {/* اینپوت تعداد بدون فلش‌های مزاحم مرورگر */}
-    <input 
-      type="number" 
-      min={1} 
-      value={addFormData.seats} 
-      onChange={(e) => {
-        const val = Math.max(1, Number(e.target.value));
-        setAddFormData((prev: any) => ({ ...prev, seats: val }));
-        calculateAddAmount(addFormData.tourName, val);
-      }} 
-      className="w-full bg-zinc-300  border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-center focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" 
-    />
-
-    {/* دکمه مثبت */}
-    <button
-      type="button"
-      onClick={() => {
-        const newVal = Number(addFormData.seats) + 1;
-        setAddFormData((prev: any) => ({ ...prev, seats: newVal }));
-        calculateAddAmount(addFormData.tourName, newVal);
-      }}
-      className="bg-zinc-800 hover:bg-zinc-700 text-white w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors shrink-0 cursor-pointer"
-    >
-      +
-    </button>
-  </div>
-</div>
-</div>
+                {/* تور، هتل، حمل‌ونقل، خدمات و محاسبه‌ی مبلغ */}
+                {renderTourPicker('add')}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
@@ -1538,10 +1700,16 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
 </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-zinc-300 mb-1.5 font-medium">مبلغ واریزی (تومان):</label>
-                    <input type="text" value={addFormData.amount} onChange={(e) => setAddFormData({ ...addFormData, amount: e.target.value })} className="w-full  bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black" />
+                    <label className="block text-xs text-zinc-300 mb-1.5 font-medium">مبلغ واریزی (تومان - خودکار و قابل ویرایش):</label>
+                    <input
+                      type="text"
+                      value={addFormData.amount}
+                      onChange={(e) => setAddFormData({ ...addFormData, amount: toEnglishDigits(e.target.value).replace(/[^0-9]/g, '') })}
+                      className="w-full  bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black"
+                    />
                   </div>
                 </div>
+
 <div>
  <div>
   
@@ -1553,8 +1721,6 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
                   onChange={(e) => handleSmartDateChange(e, setAddFormData, 'receiptDate')}
                   placeholder="۱۴۰۵/۰۷/۰۹"
                   className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
-
-                  
                 />
               </div>
 </div>
@@ -1600,7 +1766,7 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
           </div>
         )}
 
-       {/* --- مودال ویرایش مسافر (با فیش واریزی کامل) --- */}
+       {/* --- مودال ویرایش مسافر (تور، هتل، حمل‌ونقل، خدمات و فیش واریزی) --- */}
 {isEditModalOpen && (
   <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" dir="rtl">
   <div className="w-full max-w-lg bg-[#121214] border-2 border-[#E5C060] rounded-[28px] p-6 shadow-2xl overflow-y-auto max-h-[90vh] overflow-hidden relative isolate">
@@ -1619,8 +1785,6 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
                   <input type="text" required value={editFormData.fullName} onChange={(e) => setEditFormData({ ...editFormData, fullName: e.target.value })} className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black placeholder-white/70" />
                 </div>
 
-
-
 <div>
   <label className="block text-xs text-zinc-300 mb-1.5 font-medium">شماره موبایل:</label>
   <input 
@@ -1629,7 +1793,7 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
     dir="ltr"
     required 
     value={editFormData.phone} 
-    onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })} 
+    onChange={(e) => setEditFormData({ ...editFormData, phone: toEnglishDigits(e.target.value).replace(/\D/g, '') })} 
     className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
   />
 </div>
@@ -1642,65 +1806,15 @@ const handleSmartDateChange = (e: React.ChangeEvent<HTMLInputElement>, setter: R
     dir="ltr"
     required 
     value={editFormData.nationalId} 
-    onChange={(e) => setEditFormData({ ...editFormData, nationalId: e.target.value })} 
+    onChange={(e) => setEditFormData({ ...editFormData, nationalId: toEnglishDigits(e.target.value).replace(/\D/g, '') })} 
     className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
   />
 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-zinc-300 mb-1.5 font-medium">انتخاب تور:</label>
-                    <select 
-                      value={editFormData.tourName} 
-onChange={(e) => {
-  const selectedTour = e.target.value;
-  calculateEditAmount(selectedTour, Number(editFormData.seats || 1));
-}}
-                      className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs text-black"
-                    >
-                     {activeTours.map((t: any, idx: any) => (
-                        <option key={t.id || idx} value={t.name} className="bg-zinc-300 text-black">{t.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                 <div>
-  <label className="block text-xs text-zinc-300 mb-1.5 font-medium">تعداد صندلی/نفرات:</label>
-  <div className="flex items-center gap-1.5">
-   {/* دکمه منفی */}
-<button
-  type="button"
-  onClick={() => {
-    const newSeats = Math.max(1, Number(editFormData.seats || 1) - 1);
-    calculateEditAmount(editFormData.tourName, newSeats);
-  }}
-  className="px-3 py-1 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700"
->
-  -
-</button>
+                {/* تور، هتل، حمل‌ونقل، خدمات و محاسبه‌ی مبلغ */}
+                {renderTourPicker('edit')}
 
-{/* نمایش تعداد صندلی */}
-<input
-  type="text"
-  value={editFormData.seats || 1}
-  readOnly
-  className="w-12 text-center bg-transparent text-white font-bold"
-/>
-
-{/* دکمه مثبت */}
-<button
-  type="button"
-  onClick={() => {
-    const newSeats = Number(editFormData.seats || 1) + 1;
-    calculateEditAmount(editFormData.tourName, newSeats);
-  }}
-  className="px-3 py-1 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700"
->
-  +
-</button>
-  </div>
-</div>
-</div>
-{/* وضعیت مالی و مبلغ (مبلغ به صورت خودکار و غیرقابل ویرایش دستی مستقیم جهت جلوگیری از خطا) */}
+{/* وضعیت مالی و مبلغ */}
   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
     <div>
       <label className="block text-xs text-zinc-300 mb-1.5 font-medium">وضعیت مالی:</label>
@@ -1717,13 +1831,12 @@ onChange={(e) => {
 </select>
     </div>
 
-   {/* محاسبه پویا و قابلیت ویرایش مبلغ بر اساس تعداد صندلی و تور */}
-{/* بخش مبلغ واریزی */}
+{/* بخش مبلغ واریزی (خودکار از تور + هتل + تعداد، و قابل ویرایش دستی) */}
 <div className="space-y-1">
-  <label className="block text-xs text-zinc-300 mb-1.5 font-medium">مبلغ واریزی (محاسبه خودکار و قابل ویرایش):</label>
+  <label className="block text-xs text-zinc-300 mb-1.5 font-medium">مبلغ واریزی (خودکار و قابل ویرایش):</label>
   <input
     type="text"
-    value={toPersianDigits(editFormData.amount ? Number(editFormData.amount).toLocaleString() : '') + (editFormData.amount ? ' تومان' : '')}
+    value={toPersianDigits(editFormData.amount ? Number(editFormData.amount).toLocaleString('en-US') : '') + (editFormData.amount ? ' تومان' : '')}
     onChange={(e) => {
       const rawVal = toEnglishDigits(e.target.value).replace(/[^0-9]/g, '');
       setEditFormData((prev: any) => ({ ...prev, amount: rawVal }));
@@ -1731,6 +1844,7 @@ onChange={(e) => {
     placeholder="مبلغ به تومان"
     className="w-full bg-zinc-800 border border-zinc-700 text-emerald-400 font-bold p-2.5 rounded-xl text-xs font-mono text-right focus:outline-none focus:border-amber-500"
   />
+</div>
 </div>
 
 {/* بخش تاریخ پرداخت */}
@@ -1745,7 +1859,7 @@ onChange={(e) => {
     className="w-full bg-zinc-300 border border-orange-600 p-2.5 rounded-xl text-xs font-mono text-black font-bold text-right focus:outline-none"
   />
 </div>
-</div>
+
                {/* بخش فیش واریزی در ویرایش */}
                 <div>
                   <label className="block text-xs text-zinc-300 mb-1.5 font-medium">بارگذاری تصویر فیش:</label>
@@ -1806,7 +1920,7 @@ onChange={(e) => {
               <div className="space-y-4">
 <TourAddForm onTourCreated={(newTour: any) => {
   setActiveTours((prev: any) => [...prev, newTour]);
-  alert('✅ با موقیت ثبت گردید'); // پیام موفقیت
+  refreshTours(); // نسخه‌ی کامل تور (با هتل‌ها و شناسه‌ها) از سرور گرفته می‌شود
   }} />
 
                 <div className="space-y-2">
@@ -1883,6 +1997,20 @@ onChange={(e) => {
 </button>             
                          
                           </div>
+                        </div>
+                        {/* خلاصه‌ی حمل‌ونقل، هتل‌ها و خدمات تور */}
+                        <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-zinc-300">
+                          {t.transportType && (
+                            <span className="bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded-md">🚆 {t.transportType}</span>
+                          )}
+                          {Array.isArray(t.hotels) && t.hotels.length > 0 && (
+                            <span className="bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded-md">
+                              🏨 {t.hotels.length} هتل: {t.hotels.map((h: any) => h.name).join('، ')}
+                            </span>
+                          )}
+                          {Array.isArray(t.services) && t.services.length > 0 && (
+                            <span className="bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded-md">🍽️ {t.services.length} خدمت</span>
+                          )}
                         </div>
                         {/* مدیریت تصاویر تور */}
                         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-800/80">
@@ -2041,21 +2169,24 @@ onChange={(e) => {
 {(() => {
   const dbAmount = selectedReceiptPassenger?.amount;
   if (dbAmount && dbAmount !== 'null' && dbAmount !== 'undefined' && dbAmount !== '') {
-    return `${dbAmount} تومان`;
+    return `${toPersianDigits(parsePrice(dbAmount).toLocaleString('en-US'))} تومان`;
   }
-  
-  // استخراج قیمت تور از فیلدهای مسافر یا قیمت پیش‌فرض
-  const tourPriceRaw = selectedReceiptPassenger?.tourPrice || selectedReceiptPassenger?.price || selectedReceiptPassenger?.tour?.price || 17890000;
-  const rawPrice = parseInt(String(tourPriceRaw).replace(/[^0-9]/g, ''), 10) || 17890000;
-  const seats = parseInt(String(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1), 10);
-  const calculated = rawPrice * seats;
 
-  return `${calculated.toLocaleString('fa-IR')} تومان`;
+  // اگر مبلغی ثبت نشده: (قیمت تور + قیمت هتل) × تعداد نفرات
+  const calc = computePricing(
+    selectedReceiptPassenger?.tourName || '',
+    selectedReceiptPassenger?.hotelId,
+    Number(selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1)
+  );
+  return `${toPersianDigits(calc.total.toLocaleString('en-US'))} تومان`;
 })()}
       </span>
     </p>
     <p><span className="text-zinc-500">وضعیت فعلی:</span> <span className="text-amber-400">{selectedReceiptPassenger?.paymentStatus || 'در انتظار پرداخت'}</span></p>
     <p><span className="text-zinc-500">تعداد صندلی:</span> <span className="text-white font-bold">{selectedReceiptPassenger?.seatsCount || selectedReceiptPassenger?.seats || 1} صندلی</span></p>
+    {selectedReceiptPassenger?.hotelName && (
+      <p className="col-span-2"><span className="text-zinc-500">هتل:</span> <span className="text-white font-bold">🏨 {selectedReceiptPassenger.hotelName}</span></p>
+    )}
   </div>
 
 {/* Input برای تاریخ واریز دستی */}
@@ -2149,24 +2280,14 @@ onChange={(e) => {
           </div>
         </div>
       )}
-{/* قرار دادن مودال در انتهای کدها */}
-<TourEditModal 
-  tour={editingTour} 
-  isOpen={isEditTourModalOpen} 
-  onClose={() => setIsEditTourModalOpen(false)} 
-  onTourUpdated={(updated) => {
-    setActiveTours((prev: any) => prev.map((t: any) => t.id === updated.id ? updated : t));
-  }} 
-/>
-     
-
-{/* مودال ویرایش کامل تور */}
+{/* مودال ویرایش کامل تور (فقط یک نمونه) */}
 <TourEditModal 
   tour={editingTour} 
   isOpen={isEditTourModalOpen} 
   onClose={() => setIsEditTourModalOpen(false)} 
   onTourUpdated={(updated: any) => {
-    setActiveTours((prev: any) => prev.map((t: any) => t.id === updated.id ? updated : t));
+    setActiveTours((prev: any) => prev.map((t: any) => t.id === updated.id ? { ...t, ...updated } : t));
+    refreshTours(); // نسخه‌ی کامل تور (با هتل‌ها) از سرور
   }} 
 />
 

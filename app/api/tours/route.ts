@@ -223,8 +223,35 @@ export async function PUT(request: NextRequest) {
 
     const updated = await prisma.$transaction(async (tx) => {
       if (hotelsProvided) {
-        await tx.hotel.deleteMany({ where: { tourId: id } });
-        (data as any).hotels = { create: cleanHotels(body.hotels) };
+        // هتل‌ها حذف و دوباره ساخته نمی‌شوند؛ شناسه‌ی هتل‌های موجود حفظ می‌شود
+        // (مسافران ثبت‌شده با شناسه‌ی هتل به آن‌ها وصل هستند)
+        const rows = (body.hotels as any[])
+          .slice(0, MAX_HOTELS)
+          .map((h) => ({
+            id: cleanStr(h?.id, 64),
+            name: cleanStr(h?.name, 80),
+            price: Math.max(0, Math.min(Number(h?.price) || 0, 1e12)),
+            description: cleanStr(h?.desc ?? h?.description, 300),
+          }))
+          .filter((h) => h.name);
+
+        const currentHotels = await tx.hotel.findMany({ where: { tourId: id }, select: { id: true } });
+        const currentIds = new Set(currentHotels.map((h) => h.id));
+        const keepIds = rows.filter((r) => r.id && currentIds.has(r.id)).map((r) => r.id);
+
+        await tx.hotel.deleteMany({ where: { tourId: id, id: { notIn: keepIds } } });
+        for (const r of rows) {
+          if (r.id && currentIds.has(r.id)) {
+            await tx.hotel.update({
+              where: { id: r.id },
+              data: { name: r.name, price: r.price, description: r.description },
+            });
+          } else {
+            await tx.hotel.create({
+              data: { tourId: id, name: r.name, price: r.price, description: r.description },
+            });
+          }
+        }
       }
       return tx.tour.update({
         where: { id },

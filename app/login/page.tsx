@@ -21,7 +21,7 @@ function LoginFormContent() {
 
     try {
       // تغییر مسیر به API مشترک و استاندارد لاگین
-      const res = await fetch('/api/admin/login', {
+        const res = await fetch('/api/login-leader', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -31,14 +31,15 @@ function LoginFormContent() {
 
       if (res.ok && data.success) {
         // کوکی ها به صورت امن توسط سرور ست شده‌اند، نیازی به document.cookie نیست
-        const targetSlug = slug || data.slug;
+        // اسلاگ واقعیِ خود لیدر از سرور ملاک است (نه پارامتر URL)
+        const targetSlug = data.slug || slug;
         if (targetSlug) {
           router.push(`/leader?slug=${targetSlug}`);
         } else {
           router.push('/leader');
         }
       } else {
-        setError(data.error || 'خطا در نام کاربری یا رمز عبور');
+        setError(data.error || data.message || 'خطا در نام کاربری یا رمز عبور');
       }
     } catch (err) {
       console.error('Login Error:', err);
