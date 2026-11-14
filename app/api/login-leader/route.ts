@@ -44,18 +44,30 @@ export async function POST(request: Request) {
     }
 
     // ۲. پیدا کردن لیدر با نام کاربری، اسلاگ یا موبایل
-    const lower = rawUser.toLowerCase();
+    // نام کاربری و اسلاگ بدون حساسیت به حروف بزرگ/کوچک جستجو می‌شوند
     const leader = await prisma.leader.findFirst({
-      where: { OR: [{ username: lower }, { slug: lower }, { mobile: rawUser }] },
+      where: {
+        OR: [
+          { username: { equals: rawUser, mode: 'insensitive' } },
+          { slug: { equals: rawUser, mode: 'insensitive' } },
+          { mobile: rawUser },
+        ],
+      },
       select: { id: true, slug: true, password: true, status: true, mustChangePassword: true },
     });
-    if (!leader) return fail(BAD_CREDENTIALS, 401);
+    if (!leader) {
+      console.warn('[login-leader] کاربر پیدا نشد:', rawUser.toLowerCase()); // فقط در لاگ سرور؛ پاسخ کلاینت یکسان می‌ماند
+      return fail(BAD_CREDENTIALS, 401);
+    }
 
     // ۳. بررسی رمز: هش bcrypt؛ رمزهای قدیمیِ متن ساده هم یک‌بار پذیرفته و همان لحظه هش می‌شوند
     const stored = leader.password ?? '';
     const isHash = /^\$2[aby]\$/.test(stored);
     const passwordOk = isHash ? await bcrypt.compare(password, stored) : stored !== '' && stored === password;
-    if (!passwordOk) return fail(BAD_CREDENTIALS, 401);
+    if (!passwordOk) {
+      console.warn('[login-leader] رمز اشتباه برای لیدر:', leader.id, isHash ? '(هش)' : '(متن ساده)');
+      return fail(BAD_CREDENTIALS, 401);
+    }
 
     if (!isHash) {
       await prisma.leader.update({
