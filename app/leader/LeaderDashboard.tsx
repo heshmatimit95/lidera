@@ -1460,7 +1460,7 @@ const renderTourPicker = (mode: 'add' | 'edit') => {
 <div className="bg-[#1e1e1e] rounded-2xl border-2 border-[#E5C060] shadow-xl overflow-hidden">
   <div className="overflow-x-auto">
     <table className="w-full text-right border-collapse">
-      <thead className="bg-[#2a2a2a] text-white text-xs sm:text-sm">
+      <thead className="bg-[#d1c3c3] text-white text-xs sm:text-sm">
         <tr>
           <th className="p-3 sm:p-4 font-bold text-right">نام مسافر و کد ملی</th>
           <th className="p-3 sm:p-4 font-bold text-center">تلفن تماس</th>
