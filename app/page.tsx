@@ -1,0 +1,75 @@
+import { prisma } from './lib/db';
+import TourForm from './components/TourForm';
+import { isActive } from './lib/leader-status';
+export default async function Page({ 
+  searchParams 
+}: { 
+  searchParams: Promise<{ slug?: string; leader?: string }> 
+}) {
+  const resolvedParams = await searchParams;
+  const slug = resolvedParams.slug || resolvedParams.leader || 'leader_1';
+
+const leader = await prisma.leader.findFirst({
+  where: {
+    OR: [
+      { slug: slug },
+      { id: slug }
+    ]
+  },
+  select: {
+    id: true,
+    slug: true,
+    name: true,
+    fullName: true,
+      paymentMethod: true,
+      cards: true,
+      status: true,
+ tours: {
+  orderBy: { createdAt: 'desc' },
+  select: {
+    id: true,
+    name: true,
+    title: true,
+    price: true,
+    date: true,
+    duration: true,
+    startDate: true,
+    endDate: true,
+    services: true,
+    transportType: true,
+    images: true,
+    image1: true,
+    image2: true,
+    image3: true,
+    image4: true,
+    tourImages: { select: { url: true } },
+    hotels: {
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        description: true,
+      },
+    },
+  },
+},
+  }
+});
+
+  if (!leader) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F9704E', color: '#ff4d4d', fontFamily: 'Vazirmatn, sans-serif', direction: 'rtl' }}>
+        <h2>❌ لیدر یا تور مورد نظر یافت نشد.</h2>
+      </div>
+    );
+  }
+if (!isActive(leader.status)) {
+    return (
+      <div className="min-h-screen bg-[#F9704E] text-white flex items-center justify-center font-bold text-lg" dir="rtl">
+        ثبت‌نام این تور موقتاً غیرفعال است.
+      </div>
+    );
+  }
+
+ return <TourForm leader={leader} />;
+}
