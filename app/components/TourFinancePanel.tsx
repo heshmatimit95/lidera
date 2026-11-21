@@ -94,16 +94,16 @@ async function loadReport(tourId: string, range: { start: number; end: number } 
 function MoneyField({ label, hint, value, onChange }: { label: string; hint?: string; value: string; onChange: (v: string) => void }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] font-bold text-zinc-300">{label}</span>
+      <span className="mb-1 block text-[13px] font-bold text-zinc-300">{label}</span>
       <input
         type="text"
         inputMode="numeric"
         value={value ? fa(num(value)) : ''}
         onChange={(e) => onChange(toEn(e.target.value).replace(/[^0-9]/g, ''))}
         placeholder="۰"
-        className="w-full min-w-0 rounded-xl border-2 border-[#F9704E]/80 bg-black/40 p-2.5 text-base text-white outline-none focus:ring-2 focus:ring-[#F9704E]/30 sm:text-xs"
+        className="w-full min-w-0 rounded-xl border-2 border-[#F9704E]/80 bg-black/40 p-2.5 text-base text-white outline-none focus:ring-2 focus:ring-[#F9704E]/30 sm:text-sm"
       />
-      {hint && <span className="mt-1 block text-[10px] text-zinc-500">{hint}</span>}
+      {hint && <span className="mt-1 block text-xs text-zinc-500">{hint}</span>}
     </label>
   );
 }
@@ -111,16 +111,16 @@ function MoneyField({ label, hint, value, onChange }: { label: string; hint?: st
 function PctField({ label, hint, value, onChange }: { label: string; hint?: string; value: string; onChange: (v: string) => void }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] font-bold text-zinc-300">{label}</span>
+      <span className="mb-1 block text-[13px] font-bold text-zinc-300">{label}</span>
       <input
         type="text"
         inputMode="decimal"
         value={value}
         onChange={(e) => onChange(toEn(e.target.value).replace(/[^0-9.]/g, '').slice(0, 4))}
         placeholder="۰"
-        className="w-full min-w-0 rounded-xl border-2 border-[#F9704E]/80 bg-black/40 p-2.5 text-base text-white outline-none focus:ring-2 focus:ring-[#F9704E]/30 sm:text-xs"
+        className="w-full min-w-0 rounded-xl border-2 border-[#F9704E]/80 bg-black/40 p-2.5 text-base text-white outline-none focus:ring-2 focus:ring-[#F9704E]/30 sm:text-sm"
       />
-      {hint && <span className="mt-1 block text-[10px] text-zinc-500">{hint}</span>}
+      {hint && <span className="mt-1 block text-xs text-zinc-500">{hint}</span>}
     </label>
   );
 }
@@ -129,7 +129,7 @@ function Bar({ label, sub, value, max }: { label: string; sub: string; value: nu
   const w = max > 0 ? Math.max(4, Math.round((value / max) * 100)) : 0;
   return (
     <div>
-      <div className="mb-1 flex items-baseline justify-between gap-2 text-[11px]">
+      <div className="mb-1 flex items-baseline justify-between gap-2 text-[13px]">
         <span className="min-w-0 truncate font-bold text-white">{label}</span>
         <span className="shrink-0 text-zinc-400">{sub}</span>
       </div>
@@ -145,9 +145,9 @@ function Kpi({ label, value, sub, tone }: { label: string; value: string; sub?: 
     tone === 'green' ? 'text-emerald-400' : tone === 'amber' ? 'text-amber-300' : tone === 'red' ? 'text-rose-400' : tone === 'orange' ? 'text-[#F9704E]' : 'text-white';
   return (
     <div className="min-w-0 rounded-2xl border-2 border-[#F9704E]/50 bg-[#1a1a1e] p-3">
-      <div className="text-[11px] text-zinc-400">{label}</div>
-      <div className={`mt-1 truncate text-sm font-extrabold sm:text-base ${color}`}>{value}</div>
-      {sub && <div className="mt-0.5 text-[10px] text-zinc-500">{sub}</div>}
+      <div className="text-[13px] text-zinc-400">{label}</div>
+      <div className={`mt-1 truncate text-base font-extrabold sm:text-lg ${color}`}>{value}</div>
+      {sub && <div className="mt-0.5 text-xs text-zinc-500">{sub}</div>}
     </div>
   );
 }
@@ -161,11 +161,11 @@ function Section({ id, title, preview, openId, setOpenId, children }: { id: stri
         type="button"
         onClick={() => setOpenId(isOpen ? '' : id)}
         aria-expanded={isOpen}
-        className="flex min-h-48px w-full cursor-pointer items-center justify-between gap-2 px-3 py-2.5 text-right"
+        className="flex min-h-12 w-full cursor-pointer items-center justify-between gap-2 px-3 py-2.5 text-right"
       >
-        <span className="min-w-0 text-xs font-extrabold text-white sm:text-sm">{title}</span>
+        <span className="min-w-0 text-sm font-extrabold text-white sm:text-base">{title}</span>
         <span className="flex shrink-0 items-center gap-2">
-          {!isOpen && preview && <span className="max-w-140px truncate text-[11px] font-bold text-[#F9704E]">{preview}</span>}
+          {!isOpen && preview && <span className="max-w-36 truncate text-[13px] font-bold text-[#F9704E]">{preview}</span>}
           <FaChevronDown size={12} className={`text-[#F9704E] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </span>
       </button>
@@ -407,39 +407,41 @@ export default function TourFinancePanel({
       <div className="flex max-h-[92dvh] w-full max-w-3xl flex-col rounded-t-2xl border-2 border-[#E5C060] bg-[#121214] text-white shadow-2xl sm:max-h-[90dvh] sm:rounded-2xl">
         {/* سربرگ ثابت */}
         <div className="shrink-0 border-b-2 border-[#F9704E]/40 px-4 pb-3 pt-4 sm:px-6">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h3 className="flex items-center gap-2 text-sm font-extrabold text-[#F9704E] sm:text-base">
+          <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2.5">
+            <h3 className="order-1 flex flex-1 items-center gap-2 text-sm font-extrabold text-[#F9704E] sm:flex-none sm:text-base">
               <FaChartLine /> تحلیل مالی تور
             </h3>
 
-                      {/* انتخاب دوره */}
-          <div className="mt-2 flex items-center gap-2">
-            <div className="flex shrink-0 overflow-hidden rounded-xl border-2 border-[#F9704E]/80">
-              {(['week', 'month', 'year', 'all'] as PKind[]).map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => changeKind(k)}
-                  className={`min-h-36px cursor-pointer px-3 text-[11px] font-bold ${kind === k ? 'bg-[#F9704E] text-white' : 'text-zinc-300 hover:bg-white/10'}`}
-                >
-                  {KIND_LABEL[k]}
+            {/* دوره‌ی زمانی (هفته / ماه / سال / همه) با دکمه‌های قبل و بعد */}
+            <div className="order-3 flex w-full items-center gap-2 sm:order-2 sm:w-auto sm:flex-1 sm:justify-center">
+              <div className="flex shrink-0 overflow-hidden rounded-xl border-2 border-[#F9704E]/80">
+                {(['week', 'month', 'year', 'all'] as PKind[]).map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => changeKind(k)}
+                    className={`min-h-10 cursor-pointer px-3 text-xs font-bold ${kind === k ? 'bg-[#F9704E] text-white' : 'text-zinc-300 hover:bg-white/10'}`}
+                  >
+                    {KIND_LABEL[k]}
+                  </button>
+                ))}
+              </div>
+              <div className="flex min-w-0 flex-1 items-center justify-between gap-1 sm:flex-none sm:justify-center sm:gap-2">
+                <button type="button" onClick={() => go(-1)} disabled={!range} aria-label="دوره‌ی قبل" className="cursor-pointer p-2 text-[#F9704E] disabled:opacity-30">
+                  <FaChevronRight size={13} />
                 </button>
-              ))}
+                <span className="min-w-0 truncate text-center text-xs font-bold text-white sm:text-sm">{periodLabel}</span>
+                <button type="button" onClick={() => go(1)} disabled={!range || isCurrent} aria-label="دوره‌ی بعد" className="cursor-pointer p-2 text-[#F9704E] disabled:opacity-30">
+                  <FaChevronLeft size={13} />
+                </button>
+              </div>
             </div>
-            <div className="flex min-w-0 flex-1 items-center justify-between gap-1">
-              <button type="button" onClick={() => go(-1)} disabled={!range} aria-label="دوره‌ی قبل" className="cursor-pointer p-2 text-[#F9704E] disabled:opacity-30">
-                <FaChevronRight size={12} />
-              </button>
-              <span className="min-w-0 truncate text-center text-[11px] font-bold text-white">{periodLabel}</span>
-              <button type="button" onClick={() => go(1)} disabled={!range || isCurrent} aria-label="دوره‌ی بعد" className="cursor-pointer p-2 text-[#F9704E] disabled:opacity-30">
-                <FaChevronLeft size={12} />
-              </button>
-            </div>
-          </div>
-            <button type="button" onClick={onClose} className="cursor-pointer p-1 text-zinc-400 hover:text-white" aria-label="بستن">
-              <FaTimes size={18} />
+
+            <button type="button" onClick={onClose} className="order-2 cursor-pointer p-1 text-zinc-400 hover:text-white sm:order-3" aria-label="بستن">
+              <FaTimes size={20} />
             </button>
           </div>
+
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <select
               value={selected}
@@ -454,21 +456,20 @@ export default function TourFinancePanel({
             <button
               type="button"
               onClick={copySummary}
-              className="inline-flex min-h-40px w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border-2 border-[#F9704E] bg-[#F9704E]/15 px-4 py-2 text-xs font-bold text-[#F9704E] hover:bg-[#F9704E]/25 sm:w-auto"
+              className="inline-flex min-h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border-2 border-[#F9704E] bg-[#F9704E]/15 px-4 py-2 text-xs font-bold text-[#F9704E] hover:bg-[#F9704E]/25 sm:w-auto"
             >
-              <FaCopy size={11} /> {copied ? 'کپی شد ✓' : 'کپی خلاصه‌ی گزارش'}
+              <FaCopy size={12} /> {copied ? 'کپی شد ✓' : 'کپی خلاصه‌ی گزارش'}
             </button>
           </div>
-
-
         </div>
 
         {/* بدنه‌ی اسکرول‌شونده با بخش‌های کشویی */}
-        <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-contain px-4 py-3 sm:px-6" aria-busy={loading}>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3 sm:px-6" aria-busy={loading}>
           {loadErr && (
-            <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-[11px] text-rose-300">گزارش بارگذاری نشد. اینترنت را بررسی کنید و دوباره تلاش کنید.</div>
+            <div className="mb-3 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-[13px] text-rose-300">گزارش بارگذاری نشد. اینترنت را بررسی کنید و دوباره تلاش کنید.</div>
           )}
-          {loading && !loadErr && <div className="text-center text-[11px] text-zinc-400">در حال محاسبه…</div>}
+          {/* هنگام محاسبه: بدون متن اضافه؛ فقط کم‌رنگ می‌شود و کشوها تا آماده‌شدن باز/بسته نمی‌شوند */}
+          <div className={`space-y-2.5 transition-opacity duration-200 ${loading ? 'pointer-events-none opacity-50' : ''}`}>
 
           <Section id="summary" title="خلاصه‌ی وضعیت" preview={`وصول ${pct(collectPct)}`} openId={openId} setOpenId={setOpenId}>
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
@@ -481,7 +482,7 @@ export default function TourFinancePanel({
               <Kpi label="مانده‌ی قابل وصول" value={money(Math.max(0, f.revenue - f.paid))} sub="جمع ثبت‌شده منهای وصول‌شده" tone="amber" />
             </div>
             <div className="mt-3 rounded-xl border border-white/10 bg-black/30 p-3">
-              <div className="mb-1.5 flex justify-between text-[11px] text-zinc-300">
+              <div className="mb-1.5 flex justify-between text-[13px] text-zinc-300">
                 <span>درصد وصول مبلغ</span>
                 <span className="font-bold text-emerald-400">{pct(collectPct)}</span>
               </div>
@@ -489,16 +490,16 @@ export default function TourFinancePanel({
                 <div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.min(100, collectPct)}%` }} />
               </div>
             </div>
-            <p className="mt-2 text-[10px] leading-5 text-zinc-500">اعداد این بخش بر اساس تاریخ ثبت‌نام مسافر در «{periodLabel}» است.</p>
+            <p className="mt-2 text-xs leading-5 text-zinc-500">اعداد این بخش بر اساس تاریخ ثبت‌نام مسافر در «{periodLabel}» است.</p>
           </Section>
 
           <Section id="alerts" title="هشدارها و پیشنهادها" preview={insights.length ? `${fa(insights.length)} مورد` : 'موردی نیست'} openId={openId} setOpenId={setOpenId}>
             {insights.length === 0 ? (
-              <p className="text-[11px] leading-6 text-zinc-400">فعلاً موردی که نیاز به پیگیری باشد نیست.</p>
+              <p className="text-[13px] leading-6 text-zinc-400">فعلاً موردی که نیاز به پیگیری باشد نیست.</p>
             ) : (
               <div className="space-y-2">
                 {insights.map((x, i) => (
-                  <div key={i} className={`rounded-xl border px-3 py-2 text-[11px] leading-6 sm:text-xs ${toneCls(x.tone)}`}>{x.text}</div>
+                  <div key={i} className={`rounded-xl border px-3 py-2 text-[13px] leading-6 sm:text-sm ${toneCls(x.tone)}`}>{x.text}</div>
                 ))}
               </div>
             )}
@@ -507,10 +508,10 @@ export default function TourFinancePanel({
           {needTour ? (
             <Section id="compare" title="مقایسه‌ی تورها" preview={`${fa(cmp.length)} تور`} openId={openId} setOpenId={setOpenId}>
               {cmp.length === 0 ? (
-                <div className="text-[11px] text-zinc-500">در این دوره ثبت‌نامی نیست.</div>
+                <div className="text-[13px] text-zinc-500">در این دوره ثبت‌نامی نیست.</div>
               ) : (
                 <div className="-mx-1 overflow-x-auto">
-                  <table className="w-full min-w-460px text-right text-[11px]">
+                  <table className="w-full min-w-[460px] text-right text-[13px]">
                     <thead>
                       <tr className="border-b border-white/10 text-zinc-400">
                         <th className="px-1 py-2 font-bold">تور</th>
@@ -523,7 +524,7 @@ export default function TourFinancePanel({
                     <tbody>
                       {cmp.map((r) => (
                         <tr key={r.id || r.name} className="border-b border-white/5">
-                          <td className="max-w-140px truncate px-1 py-2 font-bold text-white">{r.name}</td>
+                          <td className="max-w-36 truncate px-1 py-2 font-bold text-white">{r.name}</td>
                           <td className="px-1 py-2 text-zinc-300">{fa(r.regs)} ({fa(r.seats)} نفر)</td>
                           <td className="px-1 py-2 text-zinc-300">{money(r.revenue)}</td>
                           <td className="px-1 py-2 text-emerald-400">{money(r.paid)}</td>
@@ -534,7 +535,7 @@ export default function TourFinancePanel({
                   </table>
                 </div>
               )}
-              <p className="mt-2 text-[10px] leading-5 text-zinc-500">برای دیدن جزئیات یک تور، آن را از لیست بالا انتخاب کنید.</p>
+              <p className="mt-2 text-xs leading-5 text-zinc-500">برای دیدن جزئیات یک تور، آن را از لیست بالا انتخاب کنید.</p>
             </Section>
           ) : (
             <Section id="capacity" title="ظرفیت و صندلی خالی" preview={remaining === null ? 'ظرفیت را وارد کنید' : `${fa(Math.max(0, remaining))} خالی`} openId={openId} setOpenId={setOpenId}>
@@ -542,17 +543,17 @@ export default function TourFinancePanel({
                 <MoneyField label="ظرفیت تور (نفر)" value={capacity} onChange={edit(setCapacity)} />
                 <Kpi label="صندلی خالی" value={remaining === null ? '—' : fa(Math.max(0, remaining))} sub={cap > 0 ? `پُری ${pct(fillPct)} · ${fa(a.seats)} نفر ثبت‌نام` : 'ظرفیت را وارد کنید'} />
               </div>
-              <div className={`mt-2 text-[10px] ${saveCls}`} aria-live="polite">{saveLabel}</div>
+              <div className={`mt-2 text-xs ${saveCls}`} aria-live="polite">{saveLabel}</div>
             </Section>
           )}
 
           {SHOW_PROFIT && (
           <Section id="profit" title="سود و نقطه‌ی سربه‌سر (تخمینی)" preview={!needTour && hasCosts ? money(expectedProfit) : undefined} openId={openId} setOpenId={setOpenId}>
             {needTour ? (
-              <p className="text-[11px] leading-6 text-zinc-400">برای محاسبه‌ی سود، یک تور مشخص را از لیست بالا انتخاب کنید.</p>
+              <p className="text-[13px] leading-6 text-zinc-400">برای محاسبه‌ی سود، یک تور مشخص را از لیست بالا انتخاب کنید.</p>
             ) : (
               <>
-                <p className="mb-3 text-[11px] leading-6 text-zinc-400">
+                <p className="mb-3 text-[13px] leading-6 text-zinc-400">
                   هزینه‌ها را وارد کنید تا سودِ <b className="text-white">کل تور</b> (مستقل از دوره‌ی انتخابی) حدود حساب شود. مقادیر برای هر تور جدا در حساب شما ذخیره می‌شود و فقط خودتان می‌بینید.
                 </p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -562,7 +563,7 @@ export default function TourFinancePanel({
                   <PctField label="کارمزد درگاه / بانک (٪)" hint="معمولاً ۱ تا ۲؛ روی کل مبلغ حساب می‌شود" value={feePct} onChange={edit(setFeePct)} />
                   <PctField label="ذخیره‌ی احتیاط (٪)" hint="برای هزینه‌های پیش‌بینی‌نشده؛ معمولاً ۵ تا ۱۰" value={reservePct} onChange={edit(setReservePct)} />
                 </div>
-                <div className={`mt-2 text-[10px] ${saveCls}`} aria-live="polite">{saveLabel}</div>
+                <div className={`mt-2 text-xs ${saveCls}`} aria-live="polite">{saveLabel}</div>
 
                 <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
                   <Kpi label="هزینه‌ی کل تخمینی (با ثبت‌نام فعلی)" value={hasCosts ? money(totalCost) : '—'} sub={hasCosts && (fee > 0 || reserve > 0) ? `شامل کارمزد ${money(feeAmt)} و احتیاط ${money(reserveAmt)}` : undefined} />
@@ -579,12 +580,12 @@ export default function TourFinancePanel({
                 </div>
 
                 {profitAtCap !== null && hasCosts && (
-                  <div className="mt-3 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-[11px] leading-6 text-zinc-300 sm:text-xs">
+                  <div className="mt-3 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-[13px] leading-6 text-zinc-300 sm:text-sm">
                     اگر ظرفیت تور ({fa(cap)} نفر) کامل شود و میانگین مبلغ هر نفر همین باشد،
                     سود تقریبی تور <b className={profitAtCap >= 0 ? 'text-emerald-400' : 'text-rose-400'}>{money(profitAtCap)}</b> می‌شود.
                   </div>
                 )}
-                <p className="mt-2 text-[10px] leading-5 text-zinc-500">
+                <p className="mt-2 text-xs leading-5 text-zinc-500">
                   این اعداد تخمینی‌اند و برای تصمیم‌گیری سریع هستند، نه جایگزین دفتر حسابداری. مالیات و استرداد حساب نشده است.
                 </p>
               </>
@@ -594,7 +595,7 @@ export default function TourFinancePanel({
 
           <Section id="hotels" title="درآمد به تفکیک هتل" preview={`${fa(Object.keys(rep.hotels).length)} گزینه`} openId={openId} setOpenId={setOpenId}>
             <div className="space-y-3">
-              {Object.keys(rep.hotels).length === 0 && <div className="text-[11px] text-zinc-500">داده‌ای نیست.</div>}
+              {Object.keys(rep.hotels).length === 0 && <div className="text-[13px] text-zinc-500">داده‌ای نیست.</div>}
               {Object.entries(rep.hotels).sort((x, y) => y[1].revenue - x[1].revenue).map(([name, v]) => (
                 <Bar key={name} label={name} sub={`${fa(v.seats)} نفر · ${money(v.revenue)}`} value={v.revenue} max={maxHotel} />
               ))}
@@ -603,7 +604,7 @@ export default function TourFinancePanel({
 
           <Section id="transports" title="درآمد به تفکیک حمل‌ونقل" preview={`${fa(Object.keys(rep.transports).length)} گزینه`} openId={openId} setOpenId={setOpenId}>
             <div className="space-y-3">
-              {Object.keys(rep.transports).length === 0 && <div className="text-[11px] text-zinc-500">داده‌ای نیست.</div>}
+              {Object.keys(rep.transports).length === 0 && <div className="text-[13px] text-zinc-500">داده‌ای نیست.</div>}
               {Object.entries(rep.transports).sort((x, y) => y[1].revenue - x[1].revenue).map(([name, v]) => (
                 <Bar key={name} label={name} sub={`${fa(v.seats)} نفر · ${money(v.revenue)}`} value={v.revenue} max={maxTransport} />
               ))}
@@ -612,23 +613,24 @@ export default function TourFinancePanel({
 
           <Section id="trend" title={kind === 'year' || kind === 'all' ? 'ثبت‌نام‌ها به تفکیک ماه' : 'ثبت‌نام‌ها به تفکیک روز'} preview={`${fa(trendTotal)} ثبت‌نام`} openId={openId} setOpenId={setOpenId}>
             {trend.length === 0 ? (
-              <div className="text-[11px] text-zinc-500">داده‌ای نیست.</div>
+              <div className="text-[13px] text-zinc-500">داده‌ای نیست.</div>
             ) : (
               <div className="flex h-28 items-end gap-0.5" dir="rtl">
                 {trend.map((x, i) => (
                   <div key={i} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
-                    <span className="text-[8px] text-zinc-400">{x.count ? fa(x.count) : ''}</span>
+                    <span className="text-[10px] text-zinc-400">{x.count ? fa(x.count) : ''}</span>
                     <div className="w-full rounded-t bg-[#F9704E]" style={{ height: `${x.count ? Math.max(6, (x.count / trendMax) * 70) : 2}px`, opacity: x.count ? 1 : 0.25 }} />
-                    {trend.length <= 14 && <span className="w-full truncate text-center text-[8px] text-zinc-500">{x.label}</span>}
+                    {trend.length <= 14 && <span className="w-full truncate text-center text-[10px] text-zinc-500">{x.label}</span>}
                   </div>
                 ))}
               </div>
             )}
           </Section>
 
-          <p className="pb-2 text-[10px] leading-5 text-zinc-500">
+          <p className="pb-2 text-xs leading-5 text-zinc-500">
             توضیح: مبالغ از روی «مبلغ ثبت‌شده» هر مسافر و از دیتابیس حساب می‌شود و ردشده‌ها در جمع نیستند. «بیعانه» جدا از «وصول‌شده» آمده، چون مبلغ واقعی بیعانه و اقساط هنوز جدا ثبت نمی‌شود.
           </p>
+          </div>
         </div>
       </div>
     </div>
