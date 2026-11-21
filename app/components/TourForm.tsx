@@ -29,6 +29,34 @@ function getTenantFromHost(host: string | null): string | null {
   return null;
 }
 
+// کوچک‌کردن عکس در مرورگر قبل از ارسال: عرض/ارتفاع حداکثر ۱۶۰۰ پیکسل و JPEG با کیفیت ۸۰٪
+// (فیش با ۲۰۰ تا ۴۰۰ کیلوبایت هم کاملاً خوانا می‌ماند و آپلود چند برابر سریع‌تر می‌شود)
+async function compressImage(file: File, maxSide = 1600, quality = 0.8): Promise<File> {
+  try {
+    if (!file.type.startsWith('image/') || typeof createImageBitmap !== 'function') return file;
+    const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' } as any);
+    const scale = Math.min(1, maxSide / Math.max(bmp.width, bmp.height));
+    if (scale === 1 && file.size <= 600 * 1024) { bmp.close?.(); return file; }
+    const w = Math.max(1, Math.round(bmp.width * scale));
+    const h = Math.max(1, Math.round(bmp.height * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) { bmp.close?.(); return file; }
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(bmp, 0, 0, w, h);
+    bmp.close?.();
+    const blob: Blob | null = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', quality));
+    if (!blob || blob.size >= file.size) return file;
+    const base = file.name.replace(/\.[^.]+$/, '') || 'receipt';
+    return new File([blob], base + '.jpg', { type: 'image/jpeg' });
+  } catch {
+    return file;
+  }
+}
+
 interface TourFormProps {
   leader?: any;
 }
@@ -86,6 +114,8 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
   const [idCardError, setIdCardError] = useState<string | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [receiptError, setReceiptError] = useState<string | null>(null);
+  const [receiptUploading, setReceiptUploading] = useState(false);
+  const receiptToken = useRef(0); // برای نادیده‌گرفتن نتیجه‌ی آپلودهای قدیمی‌تر
   const [isCopied, setIsCopied] = useState(false);
   const idCardInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
@@ -261,33 +291,50 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
 
   const handleReceiptChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setReceiptError(null);
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    const picked = e.target.files && e.target.files[0];
+    if (!picked) return;
+
+    const token = ++receiptToken.current;
+    const failUpload = (msg: string) => {
+      setReceiptError(msg);
+      setReceiptImage(null);
+      setReceiptPreview((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
+      if (receiptInputRef.current) receiptInputRef.current.value = '';
+    };
+
+    // پیش‌نمایش فوری (بدون منتظر ماندن برای آپلود)
+    const quickUrl = URL.createObjectURL(picked);
+    setReceiptPreview((prev) => { if (prev) URL.revokeObjectURL(prev); return quickUrl; });
+    setReceiptImage(null);
+    setReceiptUploading(true);
+
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 45_000);
+    try {
+      const file = await compressImage(picked);
+      if (token !== receiptToken.current) return;
       if (file.size > maxSize) {
-        setReceiptError("❌ حجم عکس فیش بیش از ۵ مگابایت است.");
+        failUpload("❌ حجم عکس فیش بیش از ۵ مگابایت است.");
         return;
       }
 
       const formData = new FormData();
       formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData, signal: ctrl.signal });
+      const data = await res.json().catch(() => ({}));
+      if (token !== receiptToken.current) return;
 
-      try {
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        const data = await res.json();
-
-        if (data.success) {
-          setReceiptImage(data.url);
-          setReceiptPreview(URL.createObjectURL(file));
-        } else {
-          setReceiptError(data.message || 'خطا در آپلود عکس فیش');
-        }
-      } catch (err) {
-        console.error('Upload error:', err);
-        setReceiptError('خطا در ارتباط با سرور برای آپلود');
+      if (data.success) {
+        setReceiptImage(data.url);
+      } else {
+        failUpload(data.message || 'خطا در آپلود عکس فیش');
       }
+    } catch (err) {
+      console.error('Upload error:', err);
+      if (token === receiptToken.current) failUpload('ارسال فیش انجام نشد. اینترنت را بررسی کنید و دوباره تلاش کنید.');
+    } finally {
+      clearTimeout(timer);
+      if (token === receiptToken.current) setReceiptUploading(false);
     }
   };
 
@@ -305,7 +352,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
     if (step === 2) {
       return fullName.trim() !== '' && isPhoneValid && isIdValid && !idCardError && isBirthDateValid && isNationalIdValid && isTermsAccepted;
     }
-    if (step === 3) return receiptImage !== null && !receiptError;
+    if (step === 3) return receiptImage !== null && !receiptError && !receiptUploading;
     return false;
   };
 
@@ -322,8 +369,9 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
       if (idCardError) return idCardError;
     }
     if (step === 3) {
-      if (!receiptImage) return "🧾 لطفاً عکس فیش واریزی را بارگذاری کنید.";
       if (receiptError) return receiptError;
+      if (receiptUploading) return "⏳ فیش در حال ارسال است؛ چند لحظه صبر کنید.";
+      if (!receiptImage) return "🧾 لطفاً عکس فیش واریزی را بارگذاری کنید.";
     }
     return null;
   };
@@ -456,6 +504,8 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
     setIdCardImage(null);
     setIdCardPreview(null);
     setIdCardError(null);
+    receiptToken.current++;
+    setReceiptUploading(false);
     setReceiptImage(null);
     setReceiptPreview(null);
     setReceiptError(null);
@@ -563,6 +613,11 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
   };
   
   const handleRemoveReceipt = () => {
+    receiptToken.current++; // آپلود در حال انجام (اگر هست) نادیده گرفته شود
+    if (receiptPreview) URL.revokeObjectURL(receiptPreview);
+    setReceiptImage(null);
+    setReceiptError(null);
+    setReceiptUploading(false);
     setReceiptPreview(null);
     if (receiptInputRef.current) {
       receiptInputRef.current.value = "";
@@ -1197,14 +1252,20 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                           {receiptPreview ? (
                             <div className="relative w-full aspect-4/2 rounded-xl overflow-hidden border-2 border-[#F9704E] focus:border-[#F9704E] focus-within:border-[#F9704E] active:border-[#F9704E] focus:outline-none bg-neutral-900">
                               <img src={receiptPreview} alt="فیش" className="w-full h-full object-cover opacity-80" />
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/40 gap-3">
-                                <button type="button" onClick={() => receiptInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-medium">
-                                  تغییر فیش
-                                </button>
-                                <button type="button" onClick={handleRemoveReceipt} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-medium">
-                                  حذف فیش
-                                </button>
-                              </div>
+                              {receiptUploading ? (
+                                <div className="absolute inset-0 flex items-end justify-center bg-black/30">
+                                  <div className="w-full bg-black/70 py-2 text-center text-[11px] font-medium text-white">⏳ در حال ارسال فیش…</div>
+                                </div>
+                              ) : (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/40 gap-3">
+                                  <button type="button" onClick={() => receiptInputRef.current?.click()} className="text-[11px] bg-white text-black px-4 py-2 rounded-lg font-medium">
+                                    تغییر فیش
+                                  </button>
+                                  <button type="button" onClick={handleRemoveReceipt} className="text-[11px] bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-medium">
+                                    حذف فیش
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           ) : (
                             <button 
@@ -1262,7 +1323,7 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                   ) : (
                     <button 
                       type="submit" 
-                      disabled={isSubmitting || (paymentMethod === 'card' && !receiptPreview)} 
+                      disabled={isSubmitting || (paymentMethod === 'card' && (!receiptImage || receiptUploading))} 
                       onClick={(e) => {
                         if (paymentMethod === 'online') {
                           e.preventDefault();
@@ -1271,12 +1332,14 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                       }}
                       className="flex-1 text-white py-4 rounded-xl font-bold transition-all duration-200 text-xs active:scale-[0.99] flex items-center justify-center gap-2 disabled:cursor-not-allowed border" 
                       style={
-                        (paymentMethod === 'online' || (paymentMethod === 'card' && receiptPreview))
+                        (paymentMethod === 'online' || (paymentMethod === 'card' && !!receiptImage && !receiptUploading))
                           ? { backgroundColor: activeColor, borderColor: activeColor, boxShadow: `0 8px 24px ${activeColor}30` }
                           : { backgroundColor: 'rgba(249, 112, 78, 0.15)', borderColor: 'rgba(249, 112, 78, 0.3)', color: 'rgba(255, 255, 255, 0.4)' }
                       }
                     >
-                      {isSubmitting 
+                      {receiptUploading && paymentMethod === 'card'
+                        ? "در حال ارسال فیش…"
+                        : isSubmitting 
                         ? "در حال پردازش..." 
                         : paymentMethod === 'online' 
                           ? "💳 انتقال به درگاه بانکی و ثبت‌نام آنی" 
