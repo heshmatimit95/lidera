@@ -243,7 +243,7 @@ export default function TourAssistant({ tour, leader }: { tour: any; leader: any
   };
 
   return (
-    <div dir="ltr">
+    <div dir="rtl">
       {open && (
         <div
           role="dialog"
