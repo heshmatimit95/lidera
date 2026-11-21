@@ -40,8 +40,6 @@ interface Passenger {
   seats?: number | string;
   createdAt?: string;
 }
-
-
 interface TourItem {
   id?: string;
   name: string;
@@ -951,10 +949,6 @@ const handleAddTour = async (e: React.FormEvent) => {
       console.error(e);
     }
   };
-
-
-  
-
 // تابع تایید فیش
   const handleApproveReceipt = async (passengerId: string) => {
     try {
@@ -2091,8 +2085,8 @@ const renderTourPicker = (mode: 'add' | 'edit') => {
   />
 </div>
 
-                {/* تور، هتل، حمل‌ونقل، خدمات و محاسبه‌ی مبلغ */}
-                {renderTourPicker('edit')}
+ {/* تور، هتل، حمل‌ونقل، خدمات و محاسبه‌ی مبلغ */}
+ {renderTourPicker('edit')}
 
 {/* وضعیت مالی و مبلغ */}
   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -2189,9 +2183,6 @@ const renderTourPicker = (mode: 'add' | 'edit') => {
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <FaMapMarkedAlt className="text-[#F9704E]" /> مدیریت تورهای فعال
                 </h3>
-
-
-                
                 <button onClick={() => setIsTourModalOpen(false)} className="text-zinc-400 hover:text-white cursor-pointer">
                   <FaTimes size={16} />
                 </button>
@@ -2412,8 +2403,6 @@ const renderTourPicker = (mode: 'add' | 'edit') => {
         )}
     
       </div>
-
-
 {/* مودال مشاهده و تایید فیش واریزی */}
       {isReceiptModalOpen && selectedReceiptPassenger && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 dir-rtl">
@@ -2557,10 +2546,6 @@ const renderTourPicker = (mode: 'add' | 'edit') => {
     refreshTours(); // نسخه‌ی کامل تور (با هتل‌ها) از سرور
   }} 
 />
-
-
-
-
 {/* مودال هوش مصنوعی */}
 {isAiModalOpen && (
   <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
@@ -2780,11 +2765,7 @@ const renderTourPicker = (mode: 'add' | 'edit') => {
         </button>
 
  </div>
-
-        
-
-
-    </div>
+  </div>
   </div>
 )}
 
