@@ -511,7 +511,7 @@ export default function TourFinancePanel({
                 <div className="text-[13px] text-zinc-500">در این دوره ثبت‌نامی نیست.</div>
               ) : (
                 <div className="-mx-1 overflow-x-auto">
-                  <table className="w-full min-w-[460px] text-right text-[13px]">
+                  <table className="w-full min-w-460px text-right text-[13px]">
                     <thead>
                       <tr className="border-b border-white/10 text-zinc-400">
                         <th className="px-1 py-2 font-bold">تور</th>

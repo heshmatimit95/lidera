@@ -1864,7 +1864,7 @@ const renderTourPicker = (mode: 'add' | 'edit') => {
     </table>
         {totalPages > 1 && (
       <div dir="rtl" className="flex flex-wrap items-center justify-between gap-3 px-3 py-3 border-t border-[#F9704E]">
-        <span className="text-[11px] text-zinc-400">
+        <span className="text-[11px] text-zinc-100">
           نمایش {((currentPage - 1) * itemsPerPage + 1).toLocaleString('fa-IR')} تا{' '}
           {Math.min(currentPage * itemsPerPage, filteredPassengers.length).toLocaleString('fa-IR')} از{' '}
           {filteredPassengers.length.toLocaleString('fa-IR')} نفر
