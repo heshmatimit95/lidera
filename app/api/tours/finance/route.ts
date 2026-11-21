@@ -40,11 +40,11 @@ export async function GET(request: Request) {
     // شرط leaderId جلوی دسترسی به تورِ دیگران (IDOR) را می‌گیرد
     const tour = await prisma.tour.findFirst({
       where: { id: tourId, leaderId: auth.leader.id },
-      select: { transfer: true },
+      select: { finance: true  },
     });
     if (!tour) return NextResponse.json({ message: 'تور یافت نشد' }, { status: 404 });
 
-    const f: any = tour.transfer && typeof tour.transfer === 'object' ? tour.transfer : {};
+    const f: any = tour.finance && typeof tour.finance === 'object' ? tour.finance : {};
     return NextResponse.json(shape(f), { headers: { 'Cache-Control': 'no-store' } });
   } catch (e) {
     console.error('finance GET error:', e);
@@ -67,10 +67,10 @@ export async function PUT(request: Request) {
     // فقط کلیدهای ارسال‌شده عوض می‌شوند؛ بقیه (مثلاً هزینه‌ها) دست‌نخورده می‌مانند
     const existing = await prisma.tour.findFirst({
       where: { id: tourId, leaderId: auth.leader.id },
-      select: { transfer: true },
+      select: { finance: true  },
     });
     if (!existing) return NextResponse.json({ message: 'تور یافت نشد' }, { status: 404 });
-    const prev: any = existing.transfer && typeof existing.transfer === 'object' ? existing.transfer : {};
+    const prev: any = existing.finance && typeof existing.finance === 'object' ? existing.finance : {};
     const merged: any = { ...prev };
     for (const key of ['capacity', 'fixedCost', 'perPerson', 'feePct', 'reservePct']) {
       if (body && Object.prototype.hasOwnProperty.call(body, key)) merged[key] = body[key];
@@ -79,7 +79,7 @@ export async function PUT(request: Request) {
 
     const r = await prisma.tour.updateMany({
       where: { id: tourId, leaderId: auth.leader.id },
-      data: { transfer: finance },
+      data: { finance: finance },
     });
     if (r.count === 0) return NextResponse.json({ message: 'تور یافت نشد' }, { status: 404 });
 

@@ -161,11 +161,11 @@ function Section({ id, title, preview, openId, setOpenId, children }: { id: stri
         type="button"
         onClick={() => setOpenId(isOpen ? '' : id)}
         aria-expanded={isOpen}
-        className="flex min-h-[48px] w-full cursor-pointer items-center justify-between gap-2 px-3 py-2.5 text-right"
+        className="flex min-h-48px w-full cursor-pointer items-center justify-between gap-2 px-3 py-2.5 text-right"
       >
         <span className="min-w-0 text-xs font-extrabold text-white sm:text-sm">{title}</span>
         <span className="flex shrink-0 items-center gap-2">
-          {!isOpen && preview && <span className="max-w-[140px] truncate text-[11px] font-bold text-[#F9704E]">{preview}</span>}
+          {!isOpen && preview && <span className="max-w-140px truncate text-[11px] font-bold text-[#F9704E]">{preview}</span>}
           <FaChevronDown size={12} className={`text-[#F9704E] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </span>
       </button>
@@ -404,7 +404,7 @@ export default function TourFinancePanel({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-sm sm:items-center sm:p-4" dir="rtl" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="flex max-h-[92dvh] w-full max-w-3xl flex-col rounded-t-2xl border-2 border-[#E5C060] bg-[#F9704E] text-white shadow-2xl sm:max-h-[90dvh] sm:rounded-2xl">
+      <div className="flex max-h-[92dvh] w-full max-w-3xl flex-col rounded-t-2xl border-2 border-[#E5C060] bg-[#121214] text-white shadow-2xl sm:max-h-[90dvh] sm:rounded-2xl">
         {/* سربرگ ثابت */}
         <div className="shrink-0 border-b-2 border-[#F9704E]/40 px-4 pb-3 pt-4 sm:px-6">
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -429,7 +429,7 @@ export default function TourFinancePanel({
             <button
               type="button"
               onClick={copySummary}
-              className="inline-flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border-2 border-[#F9704E] bg-[#F9704E]/15 px-4 py-2 text-xs font-bold text-[#F9704E] hover:bg-[#F9704E]/25 sm:w-auto"
+              className="inline-flex min-h-40px w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border-2 border-[#F9704E] bg-[#F9704E]/15 px-4 py-2 text-xs font-bold text-[#F9704E] hover:bg-[#F9704E]/25 sm:w-auto"
             >
               <FaCopy size={11} /> {copied ? 'کپی شد ✓' : 'کپی خلاصه‌ی گزارش'}
             </button>
@@ -443,7 +443,7 @@ export default function TourFinancePanel({
                   key={k}
                   type="button"
                   onClick={() => changeKind(k)}
-                  className={`min-h-[36px] cursor-pointer px-3 text-[11px] font-bold ${kind === k ? 'bg-[#F9704E] text-white' : 'text-zinc-300 hover:bg-white/10'}`}
+                  className={`min-h-36px cursor-pointer px-3 text-[11px] font-bold ${kind === k ? 'bg-[#F9704E] text-white' : 'text-zinc-300 hover:bg-white/10'}`}
                 >
                   {KIND_LABEL[k]}
                 </button>
@@ -508,7 +508,7 @@ export default function TourFinancePanel({
                 <div className="text-[11px] text-zinc-500">در این دوره ثبت‌نامی نیست.</div>
               ) : (
                 <div className="-mx-1 overflow-x-auto">
-                  <table className="w-full min-w-[460px] text-right text-[11px]">
+                  <table className="w-full min-w-460px text-right text-[11px]">
                     <thead>
                       <tr className="border-b border-white/10 text-zinc-400">
                         <th className="px-1 py-2 font-bold">تور</th>
@@ -521,7 +521,7 @@ export default function TourFinancePanel({
                     <tbody>
                       {cmp.map((r) => (
                         <tr key={r.id || r.name} className="border-b border-white/5">
-                          <td className="max-w-[140px] truncate px-1 py-2 font-bold text-white">{r.name}</td>
+                          <td className="max-w-140px truncate px-1 py-2 font-bold text-white">{r.name}</td>
                           <td className="px-1 py-2 text-zinc-300">{fa(r.regs)} ({fa(r.seats)} نفر)</td>
                           <td className="px-1 py-2 text-zinc-300">{money(r.revenue)}</td>
                           <td className="px-1 py-2 text-emerald-400">{money(r.paid)}</td>
