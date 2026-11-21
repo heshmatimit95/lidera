@@ -627,7 +627,7 @@ export default function TourFinancePanel({
             )}
           </Section>
 
-          <p className="pb-2 text-xs leading-5 text-zinc-500">
+          <p className="pb-2 text-xs leading-5 text-zinc-100">
             توضیح: مبالغ از روی «مبلغ ثبت‌شده» هر مسافر و از دیتابیس حساب می‌شود و ردشده‌ها در جمع نیستند. «بیعانه» جدا از «وصول‌شده» آمده، چون مبلغ واقعی بیعانه و اقساط هنوز جدا ثبت نمی‌شود.
           </p>
           </div>
