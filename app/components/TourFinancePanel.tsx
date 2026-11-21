@@ -304,7 +304,7 @@ export default function TourFinancePanel({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-sm sm:items-center sm:p-4" dir="rtl" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="flex max-h-[92dvh] w-full max-w-3xl flex-col rounded-t-2xl border-2 border-[#E5C060] bg-[#c2c0c0] text-white shadow-2xl sm:max-h-[90dvh] sm:rounded-2xl">
+      <div className="flex max-h-[92dvh] w-full max-w-3xl flex-col rounded-t-2xl border-2 border-[#E5C060] bg-[#F9704E] text-white shadow-2xl sm:max-h-[90dvh] sm:rounded-2xl">
         {/* سربرگ ثابت */}
         <div className="shrink-0 border-b-2 border-[#F9704E]/40 px-4 pb-3 pt-4 sm:px-6">
           <div className="mb-3 flex items-center justify-between gap-3">
