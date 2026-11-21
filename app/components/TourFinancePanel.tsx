@@ -411,6 +411,31 @@ export default function TourFinancePanel({
             <h3 className="flex items-center gap-2 text-sm font-extrabold text-[#F9704E] sm:text-base">
               <FaChartLine /> تحلیل مالی تور
             </h3>
+
+                      {/* انتخاب دوره */}
+          <div className="mt-2 flex items-center gap-2">
+            <div className="flex shrink-0 overflow-hidden rounded-xl border-2 border-[#F9704E]/80">
+              {(['week', 'month', 'year', 'all'] as PKind[]).map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => changeKind(k)}
+                  className={`min-h-36px cursor-pointer px-3 text-[11px] font-bold ${kind === k ? 'bg-[#F9704E] text-white' : 'text-zinc-300 hover:bg-white/10'}`}
+                >
+                  {KIND_LABEL[k]}
+                </button>
+              ))}
+            </div>
+            <div className="flex min-w-0 flex-1 items-center justify-between gap-1">
+              <button type="button" onClick={() => go(-1)} disabled={!range} aria-label="دوره‌ی قبل" className="cursor-pointer p-2 text-[#F9704E] disabled:opacity-30">
+                <FaChevronRight size={12} />
+              </button>
+              <span className="min-w-0 truncate text-center text-[11px] font-bold text-white">{periodLabel}</span>
+              <button type="button" onClick={() => go(1)} disabled={!range || isCurrent} aria-label="دوره‌ی بعد" className="cursor-pointer p-2 text-[#F9704E] disabled:opacity-30">
+                <FaChevronLeft size={12} />
+              </button>
+            </div>
+          </div>
             <button type="button" onClick={onClose} className="cursor-pointer p-1 text-zinc-400 hover:text-white" aria-label="بستن">
               <FaTimes size={18} />
             </button>
@@ -435,30 +460,7 @@ export default function TourFinancePanel({
             </button>
           </div>
 
-          {/* انتخاب دوره */}
-          <div className="mt-2 flex items-center gap-2">
-            <div className="flex shrink-0 overflow-hidden rounded-xl border-2 border-[#F9704E]/80">
-              {(['week', 'month', 'year', 'all'] as PKind[]).map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => changeKind(k)}
-                  className={`min-h-36px cursor-pointer px-3 text-[11px] font-bold ${kind === k ? 'bg-[#F9704E] text-white' : 'text-zinc-300 hover:bg-white/10'}`}
-                >
-                  {KIND_LABEL[k]}
-                </button>
-              ))}
-            </div>
-            <div className="flex min-w-0 flex-1 items-center justify-between gap-1">
-              <button type="button" onClick={() => go(-1)} disabled={!range} aria-label="دوره‌ی قبل" className="cursor-pointer p-2 text-[#F9704E] disabled:opacity-30">
-                <FaChevronRight size={12} />
-              </button>
-              <span className="min-w-0 truncate text-center text-[11px] font-bold text-white">{periodLabel}</span>
-              <button type="button" onClick={() => go(1)} disabled={!range || isCurrent} aria-label="دوره‌ی بعد" className="cursor-pointer p-2 text-[#F9704E] disabled:opacity-30">
-                <FaChevronLeft size={12} />
-              </button>
-            </div>
-          </div>
+
         </div>
 
         {/* بدنه‌ی اسکرول‌شونده با بخش‌های کشویی */}
