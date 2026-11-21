@@ -248,7 +248,7 @@ export default function TourAssistant({ tour, leader }: { tour: any; leader: any
         <div
           role="dialog"
           aria-label="دستیار پاسخ‌گوی تور"
-          className="fixed bottom-24 left-3 right-3 z-50 flex h-[min(75dvh,540px)] flex-col overflow-hidden rounded-2xl border-2 bg-[#121214] text-white shadow-2xl sm:right-auto sm:w-96"
+         className="fixed bottom-24 left-3 right-3 z-50 flex h-[min(75dvh,540px)] flex-col overflow-hidden rounded-2xl border-2 bg-[#121214] text-white shadow-2xl sm:left-auto sm:w-96"
           style={{ borderColor: RED }}
         >
           {/* سربرگ */}
@@ -313,7 +313,7 @@ export default function TourAssistant({ tour, leader }: { tour: any; leader: any
         onClick={() => setOpen((v) => !v)}
         aria-label="دستیار پاسخ‌گوی تور"
         title="دستیار پاسخ‌گوی تور"
-        className="fixed bottom-5 left-4 z-50 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full border-2 border-white text-white shadow-[3px_3px_0_rgba(18,18,20,.6)] transition-transform hover:scale-105 active:scale-95"
+        className="fixed bottom-5 right-4 z-50 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full border-2 border-white text-white shadow-[3px_3px_0_rgba(18,18,20,.6)] transition-transform hover:scale-105 active:scale-95"
         style={{ background: open ? RED_DARK : RED }}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6" aria-hidden="true">
