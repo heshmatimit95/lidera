@@ -311,7 +311,7 @@ export default function TourFinancePanel({
             <h3 className="flex items-center gap-2 text-sm font-extrabold text-[#F9704E] sm:text-base">
               <FaChartLine /> تحلیل مالی تور
             </h3>
-            <button type="button" onClick={onClose} className="cursor-pointer p-1 text-zinc-400 hover:text-white" aria-label="بستن">
+            <button type="button" onClick={onClose} className="cursor-pointer p-1 text-zinc-100 hover:text-white" aria-label="بستن">
               <FaTimes size={18} />
             </button>
           </div>
@@ -348,7 +348,7 @@ export default function TourFinancePanel({
               <Kpi label="ردشده / مغایرت" value={money(f.rejected)} sub={`${fa(f.rejectedCount)} مورد (در جمع نیست)`} tone="red" />
             </div>
             <div className="mt-3 rounded-xl border border-white/10 bg-black/30 p-3">
-              <div className="mb-1.5 flex justify-between text-[11px] text-zinc-300">
+              <div className="mb-1.5 flex justify-between text-[11px] text-zinc-100">
                 <span>درصد وصول مبلغ</span>
                 <span className="font-bold text-emerald-400">{pct(collectPct)}</span>
               </div>
@@ -360,7 +360,7 @@ export default function TourFinancePanel({
 
           <Section id="alerts" title="هشدارها و پیشنهادها" preview={insights.length ? `${fa(insights.length)} مورد` : 'موردی نیست'} openId={openId} setOpenId={setOpenId}>
             {insights.length === 0 ? (
-              <p className="text-[11px] leading-6 text-zinc-400">فعلاً موردی که نیاز به پیگیری باشد نیست.</p>
+              <p className="text-[11px] leading-6 text-zinc-100">فعلاً موردی که نیاز به پیگیری باشد نیست.</p>
             ) : (
               <div className="space-y-2">
                 {insights.map((x, i) => (
@@ -372,10 +372,10 @@ export default function TourFinancePanel({
 
           <Section id="profit" title="محاسبه‌ی سود و نقطه‌ی سربه‌سر" preview={!needTour && hasCosts ? money(expectedProfit) : undefined} openId={openId} setOpenId={setOpenId}>
             {needTour ? (
-              <p className="text-[11px] leading-6 text-zinc-400">برای محاسبه‌ی سود، یک تور مشخص را از لیست بالا انتخاب کنید.</p>
+              <p className="text-[11px] leading-6 text-zinc-100">برای محاسبه‌ی سود، یک تور مشخص را از لیست بالا انتخاب کنید.</p>
             ) : (
               <>
-                <p className="mb-3 text-[11px] leading-6 text-zinc-400">
+                <p className="mb-3 text-[11px] leading-6 text-zinc-100">
                   هزینه‌ها را وارد کنید تا سود فعلی و تعداد نفر لازم برای سربه‌سر شدن حساب شود. مقادیر برای هر تور جدا و در حساب شما ذخیره می‌شود و فقط خودتان می‌بینید.
                 </p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -411,7 +411,7 @@ export default function TourFinancePanel({
 
           <Section id="hotels" title="درآمد به تفکیک هتل" preview={`${fa(Object.keys(f.hotels).length)} گزینه`} openId={openId} setOpenId={setOpenId}>
             <div className="space-y-3">
-              {Object.keys(f.hotels).length === 0 && <div className="text-[11px] text-zinc-500">داده‌ای نیست.</div>}
+              {Object.keys(f.hotels).length === 0 && <div className="text-[11px] text-zinc-100">داده‌ای نیست.</div>}
               {Object.entries(f.hotels).sort((a, b) => b[1].revenue - a[1].revenue).map(([name, v]) => (
                 <Bar key={name} label={name} sub={`${fa(v.seats)} نفر · ${money(v.revenue)}`} value={v.revenue} max={maxHotel} />
               ))}
@@ -420,7 +420,7 @@ export default function TourFinancePanel({
 
           <Section id="transports" title="درآمد به تفکیک حمل‌ونقل" preview={`${fa(Object.keys(f.transports).length)} گزینه`} openId={openId} setOpenId={setOpenId}>
             <div className="space-y-3">
-              {Object.keys(f.transports).length === 0 && <div className="text-[11px] text-zinc-500">داده‌ای نیست.</div>}
+              {Object.keys(f.transports).length === 0 && <div className="text-[11px] text-zinc-100">داده‌ای نیست.</div>}
               {Object.entries(f.transports).sort((a, b) => b[1].revenue - a[1].revenue).map(([name, v]) => (
                 <Bar key={name} label={name} sub={`${fa(v.seats)} نفر · ${money(v.revenue)}`} value={v.revenue} max={maxTransport} />
               ))}
@@ -431,18 +431,18 @@ export default function TourFinancePanel({
             <div className="flex h-24 items-end gap-1" dir="ltr">
               {trend.map((x, i) => (
                 <div key={i} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
-                  <span className="text-[9px] text-zinc-400">{x.count ? fa(x.count) : ''}</span>
+                  <span className="text-[9px] text-zinc-100">{x.count ? fa(x.count) : ''}</span>
                   <div className="w-full rounded-t bg-[#F9704E]" style={{ height: `${x.count ? Math.max(6, (x.count / trendMax) * 70) : 2}px`, opacity: x.count ? 1 : 0.25 }} />
                 </div>
               ))}
             </div>
-            <div className="mt-1 flex justify-between text-[9px] text-zinc-500" dir="rtl">
+            <div className="mt-1 flex justify-between text-[9px] text-zinc-100" dir="rtl">
               <span>{trend[13].d.toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' })}</span>
               <span>{trend[0].d.toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' })}</span>
             </div>
           </Section>
 
-          <p className="pb-2 text-[10px] leading-5 text-zinc-500">
+          <p className="pb-2 text-[10px] leading-5 text-zinc-100">
             توضیح: مبالغ از روی «مبلغ ثبت‌شده» هر مسافر حساب می‌شود و ردشده‌ها در جمع نیستند. «بیعانه» جدا از «وصول‌شده» آمده، چون مبلغ واقعی بیعانه در سیستم جدا ثبت نمی‌شود.
           </p>
         </div>
