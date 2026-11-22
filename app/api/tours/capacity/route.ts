@@ -39,13 +39,13 @@ export async function GET(request: Request) {
 
     const tours = await prisma.tour.findMany({
       where: { leaderId: leader.id },
-      select: { id: true, name: true, transfer: true },
+      select: { id: true, name: true,  finance: true },
       take: 100,
     });
 
     const withCap = tours
       .map((t) => {
-        const f: any = t.transfer && typeof t.transfer === 'object' ? t.transfer : {};
+        const f: any = t. finance && typeof t. finance === 'object' ? t. finance : {};
         const capacity = Math.floor(Number(f.capacity) || 0);
         return { id: t.id, name: t.name, capacity };
       })
