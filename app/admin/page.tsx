@@ -508,6 +508,46 @@ export default function AdminDashboard() {
             <div className="text-neutral-400 text-xs sm:text-sm whitespace-nowrap">
               تعداد کل: <span className="text-[#F9704E] font-bold">{filteredGuides.length}</span> لیدر
             </div>
+{/* ----------------- فیلتر تاریخ ثبت‌نام (جدا از جستجو) ----------------- */}
+        <div dir="rtl" className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 px-3 py-2.5 bg-[#1e1e1e] rounded-2xl border border-zinc-700">
+          <span className="text-xs sm:text-sm text-zinc-300 font-bold">تاریخ ثبت‌نام:</span>
+          <label className="flex items-center gap-1.5 text-xs sm:text-sm text-zinc-400">
+            از
+            <input
+              type="text"
+              inputMode="numeric"
+              dir="ltr"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(maskJalali(e.target.value))}
+              placeholder="1405/01/01"
+              className={`h-9 w-32 bg-black border rounded-xl px-3 text-white text-base sm:text-sm text-center font-mono focus:outline-none ${dateFrom && fromKey === null ? 'border-red-500' : 'border-[#F9704E]'}`}
+            />
+          </label>
+          <label className="flex items-center gap-1.5 text-xs sm:text-sm text-zinc-400">
+            تا
+            <input
+              type="text"
+              inputMode="numeric"
+              dir="ltr"
+              value={dateTo}
+              onChange={(e) => setDateTo(maskJalali(e.target.value))}
+              placeholder="1405/12/29"
+              className={`h-9 w-32 bg-black border rounded-xl px-3 text-white text-base sm:text-sm text-center font-mono focus:outline-none ${dateTo && toKey === null ? 'border-red-500' : 'border-[#F9704E]'}`}
+            />
+          </label>
+          {(dateFrom || dateTo) && (
+            <button
+              type="button"
+              onClick={() => { setDateFrom(''); setDateTo(''); }}
+              className="h-9 px-3 rounded-xl text-xs font-bold bg-zinc-800 text-white border border-zinc-600 hover:border-[#F9704E] cursor-pointer"
+            >
+              پاک کردن
+            </button>
+          )}
+          {((dateFrom && fromKey === null) || (dateTo && toKey === null)) && (
+            <span className="text-[11px] text-red-400">تاریخ کامل و معتبر وارد کن (مثل 1405/08/15)</span>
+          )}
+        </div>
 
             {/* نوار جستجو - کادر نارنجی ثابت */}
             <input
@@ -584,47 +624,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* ----------------- فیلتر تاریخ ثبت‌نام (جدا از جستجو) ----------------- */}
-        <div dir="rtl" className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 px-3 py-2.5 bg-[#1e1e1e] rounded-2xl border border-zinc-700">
-          <span className="text-xs sm:text-sm text-zinc-300 font-bold">تاریخ ثبت‌نام:</span>
-          <label className="flex items-center gap-1.5 text-xs sm:text-sm text-zinc-400">
-            از
-            <input
-              type="text"
-              inputMode="numeric"
-              dir="ltr"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(maskJalali(e.target.value))}
-              placeholder="1405/01/01"
-              className={`h-9 w-32 bg-black border rounded-xl px-3 text-white text-base sm:text-sm text-center font-mono focus:outline-none ${dateFrom && fromKey === null ? 'border-red-500' : 'border-[#F9704E]'}`}
-            />
-          </label>
-          <label className="flex items-center gap-1.5 text-xs sm:text-sm text-zinc-400">
-            تا
-            <input
-              type="text"
-              inputMode="numeric"
-              dir="ltr"
-              value={dateTo}
-              onChange={(e) => setDateTo(maskJalali(e.target.value))}
-              placeholder="1405/12/29"
-              className={`h-9 w-32 bg-black border rounded-xl px-3 text-white text-base sm:text-sm text-center font-mono focus:outline-none ${dateTo && toKey === null ? 'border-red-500' : 'border-[#F9704E]'}`}
-            />
-          </label>
-          {(dateFrom || dateTo) && (
-            <button
-              type="button"
-              onClick={() => { setDateFrom(''); setDateTo(''); }}
-              className="h-9 px-3 rounded-xl text-xs font-bold bg-zinc-800 text-white border border-zinc-600 hover:border-[#F9704E] cursor-pointer"
-            >
-              پاک کردن
-            </button>
-          )}
-          {((dateFrom && fromKey === null) || (dateTo && toKey === null)) && (
-            <span className="text-[11px] text-red-400">تاریخ کامل و معتبر وارد کن (مثل 1405/08/15)</span>
-          )}
-        </div>
-
+        
         {/* ----------------- نمایش موبایل (Mobile Cards) ----------------- */}
         <div className="block md:hidden space-y-4">
           {filteredGuides.length === 0 ? (
@@ -1255,7 +1255,7 @@ export default function AdminDashboard() {
 
         {/* ----------------- 🔑 مودال نمایش و کپی رمز موقت ----------------- */}
         {tempCred && (
-          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" dir="rtl">
+          <div className="fixed inset-0 z-60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" dir="rtl">
             <div className="bg-[#1e1e1e] border-2 border-[#E5C060] rounded-2xl w-full max-w-md p-6 shadow-2xl">
               <h2 className="text-base font-bold mb-3 text-[#E5C060] border-b border-[#F9704E] pb-3">
                 {tempCred.title}
