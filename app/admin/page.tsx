@@ -547,16 +547,14 @@ export default function AdminDashboard() {
           {((dateFrom && fromKey === null) || (dateTo && toKey === null)) && (
             <span className="text-[11px] text-red-400">تاریخ کامل و معتبر وارد کن (مثل 1405/08/15)</span>
           )}
-    
-
-            {/* نوار جستجو - کادر نارنجی ثابت */}
+                {/* نوار جستجو - کادر نارنجی ثابت */}
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="جستجو نام، کد ملی، موبایل..."
               dir="rtl"
-              className="h-6 sm:h-8 bg-[#1e1e1e] border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-32 sm:w-48"
+              className="h-6 sm:h-8 bg-black border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-32 sm:w-48"
             />
 
             {/* دکمه افزودن */}
@@ -643,9 +641,9 @@ export default function AdminDashboard() {
                     <div>
                       <h3 className="font-bold text-white text-base">{guide.fullName}</h3>
                       <p className="text-xs text-[#FFD700] mt-1 font-mono">نام کاربری: {guide.username}</p>
-                      <p className="text-xs text-zinc-400 mt-1">کد ملی: <span className="font-mono text-zinc-300">{guide.nationalId || '---'}</span></p>
-                      <p className="text-xs text-zinc-400 mt-0.5">همراه: <span className="font-mono text-zinc-300">{guide.mobile}</span></p>
-                      <p className="text-xs text-zinc-400 mt-0.5">تاریخ ثبت‌نام: <span className="font-mono text-zinc-300">{formatJalali(guide.createdAt)}</span></p>
+                      <p className="text-xs text-zinc-400 mt-1">کد ملی: <span className="font-mono text-zinc-100">{guide.nationalId || '---'}</span></p>
+                      <p className="text-xs text-zinc-400 mt-0.5">همراه: <span className="font-mono text-zinc-100">{guide.mobile}</span></p>
+                      <p className="text-xs text-zinc-400 mt-0.5">تاریخ ثبت‌نام: <span className="font-mono text-zinc-100">{formatJalali(guide.createdAt)}</span></p>
                       {guide.address && (
                         <p className="text-xs text-zinc-500 mt-1">📍 {guide.address}</p>
                       )}
