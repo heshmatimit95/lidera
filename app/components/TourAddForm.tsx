@@ -74,6 +74,7 @@ export default function TourAddForm({ onTourCreated }: { onTourCreated: (newTour
   const [newTourStartDate, setNewTourStartDate] = useState('');
   const [newTourEndDate, setNewTourEndDate] = useState('');
   const [newTourPrice, setNewTourPrice] = useState('');
+  const [newTourCapacity, setNewTourCapacity] = useState(''); // اختیاری: ظرفیت تور (نفر)
   const [isSaving, setIsSaving] = useState(false);
 
   // 🚆 گزینه‌های حمل‌ونقل (مثل هتل): نام + قیمت هر نفر (اختیاری) + توضیح؛ مسافر یکی را انتخاب می‌کند
@@ -186,12 +187,28 @@ export default function TourAddForm({ onTourCreated }: { onTourCreated: (newTour
 
       if (res.ok) {
         const createdTour = await res.json();
-        alert('✅ تور پیشرفته با موفقیت ثبت شد!');
+        // ظرفیت اختیاری است؛ فقط اگر لیدر وارد کرده باشد ذخیره می‌شود
+        const capNum = Number(onlyDigits(newTourCapacity));
+        let capFailed = false;
+        if (capNum > 0 && createdTour?.id) {
+          try {
+            const capRes = await fetch('/api/tours/finance', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ tourId: createdTour.id, capacity: capNum }),
+            });
+            capFailed = !capRes.ok;
+          } catch {
+            capFailed = true;
+          }
+        }
+        alert('✅ تور پیشرفته با موفقیت ثبت شد!' + (capFailed ? '\n⚠️ ظرفیت ذخیره نشد؛ بعداً از ویرایش تور وارد کنید.' : ''));
         onTourCreated(createdTour);
         setNewTourName('');
         setNewTourStartDate('');
         setNewTourEndDate('');
         setNewTourPrice('');
+        setNewTourCapacity('');
         setNewTourHotels([{ name: '', price: '', desc: '' }]);
         setNewTourTransports([{ name: 'قطار ۴ تخته', price: '', desc: '' }]);
       } else {
@@ -238,7 +255,7 @@ export default function TourAddForm({ onTourCreated }: { onTourCreated: (newTour
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <input
             type="text"
             placeholder="تاریخ رفت (مثلا: ۴ بهمن)"
@@ -251,6 +268,14 @@ export default function TourAddForm({ onTourCreated }: { onTourCreated: (newTour
             placeholder="تاریخ برگشت (مثلا: ۸ بهمن)"
             value={newTourEndDate}
             onChange={(e) => setNewTourEndDate(e.target.value)}
+            className="w-full min-w-0 bg-black/30 border-2 border-[#F9704E]/80 focus:ring-2 focus:ring-[#F9704E]/30 rounded-xl p-3 text-sm outline-none focus:border-[#F9704E]"
+          />
+          <input
+            type="text"
+            inputMode="numeric"
+            placeholder="ظرفیت تور (نفر) — اختیاری"
+            value={toFaDigits(onlyDigits(newTourCapacity))}
+            onChange={(e) => setNewTourCapacity(onlyDigits(e.target.value).slice(0, 5))}
             className="w-full min-w-0 bg-black/30 border-2 border-[#F9704E]/80 focus:ring-2 focus:ring-[#F9704E]/30 rounded-xl p-3 text-sm outline-none focus:border-[#F9704E]"
           />
         </div>

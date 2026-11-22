@@ -107,6 +107,9 @@ export default function TourEditModal({ tour, isOpen, onClose, onTourUpdated }: 
   const [newService, setNewService] = useState('');
   const [hotels, setHotels] = useState<HotelRow[]>([{ name: '', price: '', desc: '' }]);
   const [isSaving, setIsSaving] = useState(false);
+  // ظرفیت اختیاری (در ستون جدا از اطلاعات اصلی تور ذخیره می‌شود)
+  const [capacity, setCapacity] = useState('');
+  const [capInitial, setCapInitial] = useState<string | null>(null); // null = هنوز لود نشده/خطا؛ در این حالت ذخیره نمی‌شود
 
   // هر بار که مودال برای یک تور باز می‌شود، فرم با اطلاعات همان تور پر می‌شود
   useEffect(() => {
@@ -120,6 +123,27 @@ export default function TourEditModal({ tour, isOpen, onClose, onTourUpdated }: 
     setServices(Array.isArray(tour.services) ? tour.services : []);
     setNewService('');
     setHotels(mapHotelsToRows(tour.hotels));
+
+    // خواندن ظرفیت فعلی تور
+    setCapacity('');
+    setCapInitial(null);
+    let cancelled = false;
+    (async () => {
+      try {
+        const id = tour.id || tour._id;
+        if (!id) return;
+        const r = await fetch(`/api/tours/finance?tourId=${encodeURIComponent(String(id))}`, { cache: 'no-store' });
+        if (!r.ok) return;
+        const d = await r.json();
+        if (cancelled) return;
+        const v = d?.capacity ? String(d.capacity) : '';
+        setCapacity(v);
+        setCapInitial(v);
+      } catch {
+        /* اگر خوانده نشد، ظرفیت دست‌نخورده می‌ماند */
+      }
+    })();
+    return () => { cancelled = true; };
   }, [tour, isOpen]);
 
   if (!isOpen || !tour) return null;
@@ -212,7 +236,22 @@ export default function TourEditModal({ tour, isOpen, onClose, onTourUpdated }: 
 
       if (res.ok) {
         const updatedData = await res.json();
-        alert('✅ تور و اطلاعات هتل‌ها با موفقیت بروزرسانی شد.');
+        // ظرفیت: فقط اگر لود شده بود و لیدر تغییرش داده بود ذخیره می‌شود (خالی = بدون ظرفیت)
+        let capFailed = false;
+        const capNow = onlyDigits(capacity);
+        if (capInitial !== null && capNow !== capInitial) {
+          try {
+            const capRes = await fetch('/api/tours/finance', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ tourId: tour.id || tour._id, capacity: Number(capNow) || 0 }),
+            });
+            capFailed = !capRes.ok;
+          } catch {
+            capFailed = true;
+          }
+        }
+        alert('✅ تور و اطلاعات هتل‌ها با موفقیت بروزرسانی شد.' + (capFailed ? '\n⚠️ ظرفیت ذخیره نشد؛ دوباره امتحان کنید.' : ''));
         onTourUpdated(updatedData);
         onClose();
       } else {
@@ -253,7 +292,7 @@ export default function TourEditModal({ tour, isOpen, onClose, onTourUpdated }: 
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <label className="text-xs text-zinc-400 block mb-1">تاریخ رفت</label>
               <input type="text" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full min-w-0 bg-black/30 border-2 border-[#F9704E]/80 focus:ring-2 focus:ring-[#F9704E]/30 rounded-xl p-2.5 text-xs outline-none focus:border-[#F9704E]" />
@@ -261,6 +300,10 @@ export default function TourEditModal({ tour, isOpen, onClose, onTourUpdated }: 
             <div>
               <label className="text-xs text-zinc-400 block mb-1">تاریخ برگشت</label>
               <input type="text" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full min-w-0 bg-black/30 border-2 border-[#F9704E]/80 focus:ring-2 focus:ring-[#F9704E]/30 rounded-xl p-2.5 text-xs outline-none focus:border-[#F9704E]" />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1">ظرفیت تور (نفر) — اختیاری</label>
+              <input type="text" inputMode="numeric" placeholder="خالی = بدون ظرفیت" value={toFaDigits(onlyDigits(capacity))} onChange={(e) => setCapacity(onlyDigits(e.target.value).slice(0, 5))} className="w-full min-w-0 bg-black/30 border-2 border-[#F9704E]/80 focus:ring-2 focus:ring-[#F9704E]/30 rounded-xl p-2.5 text-xs outline-none focus:border-[#F9704E]" />
             </div>
           </div>
 

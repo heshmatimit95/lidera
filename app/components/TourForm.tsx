@@ -117,11 +117,33 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
   const [receiptUploading, setReceiptUploading] = useState(false);
   const receiptToken = useRef(0); // برای نادیده‌گرفتن نتیجه‌ی آپلودهای قدیمی‌تر
   const [isCopied, setIsCopied] = useState(false);
+  // ظرفیت باقی‌مانده (فقط اگر لیدر برای تور ظرفیت گذاشته باشد؛ اجباری نیست)
+  const [capacities, setCapacities] = useState<Record<string, { capacity: number; taken: number; remaining: number }>>({});
   const idCardInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
   const [showTermsAccordion, setShowTermsAccordion] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'online'>('card');
+  const capSlug: string | null = currentLider?.slug || tenantSlug || null;
+  useEffect(() => {
+    if (!capSlug) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch(`/api/tours/capacity?slug=${encodeURIComponent(capSlug)}`, { cache: 'no-store' });
+        if (!r.ok) return;
+        const d = await r.json();
+        if (cancelled || !Array.isArray(d?.tours)) return;
+        const map: Record<string, { capacity: number; taken: number; remaining: number }> = {};
+        for (const t of d.tours) map[String(t.id)] = { capacity: t.capacity, taken: t.taken, remaining: t.remaining };
+        setCapacities(map);
+      } catch {
+        /* اگر نیامد، چیزی نمایش داده نمی‌شود */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [capSlug]);
+  const selectedCap = capacities[String(currentTourObj?.id ?? currentTourObj?._id ?? selectedTour)] || null;
   const isBirthDateValid = birthDate.trim().length >= 8;
   const isNationalIdValid = nationalId.trim().length === 10;
 
@@ -1020,6 +1042,23 @@ export default function TourForm({ leader: initialLeader }: TourFormProps) {
                       </button>
                     </div>
                   </div>
+
+                  {/* ظرفیت باقی‌مانده (فقط اگر لیدر ظرفیت گذاشته باشد) */}
+                  {selectedCap && (
+                    <div
+                      className={`text-[11px] font-medium px-3 py-2 rounded-xl text-center border ${
+                        selectedCap.remaining === 0
+                          ? 'text-rose-300 bg-rose-500/10 border-rose-500/30'
+                          : selectedCap.remaining <= Math.ceil(selectedCap.capacity * 0.2)
+                          ? 'text-amber-300 bg-amber-500/10 border-amber-500/30'
+                          : 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
+                      }`}
+                    >
+                      {selectedCap.remaining === 0
+                        ? '⚠️ ظرفیت اعلام‌شده‌ی این تور تکمیل شده؛ پیش از ثبت‌نام با لیدر هماهنگ کنید.'
+                        : `🪑 ${toPersianNumbers(selectedCap.remaining)} صندلی خالی از ${toPersianNumbers(selectedCap.capacity)} صندلی`}
+                    </div>
+                  )}
 
                   {/* راهنمای تکمیل مرحله (مثلاً انتخاب هتل) */}
                   {!isStepValid() && getValidationHint() && (
