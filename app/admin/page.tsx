@@ -641,9 +641,9 @@ export default function AdminDashboard() {
                     <div>
                       <h3 className="font-bold text-white text-base">{guide.fullName}</h3>
                       <p className="text-xs text-[#FFD700] mt-1 font-mono">نام کاربری: {guide.username}</p>
-                      <p className="text-xs text-zinc-400 mt-1">کد ملی: <span className="font-mono text-zinc-100">{guide.nationalId || '---'}</span></p>
-                      <p className="text-xs text-zinc-400 mt-0.5">همراه: <span className="font-mono text-zinc-100">{guide.mobile}</span></p>
-                      <p className="text-xs text-zinc-400 mt-0.5">تاریخ ثبت‌نام: <span className="font-mono text-zinc-100">{formatJalali(guide.createdAt)}</span></p>
+                      <p className="text-xs text-zinc-200 mt-1">کد ملی: <span className="font-mono text-zinc-100">{guide.nationalId || '---'}</span></p>
+                      <p className="text-xs text-zinc-200 mt-0.5">همراه: <span className="font-mono text-zinc-100">{guide.mobile}</span></p>
+                      <p className="text-xs text-zinc-200 mt-0.5">تاریخ ثبت‌نام: <span className="font-mono text-zinc-100">{formatJalali(guide.createdAt)}</span></p>
                       {guide.address && (
                         <p className="text-xs text-zinc-500 mt-1">📍 {guide.address}</p>
                       )}
