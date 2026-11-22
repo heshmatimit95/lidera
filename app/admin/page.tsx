@@ -43,11 +43,36 @@ interface Leader {
   rubika?: string | null;
   status: string; 
   blockedAt?: string | null;
+  createdAt?: string | Date | null;
 }
+
+// تبدیل ارقام فارسی/عربی به انگلیسی (برای جستجوی درست)
+const toEnDigits = (s: string) =>
+  s
+    .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+    .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+
+// تاریخ ثبت‌نام به شمسی (به وقت تهران): خروجی مثل 1405/08/05
+const jalaliParts = (v?: string | Date | null) => {
+  if (!v) return null;
+  const d = new Date(v);
+  if (isNaN(d.getTime())) return null;
+  const parts = new Intl.DateTimeFormat('en-US-u-ca-persian-nu-latn', {
+    timeZone: 'Asia/Tehran', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value || '';
+  return { y: get('year'), m: get('month'), d: get('day') };
+};
+const formatJalali = (v?: string | Date | null) => {
+  const p = jalaliParts(v);
+  return p ? `${p.y}/${p.m}/${p.d}` : '---';
+};
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 10;
 
   // 1. استیت‌های مودال تغییر پسورد ادمین
   const [isChangePassModalOpen, setIsChangePassModalOpen] = useState(false);
@@ -346,14 +371,49 @@ export default function AdminDashboard() {
 
   // فیلتر کردن لیدرها بر اساس جستجو (نام، نام کاربری، کد ملی، شماره تماس)
   const filteredGuides = guides.filter(guide => {
-    const term = searchTerm.toLowerCase();
+    // ارقام فارسی → انگلیسی، جداکننده‌ی تاریخ (- . ٫) → /
+    const term = toEnDigits(searchTerm).trim().toLowerCase().replace(/[-.٫]/g, '/');
+    if (!term) return true;
+    const p = jalaliParts(guide.createdAt);
+    // هم با صفر (1405/08/05) هم بدون صفر (1405/8/5) جستجو می‌شود
+    const dateFull = p ? `${p.y}/${p.m}/${p.d}` : '';
+    const dateShort = p ? `${p.y}/${Number(p.m)}/${Number(p.d)}` : '';
     return (
-      guide.fullName?.toLowerCase().includes(term) ||
-      guide.username?.toLowerCase().includes(term) ||
-      guide.nationalId?.toLowerCase().includes(term) ||
-      guide.mobile?.toLowerCase().includes(term)
+      toEnDigits(guide.fullName || '').toLowerCase().includes(term) ||
+      toEnDigits(guide.username || '').toLowerCase().includes(term) ||
+      toEnDigits(guide.nationalId || '').includes(term) ||
+      toEnDigits(guide.mobile || '').includes(term) ||
+      dateFull.includes(term) ||
+      dateShort.includes(term)
     );
   });
+
+  // صفحه‌بندی لیدرها
+  const totalPages = Math.max(1, Math.ceil(filteredGuides.length / itemsPerPage));
+  const paginatedGuides = filteredGuides.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // با تغییر جستجو، برگرد به صفحه‌ی اول
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  // اگر بعد از حذف لیدر صفحه‌ی فعلی خالی شد، برگرد به آخرین صفحه
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
+
+  // شماره‌ی صفحه‌ها همراه «…»
+  const pageNumbers: (number | '…')[] = (() => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    const set = new Set<number>([1, totalPages, currentPage - 1, currentPage, currentPage + 1]);
+    const nums = Array.from(set).filter((n) => n >= 1 && n <= totalPages).sort((a, b) => a - b);
+    const out: (number | '…')[] = [];
+    nums.forEach((n, i) => {
+      if (i > 0 && n - nums[i - 1] > 1) out.push('…');
+      out.push(n);
+    });
+    return out;
+  })();
 
   // خروجی اکسل لیست تورلیدرها (بهینه شده با Lazy-load و RTL)
   const exportToExcel = async () => {
@@ -373,6 +433,7 @@ export default function AdminDashboard() {
         'شماره واتساپ': guide.whatsapp || 'ثبت نشده',
         'آیدی روبیکا': guide.rubika || 'ثبت نشده',
         'وضعیت بررسی': currentStatus === 'active' ? 'تایید شده' : currentStatus === 'blocked' ? 'مسدود شده' : 'در انتظار تایید',
+        'تاریخ ثبت‌نام': formatJalali(guide.createdAt),
         'تاریخ مسدودی': guide.blockedAt ? new Date(guide.blockedAt).toLocaleDateString('fa-IR') : '---',
       };
     });
@@ -432,9 +493,9 @@ export default function AdminDashboard() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="جستجو نام، کد ملی، موبایل..."
+              placeholder="نام، کد ملی، موبایل، تاریخ (1405/08)"
               dir="rtl"
-              className="h-6 sm:h-8 bg-[#1e1e1e] border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-32 sm:w-48"
+              className="h-6 sm:h-8 bg-[#1e1e1e] border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-40 sm:w-56"
             />
 
             {/* دکمه افزودن */}
@@ -504,12 +565,12 @@ export default function AdminDashboard() {
 
         {/* ----------------- نمایش موبایل (Mobile Cards) ----------------- */}
         <div className="block md:hidden space-y-4">
-          {guides.length === 0 ? (
+          {filteredGuides.length === 0 ? (
             <div className="text-center py-12 bg-[#1e1e1e] rounded-2xl border-2 border-[#FFD700] text-white text-sm">
-              هیچ لیدری ثبت نشده است.
+              {guides.length === 0 ? 'هیچ لیدری ثبت نشده است.' : 'لیدری با این مشخصات پیدا نشد.'}
             </div>
           ) : (
-            guides.map((guide) => {
+            paginatedGuides.map((guide) => {
               const currentStatus = pendingStatusChanges[guide.id] ?? guide.status;
               const isChanged = pendingStatusChanges[guide.id] !== undefined && pendingStatusChanges[guide.id] !== guide.status;
 
@@ -522,6 +583,7 @@ export default function AdminDashboard() {
                       <p className="text-xs text-[#FFD700] mt-1 font-mono">نام کاربری: {guide.username}</p>
                       <p className="text-xs text-zinc-400 mt-1">کد ملی: <span className="font-mono text-zinc-300">{guide.nationalId || '---'}</span></p>
                       <p className="text-xs text-zinc-400 mt-0.5">همراه: <span className="font-mono text-zinc-300">{guide.mobile}</span></p>
+                      <p className="text-xs text-zinc-400 mt-0.5">تاریخ ثبت‌نام: <span className="font-mono text-zinc-300">{formatJalali(guide.createdAt)}</span></p>
                       {guide.address && (
                         <p className="text-xs text-zinc-500 mt-1">📍 {guide.address}</p>
                       )}
@@ -623,14 +685,14 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800/60 text-zinc-300">
-                {guides.length === 0 ? (
+                {filteredGuides.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="p-8 text-center text-zinc-500 text-sm">
-                      هیچ لیدری ثبت نشده است.
+                      {guides.length === 0 ? 'هیچ لیدری ثبت نشده است.' : 'لیدری با این مشخصات پیدا نشد.'}
                     </td>
                   </tr>
                 ) : (
-                  guides.map((guide) => {
+                  paginatedGuides.map((guide) => {
                     const currentStatus = pendingStatusChanges[guide.id] ?? guide.status;
                     const isChanged = pendingStatusChanges[guide.id] !== undefined && pendingStatusChanges[guide.id] !== guide.status;
 
@@ -647,6 +709,7 @@ export default function AdminDashboard() {
                         <td className="p-5">
                           <div className="text-sm font-mono text-[#F9704E] font-bold">{guide.username}</div>
                           <div className="text-xs font-mono text-zinc-400 mt-1">کد ملی: {guide.nationalId || '---'}</div>
+                          <div className="text-xs font-mono text-zinc-500 mt-1">ثبت‌نام: {formatJalali(guide.createdAt)}</div>
                         </td>
 
                         <td className="p-5">
@@ -736,6 +799,53 @@ export default function AdminDashboard() {
             </table>
           </div>
         </div>
+
+        {/* ----------------- صفحه‌بندی ----------------- */}
+        {totalPages > 1 && (
+          <div dir="rtl" className="flex flex-wrap items-center justify-between gap-3 px-3 py-3 mt-3 bg-[#1e1e1e] rounded-2xl border-2 border-[#E5C060]">
+            <span className="text-xs text-zinc-400">
+              نمایش {((currentPage - 1) * itemsPerPage + 1).toLocaleString('fa-IR')} تا{' '}
+              {Math.min(currentPage * itemsPerPage, filteredGuides.length).toLocaleString('fa-IR')} از{' '}
+              {filteredGuides.length.toLocaleString('fa-IR')} لیدر
+            </span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-zinc-800 text-white border border-[#F9704E] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+              >
+                ‹ قبلی
+              </button>
+              {pageNumbers.map((n, i) =>
+                n === '…' ? (
+                  <span key={`dots-${i}`} className="px-1 text-zinc-500">…</span>
+                ) : (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setCurrentPage(n)}
+                    className={`min-w-8 px-2.5 py-1.5 rounded-lg text-xs font-bold border cursor-pointer ${
+                      n === currentPage
+                        ? 'bg-[#F9704E] text-white border-[#F9704E]'
+                        : 'bg-zinc-800 text-zinc-300 border-zinc-600 hover:border-[#F9704E]'
+                    }`}
+                  >
+                    {n.toLocaleString('fa-IR')}
+                  </button>
+                )
+              )}
+              <button
+                type="button"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-zinc-800 text-white border border-[#F9704E] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+              >
+                بعدی ›
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ----------------- ➕ مودال افزودن لیدر جدید ----------------- */}
         {isAddLeaderModalOpen && (
@@ -1083,7 +1193,7 @@ export default function AdminDashboard() {
 
         {/* ----------------- 🔑 مودال نمایش و کپی رمز موقت ----------------- */}
         {tempCred && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" dir="rtl">
+          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" dir="rtl">
             <div className="bg-[#1e1e1e] border-2 border-[#E5C060] rounded-2xl w-full max-w-md p-6 shadow-2xl">
               <h2 className="text-base font-bold mb-3 text-[#E5C060] border-b border-[#F9704E] pb-3">
                 {tempCred.title}
