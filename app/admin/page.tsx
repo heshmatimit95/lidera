@@ -508,8 +508,8 @@ export default function AdminDashboard() {
             <div className="text-neutral-400 text-xs sm:text-sm whitespace-nowrap">
               تعداد کل: <span className="text-[#F9704E] font-bold">{filteredGuides.length}</span> لیدر
             </div>
-{/* ----------------- فیلتر تاریخ ثبت‌نام (جدا از جستجو) ----------------- */}
-        <div dir="rtl" className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 px-3 py-2.5 bg-[#1e1e1e] rounded-2xl border border-zinc-700">
+           
+        
           <span className="text-xs sm:text-sm text-zinc-300 font-bold">تاریخ ثبت‌نام:</span>
           <label className="flex items-center gap-1.5 text-xs sm:text-sm text-zinc-400">
             از
@@ -547,7 +547,7 @@ export default function AdminDashboard() {
           {((dateFrom && fromKey === null) || (dateTo && toKey === null)) && (
             <span className="text-[11px] text-red-400">تاریخ کامل و معتبر وارد کن (مثل 1405/08/15)</span>
           )}
-        </div>
+    
 
             {/* نوار جستجو - کادر نارنجی ثابت */}
             <input
