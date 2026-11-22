@@ -63,6 +63,21 @@ const jalaliParts = (v?: string | Date | null) => {
   const get = (t: string) => parts.find((p) => p.type === t)?.value || '';
   return { y: get('year'), m: get('month'), d: get('day') };
 };
+// ماسک ورودی تاریخ: فقط رقم می‌گیرد و خودکار می‌شود 1405/08/15
+const maskJalali = (raw: string) => {
+  const d = toEnDigits(raw).replace(/\D/g, '').slice(0, 8);
+  if (d.length <= 4) return d;
+  if (d.length <= 6) return `${d.slice(0, 4)}/${d.slice(4)}`;
+  return `${d.slice(0, 4)}/${d.slice(4, 6)}/${d.slice(6)}`;
+};
+// تبدیل «1405/08/15» به عدد قابل مقایسه 14050815 (نامعتبر/ناقص → null)
+const jalaliKey = (s: string): number | null => {
+  const m = /^(\d{4})\/(\d{2})\/(\d{2})$/.exec(s);
+  if (!m) return null;
+  const mo = Number(m[2]), da = Number(m[3]);
+  if (mo < 1 || mo > 12 || da < 1 || da > 31) return null;
+  return Number(m[1]) * 10000 + mo * 100 + da;
+};
 const formatJalali = (v?: string | Date | null) => {
   const p = jalaliParts(v);
   return p ? `${p.y}/${p.m}/${p.d}` : '---';
@@ -72,6 +87,8 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const itemsPerPage = 10;
 
   // 1. استیت‌های مودال تغییر پسورد ادمین
@@ -370,21 +387,25 @@ export default function AdminDashboard() {
   };
 
   // فیلتر کردن لیدرها بر اساس جستجو (نام، نام کاربری، کد ملی، شماره تماس)
+  const fromKey = jalaliKey(dateFrom);
+  const toKey = jalaliKey(dateTo);
   const filteredGuides = guides.filter(guide => {
     // ارقام فارسی → انگلیسی، جداکننده‌ی تاریخ (- . ٫) → /
-    const term = toEnDigits(searchTerm).trim().toLowerCase().replace(/[-.٫]/g, '/');
+    // فیلتر بازه‌ی تاریخ ثبت‌نام (جدا از جستجو)
+    if (fromKey !== null || toKey !== null) {
+      const p = jalaliParts(guide.createdAt);
+      if (!p) return false;
+      const k = Number(p.y) * 10000 + Number(p.m) * 100 + Number(p.d);
+      if (fromKey !== null && k < fromKey) return false;
+      if (toKey !== null && k > toKey) return false;
+    }
+    const term = toEnDigits(searchTerm).trim().toLowerCase();
     if (!term) return true;
-    const p = jalaliParts(guide.createdAt);
-    // هم با صفر (1405/08/05) هم بدون صفر (1405/8/5) جستجو می‌شود
-    const dateFull = p ? `${p.y}/${p.m}/${p.d}` : '';
-    const dateShort = p ? `${p.y}/${Number(p.m)}/${Number(p.d)}` : '';
     return (
       toEnDigits(guide.fullName || '').toLowerCase().includes(term) ||
       toEnDigits(guide.username || '').toLowerCase().includes(term) ||
       toEnDigits(guide.nationalId || '').includes(term) ||
-      toEnDigits(guide.mobile || '').includes(term) ||
-      dateFull.includes(term) ||
-      dateShort.includes(term)
+      toEnDigits(guide.mobile || '').includes(term)
     );
   });
 
@@ -395,7 +416,7 @@ export default function AdminDashboard() {
   // با تغییر جستجو، برگرد به صفحه‌ی اول
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, dateFrom, dateTo]);
 
   // اگر بعد از حذف لیدر صفحه‌ی فعلی خالی شد، برگرد به آخرین صفحه
   useEffect(() => {
@@ -493,9 +514,9 @@ export default function AdminDashboard() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="نام، کد ملی، موبایل، تاریخ (1405/08)"
+              placeholder="جستجو نام، کد ملی، موبایل..."
               dir="rtl"
-              className="h-6 sm:h-8 bg-[#1e1e1e] border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-40 sm:w-56"
+              className="h-6 sm:h-8 bg-[#1e1e1e] border border-[#F9704E] rounded-xl px-3.5 text-white text-xs sm:text-sm focus:outline-none text-right w-32 sm:w-48"
             />
 
             {/* دکمه افزودن */}
@@ -561,6 +582,47 @@ export default function AdminDashboard() {
             </button>
 
           </div>
+        </div>
+
+        {/* ----------------- فیلتر تاریخ ثبت‌نام (جدا از جستجو) ----------------- */}
+        <div dir="rtl" className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 px-3 py-2.5 bg-[#1e1e1e] rounded-2xl border border-zinc-700">
+          <span className="text-xs sm:text-sm text-zinc-300 font-bold">تاریخ ثبت‌نام:</span>
+          <label className="flex items-center gap-1.5 text-xs sm:text-sm text-zinc-400">
+            از
+            <input
+              type="text"
+              inputMode="numeric"
+              dir="ltr"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(maskJalali(e.target.value))}
+              placeholder="1405/01/01"
+              className={`h-9 w-32 bg-black border rounded-xl px-3 text-white text-base sm:text-sm text-center font-mono focus:outline-none ${dateFrom && fromKey === null ? 'border-red-500' : 'border-[#F9704E]'}`}
+            />
+          </label>
+          <label className="flex items-center gap-1.5 text-xs sm:text-sm text-zinc-400">
+            تا
+            <input
+              type="text"
+              inputMode="numeric"
+              dir="ltr"
+              value={dateTo}
+              onChange={(e) => setDateTo(maskJalali(e.target.value))}
+              placeholder="1405/12/29"
+              className={`h-9 w-32 bg-black border rounded-xl px-3 text-white text-base sm:text-sm text-center font-mono focus:outline-none ${dateTo && toKey === null ? 'border-red-500' : 'border-[#F9704E]'}`}
+            />
+          </label>
+          {(dateFrom || dateTo) && (
+            <button
+              type="button"
+              onClick={() => { setDateFrom(''); setDateTo(''); }}
+              className="h-9 px-3 rounded-xl text-xs font-bold bg-zinc-800 text-white border border-zinc-600 hover:border-[#F9704E] cursor-pointer"
+            >
+              پاک کردن
+            </button>
+          )}
+          {((dateFrom && fromKey === null) || (dateTo && toKey === null)) && (
+            <span className="text-[11px] text-red-400">تاریخ کامل و معتبر وارد کن (مثل 1405/08/15)</span>
+          )}
         </div>
 
         {/* ----------------- نمایش موبایل (Mobile Cards) ----------------- */}
@@ -1193,7 +1255,7 @@ export default function AdminDashboard() {
 
         {/* ----------------- 🔑 مودال نمایش و کپی رمز موقت ----------------- */}
         {tempCred && (
-          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" dir="rtl">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" dir="rtl">
             <div className="bg-[#1e1e1e] border-2 border-[#E5C060] rounded-2xl w-full max-w-md p-6 shadow-2xl">
               <h2 className="text-base font-bold mb-3 text-[#E5C060] border-b border-[#F9704E] pb-3">
                 {tempCred.title}
