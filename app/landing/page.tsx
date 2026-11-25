@@ -583,10 +583,10 @@ export default async function LandingPage({ searchParams }: { searchParams?: any
           />
           <div className="w-full text-left my-4">
             <a
-              href="https://lidera.ir"
+              href="https://lidera-demo.ir"
               className="inline-block text-2xl sm:text-3xl font-extrabold tracking-wider underline"
             >
-              lidera.ir
+              lidera-demo.ir
             </a>
           </div>
         </div>

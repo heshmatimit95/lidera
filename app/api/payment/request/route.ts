@@ -4,7 +4,7 @@ import { isActive } from '../../../lib/leader-status';
 import { checkRateLimit } from '../../../lib/rate-limit';
 
 // ─── تنظیمات ────────────────────────────────────────────────
-const SITE_URL = (process.env.SITE_URL || 'https://lidera.ir').replace(/\/$/, '');
+const SITE_URL = (process.env.SITE_URL || 'https://lidera-demo.ir').replace(/\/$/, '');
 // پیش‌فرض sandbox است؛ برای حالت واقعی در Render مقدار ZARINPAL_SANDBOX=false بگذار
 const IS_SANDBOX = process.env.ZARINPAL_SANDBOX !== 'false';
 const ZP_HOST = IS_SANDBOX ? 'https://sandbox.zarinpal.com' : 'https://payment.zarinpal.com';

@@ -23,12 +23,12 @@ export default function SiteFooter() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6 sm:px-6">
                  <div className="my-4 w-full text-left">
             <a
-              href="https://lidera.ir"
+              href="https://lidera-demo.ir"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block text-2xl font-extrabold tracking-wider underline sm:text-3xl"
             >
-              lidera.ir
+              lidera-demo.ir
             </a>
           </div>
         </div>
