@@ -403,8 +403,8 @@ export default function TourFinancePanel({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-sm sm:items-center sm:p-4" dir="rtl" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="flex max-h-[92dvh] w-full max-w-3xl flex-col rounded-t-2xl border-2 border-[#E5C060] bg-[#121214] text-white shadow-2xl sm:max-h-[90dvh] sm:rounded-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-4" dir="rtl" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="flex max-h-[88dvh] w-full max-w-3xl flex-col rounded-2xl border-2 border-[#E5C060] bg-[#121214] text-white shadow-2xl sm:max-h-[90dvh]">
         {/* سربرگ ثابت */}
         <div className="shrink-0 border-b-2 border-[#F9704E]/40 px-4 pb-3 pt-4 sm:px-6">
           <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2.5">
@@ -511,7 +511,7 @@ export default function TourFinancePanel({
                 <div className="text-[13px] text-zinc-500">در این دوره ثبت‌نامی نیست.</div>
               ) : (
                 <div className="-mx-1 overflow-x-auto">
-                  <table className="w-full min-w-460px text-right text-[13px]">
+                  <table className="w-full min-w-[460px] text-right text-[13px]">
                     <thead>
                       <tr className="border-b border-white/10 text-zinc-400">
                         <th className="px-1 py-2 font-bold">تور</th>
@@ -627,7 +627,7 @@ export default function TourFinancePanel({
             )}
           </Section>
 
-          <p className="pb-2 text-xs leading-5 text-zinc-100">
+          <p className="pb-2 text-xs leading-5 text-zinc-500">
             توضیح: مبالغ از روی «مبلغ ثبت‌شده» هر مسافر و از دیتابیس حساب می‌شود و ردشده‌ها در جمع نیستند. «بیعانه» جدا از «وصول‌شده» آمده، چون مبلغ واقعی بیعانه و اقساط هنوز جدا ثبت نمی‌شود.
           </p>
           </div>
