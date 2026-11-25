@@ -37,6 +37,11 @@ model Leader {
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
     blockedAt          DateTime?
+  planName           String?     // نام پلن/بسته (ثبت دستی توسط ادمین)
+  paidAmount         Int?        // مبلغ دریافتی به تومان
+  paidAt             DateTime?   // تاریخ دریافت
+  planExpiresAt      DateTime?   // پایان اعتبار
+  adminNote          String?     // یادداشت داخلی (فقط ادمین)
 }
 
 model BankCard {
@@ -142,6 +147,7 @@ model Passenger {
   paymentRefId      String?                   // کد پیگیری زرین‌پال بعد از پرداخت موفق
   @@index([leaderId])
   @@index([tourId])
+  @@index([leaderId, createdAt])
 transportId    String?   
   transportName  String?
   transportPrice Float?
@@ -181,5 +187,17 @@ model AdminCredential {
   updatedAt    DateTime @updatedAt
 }
 
+// گزارش فعالیت ادمین (فقط رویداد و شناسه؛ بدون رمز، کد ملی یا فیش)
+model AuditLog {
+  id         String   @id @default(uuid())
+  actor      String   @default("admin")
+  action     String
+  targetId   String?
+  targetName String?
+  detail     String?
+  ip         String?
+  createdAt  DateTime @default(now())
 
-  
+  @@index([createdAt])
+  @@index([targetId])
+}

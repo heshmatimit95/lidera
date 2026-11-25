@@ -391,12 +391,13 @@ export default async function LandingPage({ searchParams }: { searchParams?: any
             </span>
           )}
         </h3>
-        <p className="text-sm leading-relaxed text-zinc-300">{item.text}</p>
+ <p className="text-justify leading-relaxed text-sm text-zinc-300">
+  {item.text}
+</p>
       </div>
     </div>
   ))}
 </div>
-
           {/* نمونه‌ی بصری: تحلیل مالی و دستیار پاسخ‌گو */}
           <div className="mt-10 grid gap-6 lg:grid-cols-2">
             <div className="ld-reveal min-w-0 rounded-3xl border-2 border-[#F9704E] bg-[#1a1a1e] p-5 sm:p-6">

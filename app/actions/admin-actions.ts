@@ -52,6 +52,87 @@ const isAdminCaller = async () => {
 
 const FAIL_FORBIDDEN = { success: false, message: 'دسترسی غیرمجاز' };
 
+// ─── گزارش فعالیت (audit log) ───────────────────────────────────────
+// 🔒 فقط نوع رویداد و شناسه ثبت می‌شود؛ هرگز رمز، کد ملی، فیش یا نام کاربری واردشده‌ی ناموفق.
+// خطا در ثبت لاگ نباید عملیات اصلی را خراب کند.
+const writeAudit = async (
+  action: string,
+  targetId?: string | null,
+  targetName?: string | null,
+  detail?: string | null,
+  actor: 'admin' | 'leader' = 'admin',
+) => {
+  try {
+    await prisma.auditLog.create({
+      data: {
+        actor,
+        action: cleanStr(action, 64),
+        targetId: targetId ? cleanStr(targetId, 64) : null,
+        targetName: targetName ? cleanStr(targetName, 120) : null,
+        detail: detail ? cleanStr(detail, 300) : null,
+        ip: await callerIp(),
+      },
+    });
+  } catch (error) {
+    console.error('Audit log error:', error);
+  }
+};
+
+// ─── تاریخ شمسی سمت سرور (هماهنگ با Intl که نمایش مرورگر هم از آن می‌آید) ───
+const TEHRAN_OFFSET_MS = 3.5 * 3600_000; // ایران از ۱۴۰۱ ساعت تابستانی ندارد
+const DAY_MS = 86_400_000;
+
+const jalaliPartsOf = (ms: number) => {
+  const parts = new Intl.DateTimeFormat('en-US-u-ca-persian-nu-latn', {
+    timeZone: 'Asia/Tehran', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date(ms));
+  const get = (t: string) => Number(parts.find((x) => x.type === t)?.value || 0);
+  return { y: get('year'), m: get('month'), d: get('day') };
+};
+
+// «1405/08/15» → شروع (یا پایان) همان روز به وقت تهران؛ نامعتبر → null
+const parseJalaliInput = (raw: unknown, endOfDay = false): Date | null => {
+  const s = toEnglishDigits(String(raw ?? '').trim());
+  const m = /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/.exec(s);
+  if (!m) return null;
+  const jy = Number(m[1]), jm = Number(m[2]), jd = Number(m[3]);
+  if (jy < 1400 || jy > 1500 || jm < 1 || jm > 12 || jd < 1 || jd > 31) return null;
+
+  const wanted = jy * 10000 + jm * 100 + jd;
+  const noon = 12 * 3600_000;
+  // حدس اولیه (۱ فروردین ≈ ۲۰ مارس) و سپس اصلاح روز‌به‌روز تا خود Intl همان تاریخ را نشان دهد
+  let ms = Date.UTC(jy + 621, 2, 20)
+    + ((jm < 7 ? (jm - 1) * 31 : 186 + (jm - 7) * 30) + (jd - 1)) * DAY_MS
+    + noon - TEHRAN_OFFSET_MS;
+  for (let i = 0; i < 8; i++) {
+    const p = jalaliPartsOf(ms);
+    const key = p.y * 10000 + p.m * 100 + p.d;
+    if (key === wanted) {
+      const start = ms - noon;
+      return new Date(endOfDay ? start + DAY_MS - 1000 : start);
+    }
+    ms += (key < wanted ? 1 : -1) * DAY_MS;
+  }
+  return null; // روز وجود ندارد (مثل ۳۰ اسفند سال غیرکبیسه)
+};
+
+// شروع ماه شمسی جاری (نیمه‌شب تهران)
+const jalaliMonthStart = (now: Date = new Date()): Date => {
+  const day = jalaliPartsOf(now.getTime()).d;
+  const startOfToday = Math.floor((now.getTime() + TEHRAN_OFFSET_MS) / DAY_MS) * DAY_MS - TEHRAN_OFFSET_MS;
+  return new Date(startOfToday - (day - 1) * DAY_MS);
+};
+
+type LeaderUsage = {
+  tours: number;
+  toursWithPassengers: number;
+  passengers: number;
+  seats: number;
+  passengersMonth: number;
+  seatsMonth: number;
+  lastActivity: string | null;
+};
+
 // ─── توابع ──────────────────────────────────────────────────────────
 
 export async function getLeadersFromDb() {
@@ -74,13 +155,131 @@ export async function getLeadersFromDb() {
       status: true,
       blockedAt: true,
       createdAt: true,
+      planName: true,
+      paidAmount: true,
+      paidAt: true,
+      planExpiresAt: true,
+      adminNote: true,
     },
   });
-  // تاریخ مسدودی به رشته تبدیل می‌شود تا در مرورگر مشکل سریالایز نداشته باشد
+  // تاریخ‌ها به رشته تبدیل می‌شوند تا در مرورگر مشکل سریالایز نداشته باشند
   return leaders.map((l) => ({
     ...l,
     blockedAt: l.blockedAt ? l.blockedAt.toISOString() : null,
+    paidAt: l.paidAt ? l.paidAt.toISOString() : null,
+    planExpiresAt: l.planExpiresAt ? l.planExpiresAt.toISOString() : null,
   }));
+}
+
+// ─── مصرف هر لیدر (فقط عدد؛ هیچ داده‌ی مسافر یا فیشی برنمی‌گردد) ─────────
+export async function getLeaderUsageFromDb() {
+  await requireAdmin();
+  const monthStart = jalaliMonthStart();
+
+  const [tourRows, passengerTotals, passengerMonth, tourWithPassengerRows] = await Promise.all([
+    prisma.tour.groupBy({ by: ['leaderId'], _count: { _all: true } }),
+    prisma.passenger.groupBy({
+      by: ['leaderId'],
+      _count: { _all: true },
+      _sum: { seatsCount: true },
+      _max: { createdAt: true },
+    }),
+    prisma.passenger.groupBy({
+      by: ['leaderId'],
+      where: { createdAt: { gte: monthStart } },
+      _count: { _all: true },
+      _sum: { seatsCount: true },
+    }),
+    // هر جفت (لیدر، تور) که حداقل یک مسافر دارد
+    prisma.passenger.groupBy({ by: ['leaderId', 'tourId'], where: { tourId: { not: null } } }),
+  ]);
+
+  const usage: Record<string, LeaderUsage> = {};
+  const slot = (id: string): LeaderUsage => {
+    if (!usage[id]) {
+      usage[id] = {
+        tours: 0, toursWithPassengers: 0, passengers: 0, seats: 0,
+        passengersMonth: 0, seatsMonth: 0, lastActivity: null,
+      };
+    }
+    return usage[id];
+  };
+
+  tourRows.forEach((r) => { slot(r.leaderId).tours = r._count._all; });
+  passengerTotals.forEach((r) => {
+    const u = slot(r.leaderId);
+    u.passengers = r._count._all;
+    u.seats = r._sum.seatsCount ?? 0;
+    u.lastActivity = r._max.createdAt ? r._max.createdAt.toISOString() : null;
+  });
+  passengerMonth.forEach((r) => {
+    const u = slot(r.leaderId);
+    u.passengersMonth = r._count._all;
+    u.seatsMonth = r._sum.seatsCount ?? 0;
+  });
+  tourWithPassengerRows.forEach((r) => { slot(r.leaderId).toursWithPassengers += 1; });
+
+  return usage;
+}
+
+// ─── ثبت دستی پلن و پرداخت لیدر (کارت‌به‌کارت/حواله؛ پرداخت آنلاین نیست) ──────
+export async function updateLeaderBillingInDb(id: string, data: any, pathName: string) {
+  await requireAdmin();
+  const leaderId = cleanStr(id, 64);
+  if (!leaderId) return { success: false, message: 'شناسه نامعتبر است.' };
+
+  const planName = cleanStr(data?.planName, 80) || null;
+  const adminNote = cleanStr(data?.adminNote, 500) || null;
+
+  // مبلغ به تومان؛ فقط عدد صحیح
+  const amountDigits = toEnglishDigits(String(data?.paidAmount ?? '')).replace(/\D/g, '');
+  let paidAmount: number | null = null;
+  if (amountDigits) {
+    paidAmount = Number(amountDigits);
+    if (!Number.isSafeInteger(paidAmount) || paidAmount > 2_000_000_000) {
+      return { success: false, message: 'مبلغ نامعتبر است.' };
+    }
+  }
+
+  const paidRaw = cleanStr(data?.paidAt, 20);
+  const expRaw = cleanStr(data?.planExpiresAt, 20);
+  const paidAt = paidRaw ? parseJalaliInput(paidRaw) : null;
+  const planExpiresAt = expRaw ? parseJalaliInput(expRaw, true) : null;
+  if (paidRaw && !paidAt) return { success: false, message: 'تاریخ پرداخت نامعتبر است (مثل 1405/08/15).' };
+  if (expRaw && !planExpiresAt) return { success: false, message: 'تاریخ پایان اعتبار نامعتبر است (مثل 1405/08/15).' };
+  if (paidAt && planExpiresAt && planExpiresAt.getTime() < paidAt.getTime()) {
+    return { success: false, message: 'پایان اعتبار نباید قبل از تاریخ پرداخت باشد.' };
+  }
+
+  try {
+    const updated = await prisma.leader.update({
+      where: { id: leaderId },
+      data: { planName, paidAmount, paidAt, planExpiresAt, adminNote },
+      select: { fullName: true, username: true },
+    });
+    await writeAudit(
+      'leader.billing',
+      leaderId,
+      updated.fullName || updated.username,
+      `پلن: ${planName || '-'} | مبلغ: ${paidAmount ?? '-'} | پایان: ${expRaw || '-'}`,
+    );
+  } catch (error) {
+    console.error('Update billing error:', error);
+    return { success: false, message: 'خطا در ذخیره (لیدر یافت نشد؟).' };
+  }
+
+  revalidatePath(pathName);
+  return { success: true, message: "" };
+}
+
+// ─── گزارش فعالیت ادمین (۲۰۰ مورد آخر) ──────────────────────────────
+export async function getAuditLogsFromDb() {
+  await requireAdmin();
+  const rows = await prisma.auditLog.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 200,
+  });
+  return rows.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() }));
 }
 
 export async function createLeaderInDb(data: any, pathName: string) {
@@ -148,6 +347,7 @@ export async function createLeaderInDb(data: any, pathName: string) {
       },
       select: { id: true, slug: true, username: true },
     });
+    await writeAudit('leader.create', newLeader.id, cleanStr(data?.fullName, 80) || username);
 
     revalidatePath(pathName);
     // رمز اولیه فقط همین یک بار به ادمین برمی‌گردد تا به لیدر بدهد
@@ -210,6 +410,7 @@ export async function updateLeaderInDb(leader: any, pathName: string) {
     return { success: false, message: 'خطا در ویرایش اطلاعات لیدر.' };
   }
 
+  await writeAudit('leader.update', id, cleanStr(leader?.fullName, 80) || username);
   revalidatePath(pathName);
   return { success: true, message: "" };
 }
@@ -220,11 +421,20 @@ export async function deleteLeaderFromDb(id: string, pathName: string) {
   if (!leaderId) return { success: false, message: 'شناسه نامعتبر است.' };
 
   try {
+    // برای گزارش فعالیت: نام لیدر و تعداد مسافران قبل از حذف
+    const target = await prisma.leader.findUnique({
+      where: { id: leaderId },
+      select: { fullName: true, username: true },
+    });
+    const passengerCount = await prisma.passenger.count({ where: { leaderId } });
+
     await prisma.$transaction([
       prisma.passenger.deleteMany({ where: { leaderId } }),
       prisma.tour.deleteMany({ where: { OR: [{ tenantId: leaderId }, { leaderId }] } }),
       prisma.leader.delete({ where: { id: leaderId } }),
     ]);
+
+    await writeAudit('leader.delete', leaderId, target?.fullName || target?.username || null, `مسافران حذف‌شده: ${passengerCount}`);
   } catch (error) {
     console.error('Delete leader error:', error);
     return { success: false, message: 'خطا در حذف لیدر.' };
@@ -252,9 +462,10 @@ export async function deleteAllRecordsForLeader(tenantSlug: string, pathName: st
     });
     if (!leader || (ownerId && leader.id !== ownerId)) return FAIL_FORBIDDEN;
 
-    await prisma.passenger.deleteMany({
+    const removed = await prisma.passenger.deleteMany({
       where: { leaderId: leader.id }
     });
+    await writeAudit('passengers.delete_all', leader.id, null, `تعداد: ${removed.count}`, admin ? 'admin' : 'leader');
 
     revalidatePath(pathName);
     return { success: true, message: "تمامی مسافران با موفقیت از دیتابیس حذف شدند." };
@@ -279,7 +490,7 @@ export async function updateLeaderStatusInDb(id: string, status: string, pathNam
   const leaderId = cleanStr(id, 64);
   const current = await prisma.leader.findUnique({
     where: { id: leaderId },
-    select: { blockedAt: true },
+    select: { blockedAt: true, status: true, fullName: true, username: true },
   });
   if (!current) return { success: false, message: 'لیدر یافت نشد.' };
 
@@ -291,6 +502,7 @@ export async function updateLeaderStatusInDb(id: string, status: string, pathNam
       blockedAt: status === 'blocked' ? (current.blockedAt ?? new Date()) : null,
     },
   });
+  await writeAudit('leader.status', leaderId, current.fullName || current.username, `${current.status} -> ${status}`);
   revalidatePath(pathName);
   return { success: true, message: "" };
 }
@@ -303,10 +515,12 @@ export async function updatePassword(id: string, newPassword: string, pathName: 
   }
   // 🔒 رمز هرگز به‌صورت متن ساده ذخیره نمی‌شود
   const hashed = await hashPassword(pass);
-  await prisma.leader.update({
+  const updated = await prisma.leader.update({
     where: { id: cleanStr(id, 64) },
     data: { password: hashed, mustChangePassword: true },
+    select: { fullName: true, username: true },
   });
+  await writeAudit('leader.password_set', cleanStr(id, 64), updated.fullName || updated.username);
   revalidatePath(pathName);
   return { success: true, message: "" };
 }
@@ -316,13 +530,15 @@ export async function resetLeaderPasswordInDb(id: string, pathName: string = "/a
   // رمز موقت تصادفی (به‌جای 123456 ثابت)
   const newPassword = generatePassword();
   const hashedPassword = await hashPassword(newPassword);
-  await prisma.leader.update({
+  const updated = await prisma.leader.update({
     where: { id: cleanStr(id, 64) },
     data: {
       password: hashedPassword,
       mustChangePassword: true
-    }
+    },
+    select: { fullName: true, username: true },
   });
+  await writeAudit('leader.password_reset', cleanStr(id, 64), updated.fullName || updated.username);
   revalidatePath(pathName);
   return { success: true, newPassword, message: "" };
 }
@@ -346,9 +562,18 @@ export async function deleteSingleRecord(id: string, modelName: string, pathName
         ? await prisma.passenger.deleteMany({ where })
         : await prisma.tour.deleteMany({ where });
       if (result.count === 0) return { success: false, message: 'رکورد یافت نشد.' };
+      // حذف تکی مسافر توسط لیدر ثبت نمی‌شود (حجم زیاد)؛ حذف ادمین و حذف تور همیشه ثبت می‌شود
+      if (admin || modelName === 'tour') {
+        await writeAudit(`${modelName}.delete`, recordId, null, null, admin ? 'admin' : 'leader');
+      }
     } else if (modelName === 'leader') {
       if (!admin) return FAIL_FORBIDDEN;
+      const target = await prisma.leader.findUnique({
+        where: { id: recordId },
+        select: { fullName: true, username: true },
+      });
       await prisma.leader.delete({ where: { id: recordId } });
+      await writeAudit('leader.delete', recordId, target?.fullName || target?.username || null, 'حذف تکی');
     } else {
       // قبلاً هر مقدار ناشناخته‌ای «لیدر» را حذف می‌کرد؛ حالا رد می‌شود
       return { success: false, message: 'نوع رکورد نامعتبر است.' };
@@ -466,10 +691,13 @@ export async function loginAdminAction(username: string, pass: string) {
     if (adminUser && adminHash && cleanUser === adminUser) {
       const ok = await bcrypt.compare(cleanPass, adminHash);
       if (ok) {
+        await writeAudit('admin.login');
         return { success: true, message: "ورود موفقیت‌آمیز ادمین کل" };
       }
     }
 
+    // 🔒 نام کاربری/رمز واردشده هرگز ثبت نمی‌شود؛ فقط خود رویداد و آی‌پی
+    await writeAudit('admin.login_failed');
     return { success: false, message: 'نام کاربری یا رمز عبور ادمین اشتباه است' };
   } catch (error) {
     console.error('Admin Login Error:', error);
@@ -483,12 +711,14 @@ export async function deleteAllRecords(pathName: string) {
 
     // 🔒 پاک‌کردن کل دیتابیس فقط وقتی مجاز است که صراحتاً در Render فعال شده باشد
     if (process.env.ALLOW_DELETE_ALL !== 'true') {
+      await writeAudit('db.delete_all_blocked');
       return { success: false, message: "حذف کامل دیتابیس در این محیط غیرفعال است." };
     }
 
     await prisma.passenger.deleteMany({});
     await prisma.tour.deleteMany({});
     await prisma.leader.deleteMany({});
+    await writeAudit('db.delete_all');
 
     revalidatePath(pathName);
     return { success: true, message: "کلیه اطلاعات با موفقیت از دیتابیس پاک شدند." };

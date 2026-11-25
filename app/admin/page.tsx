@@ -13,7 +13,9 @@ import {
   FaPlus, 
   FaSave,
   FaEdit,
-  FaLink
+  FaLink,
+  FaMoneyBillWave,
+  FaHistory
 } from 'react-icons/fa';
 import { MdChat } from 'react-icons/md';
 import SiteFooter from '@/app/components/SiteFooter';
@@ -26,7 +28,10 @@ import {
   updateLeaderStatusInDb,
   resetLeaderPasswordInDb,
   updateAdminPassword,
-  deleteAllRecords
+  deleteAllRecords,
+  getLeaderUsageFromDb,
+  updateLeaderBillingInDb,
+  getAuditLogsFromDb
 } from "@/app/actions/admin-actions";
 
 interface Leader {
@@ -44,7 +49,51 @@ interface Leader {
   status: string; 
   blockedAt?: string | null;
   createdAt?: string | Date | null;
+  planName?: string | null;
+  paidAmount?: number | null;
+  paidAt?: string | null;
+  planExpiresAt?: string | null;
+  adminNote?: string | null;
 }
+
+// مصرف هر لیدر (فقط عدد؛ از سرور می‌آید)
+interface LeaderUsage {
+  tours: number;
+  toursWithPassengers: number;
+  passengers: number;
+  seats: number;
+  passengersMonth: number;
+  seatsMonth: number;
+  lastActivity: string | null;
+}
+
+interface AuditRow {
+  id: string;
+  actor: string;
+  action: string;
+  targetId: string | null;
+  targetName: string | null;
+  detail: string | null;
+  ip: string | null;
+  createdAt: string;
+}
+
+const AUDIT_LABELS: Record<string, string> = {
+  'admin.login': 'ورود ادمین',
+  'admin.login_failed': 'ورود ناموفق ادمین',
+  'leader.create': 'ثبت لیدر',
+  'leader.update': 'ویرایش لیدر',
+  'leader.delete': 'حذف لیدر',
+  'leader.status': 'تغییر وضعیت',
+  'leader.password_set': 'تعیین رمز لیدر',
+  'leader.password_reset': 'ریست رمز لیدر',
+  'leader.billing': 'ثبت پلن/پرداخت',
+  'passengers.delete_all': 'حذف همه‌ی مسافران',
+  'passenger.delete': 'حذف مسافر',
+  'tour.delete': 'حذف تور',
+  'db.delete_all': 'حذف کل دیتابیس',
+  'db.delete_all_blocked': 'تلاش حذف کل دیتابیس (مسدود)',
+};
 
 // تبدیل ارقام فارسی/عربی به انگلیسی (برای جستجوی درست)
 const toEnDigits = (s: string) =>
@@ -82,6 +131,27 @@ const formatJalali = (v?: string | Date | null) => {
   const p = jalaliParts(v);
   return p ? `${p.y}/${p.m}/${p.d}` : '---';
 };
+// مقدار اولیه‌ی فیلد تاریخ در فرم (خالی اگر تاریخی نیست)
+const toJalaliInput = (v?: string | Date | null) => {
+  const p = jalaliParts(v);
+  return p ? `${p.y}/${p.m}/${p.d}` : '';
+};
+const faNum = (n: number) => n.toLocaleString('fa-IR');
+// وضعیت اعتبار پلن: none | expired | soon (≤۷ روز) | ok
+const planState = (iso?: string | null): 'none' | 'expired' | 'soon' | 'ok' => {
+  if (!iso) return 'none';
+  const t = new Date(iso).getTime();
+  if (isNaN(t)) return 'none';
+  const left = t - Date.now();
+  if (left < 0) return 'expired';
+  return left <= 7 * 86_400_000 ? 'soon' : 'ok';
+};
+const PLAN_BADGE = {
+  none: { text: 'پلن ثبت نشده', cls: 'text-zinc-400 border-zinc-600' },
+  expired: { text: 'منقضی', cls: 'text-rose-400 border-rose-500/40' },
+  soon: { text: 'نزدیک انقضا', cls: 'text-amber-400 border-amber-500/40' },
+  ok: { text: 'فعال', cls: 'text-emerald-400 border-emerald-500/40' },
+} as const;
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -124,6 +194,17 @@ export default function AdminDashboard() {
   // 5. تغییرات وضعیت معلق (پیش از ذخیره)
   const [pendingStatusChanges, setPendingStatusChanges] = useState<Record<string, string>>({});
 
+  // 7. مصرف هر لیدر (عدد)، مودال پلن/پرداخت و مودال گزارش فعالیت
+  const [usage, setUsage] = useState<Record<string, LeaderUsage>>({});
+  const [billingLeader, setBillingLeader] = useState<Leader | null>(null);
+  const [billingForm, setBillingForm] = useState({
+    planName: '', paidAmount: '', paidAt: '', planExpiresAt: '', adminNote: ''
+  });
+  const [isSavingBilling, setIsSavingBilling] = useState(false);
+  const [isAuditOpen, setIsAuditOpen] = useState(false);
+  const [auditLogs, setAuditLogs] = useState<AuditRow[]>([]);
+  const [auditLoading, setAuditLoading] = useState(false);
+
   // 6. رمز موقت تازه ساخته‌شده (برای نمایش و کپی؛ فقط یک بار دیده می‌شود)
   const [tempCred, setTempCred] = useState<{ title: string; fullName: string; username: string; password: string } | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -136,6 +217,12 @@ export default function AdminDashboard() {
           setGuides(res);
         } else if (res && Array.isArray(res.data)) {
           setGuides(res.data);
+        }
+        try {
+          const u = await getLeaderUsageFromDb();
+          setUsage(u as any);
+        } catch (usageError) {
+          console.error("Error fetching usage:", usageError);
         }
       } catch (error) {
         console.error("Error fetching guides:", error);
@@ -283,6 +370,95 @@ export default function AdminDashboard() {
       console.error(error);
       alert('❌ خطا در ذخیره وضعیت‌ها.');
     }
+  };
+
+  // باز کردن مودال پلن/پرداخت
+  const handleOpenBilling = (leader: Leader) => {
+    setBillingLeader(leader);
+    setBillingForm({
+      planName: leader.planName || '',
+      paidAmount: leader.paidAmount != null ? String(leader.paidAmount) : '',
+      paidAt: toJalaliInput(leader.paidAt),
+      planExpiresAt: toJalaliInput(leader.planExpiresAt),
+      adminNote: leader.adminNote || '',
+    });
+  };
+
+  // ذخیره‌ی پلن/پرداخت (ثبت دستی)
+  const handleSaveBilling = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!billingLeader) return;
+    if (
+      (billingForm.paidAt && jalaliKey(billingForm.paidAt) === null) ||
+      (billingForm.planExpiresAt && jalaliKey(billingForm.planExpiresAt) === null)
+    ) {
+      alert('⚠️ تاریخ کامل و معتبر وارد کن (مثل 1405/08/15)');
+      return;
+    }
+    setIsSavingBilling(true);
+    try {
+      const res = await updateLeaderBillingInDb(billingLeader.id, billingForm, window.location.pathname);
+      if (res.success) {
+        const updatedData = await getLeadersFromDb();
+        setGuides(updatedData as any);
+        setBillingLeader(null);
+      } else {
+        alert(res.message || '❌ خطا در ذخیره.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('❌ خطا در ذخیره.');
+    } finally {
+      setIsSavingBilling(false);
+    }
+  };
+
+  // گزارش فعالیت ادمین
+  const handleOpenAudit = async () => {
+    setIsAuditOpen(true);
+    setAuditLoading(true);
+    try {
+      const rows = await getAuditLogsFromDb();
+      setAuditLogs(rows as any);
+    } catch (error) {
+      console.error(error);
+      alert('❌ خطا در دریافت گزارش فعالیت.');
+    } finally {
+      setAuditLoading(false);
+    }
+  };
+
+  // بلوک مصرف و پرداخت (مشترک بین موبایل و دسکتاپ؛ فقط عدد، بدون داده‌ی مسافر)
+  const renderUsagePay = (guide: Leader) => {
+    const u = usage[guide.id];
+    const badge = PLAN_BADGE[planState(guide.planExpiresAt)];
+    return (
+      <div className="space-y-1 text-xs">
+        <div className="text-zinc-300">
+          تور: <span className="font-mono text-white">{u ? faNum(u.tours) : '—'}</span>
+          {u && <span className="text-zinc-500"> (دارای مسافر: {faNum(u.toursWithPassengers)})</span>}
+        </div>
+        <div className="text-zinc-300">
+          این ماه (شمسی): <span className="font-mono text-white">{u ? `${faNum(u.passengersMonth)} ثبت‌نام / ${faNum(u.seatsMonth)} نفر` : '—'}</span>
+        </div>
+        <div className="text-zinc-400">کل: {u ? `${faNum(u.passengers)} ثبت‌نام / ${faNum(u.seats)} نفر` : '—'}</div>
+        <div className="text-zinc-500">آخرین ثبت‌نام: {u?.lastActivity ? formatJalali(u.lastActivity) : '---'}</div>
+        <div className="pt-1 border-t border-zinc-800 flex flex-wrap items-center gap-1.5">
+          <span className={`px-2 py-0.5 rounded border text-[10px] font-bold ${badge.cls}`}>{badge.text}</span>
+          {guide.planName && <span className="text-zinc-300">{guide.planName}</span>}
+        </div>
+        {guide.paidAmount != null && (
+          <div className="text-zinc-400">
+            دریافتی: <span className="font-mono text-zinc-200">{faNum(guide.paidAmount)}</span> تومان
+            {guide.paidAt ? ` (${formatJalali(guide.paidAt)})` : ''}
+          </div>
+        )}
+        {guide.planExpiresAt && (
+          <div className="text-zinc-400">پایان اعتبار: <span className="font-mono text-zinc-200">{formatJalali(guide.planExpiresAt)}</span></div>
+        )}
+        {guide.adminNote && <div className="text-zinc-500 truncate max-w-[14rem]" title={guide.adminNote}>📝 {guide.adminNote}</div>}
+      </div>
+    );
   };
 
   // تغییر پسورد مدیریت
@@ -456,6 +632,13 @@ export default function AdminDashboard() {
         'وضعیت بررسی': currentStatus === 'active' ? 'تایید شده' : currentStatus === 'blocked' ? 'مسدود شده' : 'در انتظار تایید',
         'تاریخ ثبت‌نام': formatJalali(guide.createdAt),
         'تاریخ مسدودی': guide.blockedAt ? new Date(guide.blockedAt).toLocaleDateString('fa-IR') : '---',
+        'پلن': guide.planName || '---',
+        'مبلغ دریافتی (تومان)': guide.paidAmount ?? '---',
+        'تاریخ پرداخت': guide.paidAt ? formatJalali(guide.paidAt) : '---',
+        'پایان اعتبار': guide.planExpiresAt ? formatJalali(guide.planExpiresAt) : '---',
+        'تعداد تور': usage[guide.id]?.tours ?? 0,
+        'ثبت‌نام این ماه': usage[guide.id]?.passengersMonth ?? 0,
+        'نفر این ماه': usage[guide.id]?.seatsMonth ?? 0,
       };
     });
 
@@ -587,6 +770,15 @@ export default function AdminDashboard() {
               <FaFileExcel className="text-[18px] sm:text-[14px]" />
             </button>
 
+            {/* دکمه گزارش فعالیت ادمین */}
+            <button
+              onClick={handleOpenAudit}
+              title="گزارش فعالیت مدیریت"
+              className="flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 bg-zinc-900 hover:bg-zinc-800 text-sky-400 rounded-xl transition-all border border-zinc-800 active:scale-95 cursor-pointer"
+            >
+              <FaHistory className="text-[18px] sm:text-[14px]" />
+            </button>
+
             {/* دکمه تغییر رمز */}
             <button
               onClick={() => setIsChangePassModalOpen(true)}
@@ -649,7 +841,16 @@ export default function AdminDashboard() {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex flex-wrap justify-end items-center gap-1">
+                      {/* 💰 پلن و پرداخت */}
+                      <button
+                        onClick={() => handleOpenBilling(guide)}
+                        className="p-2 text-yellow-400 hover:text-yellow-400 bg-zinc-900 border border-zinc-800 rounded-lg active:scale-95 transition-all"
+                        title="پلن و پرداخت"
+                      >
+                        <FaMoneyBillWave size={15} />
+                      </button>
+
                       {/* 🔗 لینک مسافر */}
                       <button
                         onClick={() => handleCopyLeaderLink(guide.username)}
@@ -707,6 +908,11 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
+                  {/* مصرف و پرداخت */}
+                  <div className="bg-zinc-900/80 p-3 rounded-xl border border-zinc-700">
+                    {renderUsagePay(guide)}
+                  </div>
+
                   {/* وضعیت دسترسی */}
                   <div className="flex items-center justify-between pt-1">
                     <span className="text-xs text-zinc-400">
@@ -739,6 +945,7 @@ export default function AdminDashboard() {
                 <tr className="bg-black border-b-2 border-[#F9704E] text-white text-sm">
                   <th className="p-5 font-bold">اطلاعات تورلیدر</th>
                   <th className="p-5 font-bold">نام کاربری & کد ملی</th>
+                  <th className="p-5 font-bold">مصرف و پرداخت</th>
                   <th className="p-5 font-bold text-center">ارتباط</th>
                   <th className="p-5 font-bold text-center">وضعیت دسترسی</th>
                   <th className="p-5 font-bold text-center">عملیات</th>
@@ -747,7 +954,7 @@ export default function AdminDashboard() {
               <tbody className="divide-y divide-zinc-800/60 text-zinc-300">
                 {filteredGuides.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-zinc-500 text-sm">
+                    <td colSpan={6} className="p-8 text-center text-zinc-500 text-sm">
                       {guides.length === 0 ? 'هیچ لیدری ثبت نشده است.' : 'لیدری با این مشخصات پیدا نشد.'}
                     </td>
                   </tr>
@@ -770,6 +977,10 @@ export default function AdminDashboard() {
                           <div className="text-sm font-mono text-[#F9704E] font-bold">{guide.username}</div>
                           <div className="text-xs font-mono text-zinc-400 mt-1">کد ملی: {guide.nationalId || '---'}</div>
                           <div className="text-xs font-mono text-zinc-500 mt-1">ثبت‌نام: {formatJalali(guide.createdAt)}</div>
+                        </td>
+
+                        <td className="p-5 align-top">
+                          {renderUsagePay(guide)}
                         </td>
 
                         <td className="p-5">
@@ -810,6 +1021,14 @@ export default function AdminDashboard() {
 
                         <td className="p-5 text-center">
                           <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleOpenBilling(guide)}
+                              className="p-2 text-yellow-400 hover:text-yellow-400 rounded-lg hover:bg-yellow-500/10 transition-colors cursor-pointer"
+                              title="پلن و پرداخت"
+                            >
+                              <FaMoneyBillWave size={16} />
+                            </button>
+
                             <button
                               onClick={() => handleCopyLeaderLink(guide.username)}
                               className="p-2 text-emerald-400 hover:text-emerald-400 rounded-lg hover:bg-emerald-500/10 transition-colors cursor-pointer"
@@ -1247,6 +1466,159 @@ export default function AdminDashboard() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* ----------------- 💰 مودال پلن و پرداخت (ثبت دستی) ----------------- */}
+        {billingLeader && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto" dir="rtl">
+            <div className="bg-[#1e1e1e] border-2 border-[#E5C060] rounded-2xl w-full max-w-md p-6 shadow-2xl my-8">
+              <h2 className="text-base font-bold mb-2 text-[#F9704E] flex items-center gap-2 border-b border-zinc-800 pb-3">
+                <FaMoneyBillWave /> پلن و پرداخت: {billingLeader.fullName}
+              </h2>
+              <p className="text-[11px] text-zinc-400 mb-4 leading-relaxed">
+                ثبت دستی (کارت‌به‌کارت/حواله) است و پرداخت آنلاین نیست. فیلدهای خالی پاک می‌شوند.
+              </p>
+
+              <form onSubmit={handleSaveBilling} className="space-y-4">
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1">نام پلن / بسته</label>
+                  <input
+                    type="text"
+                    value={billingForm.planName}
+                    onChange={e => setBillingForm({ ...billingForm, planName: e.target.value })}
+                    className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none"
+                    placeholder="مثال: بسته ۳ ماهه"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1">مبلغ دریافتی (تومان)</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    dir="ltr"
+                    value={billingForm.paidAmount}
+                    onChange={e => setBillingForm({ ...billingForm, paidAmount: e.target.value })}
+                    className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none font-mono text-left"
+                    placeholder="900000"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-zinc-400 mb-1">تاریخ پرداخت</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      dir="ltr"
+                      value={billingForm.paidAt}
+                      onChange={e => setBillingForm({ ...billingForm, paidAt: maskJalali(e.target.value) })}
+                      placeholder="1405/09/01"
+                      className={`w-full bg-zinc-900 border rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none font-mono text-center ${billingForm.paidAt && jalaliKey(billingForm.paidAt) === null ? 'border-red-500' : 'border-[#F9704E]'}`}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-zinc-400 mb-1">پایان اعتبار</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      dir="ltr"
+                      value={billingForm.planExpiresAt}
+                      onChange={e => setBillingForm({ ...billingForm, planExpiresAt: maskJalali(e.target.value) })}
+                      placeholder="1405/12/01"
+                      className={`w-full bg-zinc-900 border rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none font-mono text-center ${billingForm.planExpiresAt && jalaliKey(billingForm.planExpiresAt) === null ? 'border-red-500' : 'border-[#F9704E]'}`}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1">یادداشت داخلی (فقط ادمین می‌بیند)</label>
+                  <textarea
+                    rows={2}
+                    value={billingForm.adminNote}
+                    onChange={e => setBillingForm({ ...billingForm, adminNote: e.target.value })}
+                    className="w-full bg-zinc-900 border border-[#F9704E] rounded-xl p-3 text-xs text-white focus:outline-none"
+                    placeholder="مثال: قول تخفیف ماه بعد"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+                  <button
+                    type="button"
+                    onClick={() => setBillingLeader(null)}
+                    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-4 py-2 rounded-xl text-xs transition-colors cursor-pointer"
+                  >
+                    انصراف
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingBilling}
+                    className="bg-[#F9704E] hover:bg-[#e05b3a] text-black font-bold px-5 py-2 rounded-xl text-xs transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {isSavingBilling ? 'در حال ذخیره...' : 'ذخیره'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ----------------- 🕘 مودال گزارش فعالیت مدیریت ----------------- */}
+        {isAuditOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" dir="rtl">
+            <div className="bg-[#1e1e1e] border-2 border-[#E5C060] rounded-2xl w-full max-w-4xl p-6 shadow-2xl">
+              <h2 className="text-base font-bold mb-2 text-[#F9704E] flex items-center gap-2 border-b border-zinc-800 pb-3">
+                <FaHistory /> گزارش فعالیت مدیریت (۲۰۰ مورد آخر)
+              </h2>
+              <p className="text-[11px] text-zinc-400 mb-3 leading-relaxed">
+                فقط نوع رویداد، نام لیدر و آی‌پی ثبت می‌شود؛ رمز، کد ملی و فیش مسافران هرگز ثبت نمی‌شود.
+              </p>
+
+              <div className="max-h-[60vh] overflow-auto rounded-xl border border-zinc-800">
+                {auditLoading ? (
+                  <div className="p-8 text-center text-zinc-400 text-sm">در حال بارگذاری...</div>
+                ) : auditLogs.length === 0 ? (
+                  <div className="p-8 text-center text-zinc-500 text-sm">هنوز رویدادی ثبت نشده است.</div>
+                ) : (
+                  <table className="w-full text-right text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-black text-white">
+                        <th className="p-3 font-bold">زمان</th>
+                        <th className="p-3 font-bold">رویداد</th>
+                        <th className="p-3 font-bold">هدف</th>
+                        <th className="p-3 font-bold">جزئیات</th>
+                        <th className="p-3 font-bold">آی‌پی</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800/60 text-zinc-300">
+                      {auditLogs.map((row) => (
+                        <tr key={row.id} className={row.action.includes('failed') || row.action.includes('blocked') ? 'bg-rose-950/20' : ''}>
+                          <td className="p-3 whitespace-nowrap font-mono text-zinc-400">
+                            {new Date(row.createdAt).toLocaleString('fa-IR', { timeZone: 'Asia/Tehran' })}
+                          </td>
+                          <td className="p-3 font-bold text-white">
+                            {AUDIT_LABELS[row.action] || row.action}
+                            {row.actor !== 'admin' && <span className="text-amber-400 font-normal"> (لیدر)</span>}
+                          </td>
+                          <td className="p-3">{row.targetName || (row.targetId ? row.targetId.slice(0, 8) : '---')}</td>
+                          <td className="p-3 text-zinc-400" dir="auto">{row.detail || '---'}</td>
+                          <td className="p-3 font-mono text-zinc-500" dir="ltr">{row.ip || '---'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsAuditOpen(false)}
+                className="w-full mt-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 py-2 rounded-xl text-xs cursor-pointer"
+              >
+                بستن
+              </button>
             </div>
           </div>
         )}
