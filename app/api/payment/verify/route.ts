@@ -2,7 +2,7 @@ import { prisma } from '../../../lib/db';
 import { NextResponse, NextRequest } from "next/server";
 import { checkRateLimit } from '../../../lib/rate-limit';
 
-const SITE_URL = (process.env.SITE_URL || 'https://lidera.ir').replace(/\/$/, '');
+const SITE_URL = (process.env.SITE_URL || 'https://lidera-demo.ir').replace(/\/$/, '');
 const IS_SANDBOX = process.env.ZARINPAL_SANDBOX !== 'false';
 const ZP_HOST = IS_SANDBOX ? 'https://sandbox.zarinpal.com' : 'https://payment.zarinpal.com';
 const STATUS_PAID = 'پرداخت شده آنلاین';
